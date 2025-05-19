@@ -1,0 +1,123 @@
+@charset "UTF-8";
+
+body {
+
+    background-image: url("/ChatService/images/chat.jpg"); /* 배경 이미지 */
+    background-repeat: no-repeat;   /* 배경 채울 때 사진 여러개 반복되지 않게 설정 */
+    background-size: 100% 100%;    /* 사진의 가로 세로 비율 맞추기*/
+
+    position: relative;
+    height: 100vh;
+    width: 100%;
+}
+
+/* 버튼 : 채팅 대기방 이동 */
+#exitroom {
+
+    background-color: slategray;
+    border: 3px solid black;
+    border-radius: 5px;
+
+    color: white;
+
+    display : inline-block;
+    width: 2%;
+    height: 50px;
+    margin-right: 2%;
+    font-size: 15px;
+    font-weight: bold;
+    position: relative;
+
+    width: 12%;
+
+    text-align: center; /* 글자를 가운데로 정렬 */
+    line-height: 50px; /* 글자를 수직 중앙으로 정렬 */
+
+    position: relative;
+   
+    top : 3px;
+}
+
+#exitroom:hover {
+    background-color: yellow; /* 마우스를 올렸을 때의 배경색 */
+    color: black;
+}
+
+/* 방 생성 시 입력하는 방 제목 및 방 인원 수 설정 */
+.inforoom {
+
+    width: 98%;
+    height: 40%;
+
+    position: relative;
+    top : 10px;
+
+    display: block;
+}
+
+#title, .title, #people, .people {
+
+    border : 4px solid slategray;
+    border-radius: 5px;
+    background-color: #F5F5F5;
+
+    position: relative;
+    top : 40%;
+    left : 35%;
+
+    width: 12%;
+    height: 15%;
+}
+
+.title, .people {
+
+    border : 4px solid goldenrod;
+    border-radius: 5px;
+    background-color: yellow;
+
+    display: inline-block;
+
+    font-size: 17.5px;
+    font-weight: bold;
+
+    text-align: center; /* 글자를 가운데로 정렬 */
+    line-height: 50px; /* 글자를 수직 중앙으로 정렬 */
+}
+
+#title, #people{
+
+    position: relative;
+    top : 41%;
+
+    text-align: center;
+}
+
+/* 방 생성 버튼 */
+#createroom {
+
+    background-color: skyblue;
+    border: 3px solid blue;
+    border-radius: 5px;
+
+    color: black;
+
+    display : inline-block;
+    width: 2%;
+    height: 50px;
+    margin-right: 2%;
+    font-size: 15px;
+    font-weight: bold;
+    position: relative;
+
+    width: 15%;
+
+    text-align: center; /* 글자를 가운데로 정렬 */
+    line-height: 50px; /* 글자를 수직 중앙으로 정렬 */
+
+    position: relative;
+    left : 40%;
+}
+
+#createroom:hover {
+    background-color: yellow; /* 마우스를 올렸을 때의 배경색 */
+}

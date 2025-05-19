@@ -1,0 +1,74 @@
+server:
+  port: 8186
+  servlet:
+    context-path: /ChatService
+
+spring:
+  application:
+    name: ChatService
+
+  datasource:
+    driver-class-name: oracle.jdbc.OracleDriver
+    url: jdbc:oracle:thin:@127.0.0.1:1521:xe
+    username: TOYCHAT
+    password: qwer1234
+
+    hikari:
+      auto-commit: false
+      idle-timeout: 30000
+      max-lifetime: 1800000
+
+  data:
+    redis:
+      host: 127.0.0.1   # 변경 필요 시 외부 IP 입력
+      port: 6379
+      timeout: 0
+      lettuce:
+        pool:
+          max-active: 100
+          max-idle: 50
+          min-idle: 10
+          max-wait: -1ms
+          time-between-eviction-runs: 10s
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.OracleDialect
+        format_sql: true
+        default_batch_fetch_size: 50
+        jdbc.fetch_size: 100
+        cache.use_query_cache: false
+        physical_naming_strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    open-in-view: false
+
+  mvc:
+    view:
+      prefix: /WEB-INF/views/
+      suffix: .jsp
+logging:
+  level:
+    org:
+      springframework:
+        web:
+          socket: DEBUG
+          socket.server: DEBUG
+#mybatis:
+#  mapper-locations: classpath:/mapper/*Mapper.xml
+#  type-aliases-package: com.chatservice.model
+#  configuration:
+#    jdbc-type-for-null: null
+
+
+
+#logging:
+#  file:
+#    name: log/chatservice.log
+#  level:
+#    root: info
+#
+#TestJWT:
+#  token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3RVc2VyIiwidXNlcklkIjoidGVzdFVzZXJJZCIsInJvbGVzIjpbIlJPTEVfVVNFUiJdLCJpYXQiOjE3NDI0NTUyODIsImV4cCI6MjA1NzgxNTI4Mn0.A6_AjQFf9btisDxrJq4L2qxCTsDZv1zjyeROXdE18oI"
+#  secretKey: "dEFnIT_lov0A2kRWE83Lkjh5hIZb1hyX1GbTnlhiDsI="

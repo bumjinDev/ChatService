@@ -1,0 +1,22 @@
+[3] 기술 선택과 구조적 근거
+
+책임 분리를 통해 구조적으로 "요청 순서의 보존"과 "입장 허용 여부의 통제"가 명확히 나뉜 이후, 각 구조에 대해 어떤 기술을 선택할 것인가에 대한 판단은 단순 구현 편의가 아니라, 다음과 같은 구조적 보장 조건에 의해 결정되었다.
+
+1. FIFO 구조 – ConcurrentLinkedQueue의 선택과 내부 동작 기반
+입장 요청 순서를 보존하기 위한 큐 구조는 java.util.concurrent.ConcurrentLinkedQueue로 결정되었다. 이 자료구조는 Michael-Scott 알고리즘을 기반으로 하며, enqueue와 dequeue 연산 시 각 노드의 next 참조를 CAS(Compare-And-Swap) 연산으로 갱신하여 락 없이 원자적인 구조 변경을 보장한다. 
+- 사용자는 REST API를 통해 입장 요청을 보내고, 이는 JoinRequestQueueManager를 통해 각 roomNumber별 큐에 삽입된다.
+- 삽입 시 큐의 tail 노드에 CAS 기반으로 새로운 RequestEntry 노드가 연결되며, 이는 다른 스레드와의 경합 없이 삽입이 완료된다.
+- TTL 기준으로 queue.peek()를 반복 조회하며 만료된 요청을 poll()로 제거한다. 이 연산 역시 head.next를 이동시키는 CAS 연산으로 구현된다.
+
+2. 자원 선점 제어 – Semaphore의 선택과 논리적 배치 근거
+입장 허용 여부를 제어하기 위한 기술로 java.util.concurrent.Semaphore가 채택되었다. 이는 JVM 수준에서 스레드 간 동시 접근 허용 수를 제어하는 구조로써, permit 카운터를 유지하며, tryAcquire()를 통해 permit을 원자적으로 감소시키고, release()를 통해 복원한다.
+- 사용자가 WebSocket을 통해 입장을 시도할 때 tryAcquire()를 호출하여 자원 선점을 시도.
+- 성공 시 입장 진행, 실패 시 입장 차단.
+- 순서 검증 실패 또는 입장 오류 발생 시 release()로 permit을 복원.
+- afterConnectionClosed()에서도 release() 호출로 자원 복원 수행.
+
+3. 병렬 판단의 필요성과 구조 결합 근거
+각 기술은 단일 책임만 수행하므로, 두 조건을 병렬로 판단하여야만 구조가 안정된다.
+- tryAcquire() → queue.peek() → ID 일치 여부 확인
+- 불일치 시 release() 후 즉시 입장 거부
+이 병렬 판단은 시스템 레벨 자원 통제(semaphore)와 애플리케이션 레벨 요청 흐름(queue)의 논리적 결합이며, 구조적으로 순서 정합성과 인원 제한을 동시에 만족시키는 조건 분기 구조로 작동한다.

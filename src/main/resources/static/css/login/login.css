@@ -1,0 +1,76 @@
+@font-face {
+    font-family: 'TheJamsil5Bold';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2302_01@1.0/TheJamsil5Bold.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'MBC1961GulimM';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2304-01@1.0/MBC1961GulimM.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body {
+    background-image: url('/ChatService/images/chat.jpg'); /* 또는 절대 URL 사용 */
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center center;
+}
+
+#logo {
+    font-size: 50px;
+    line-height: 40px;
+    font-family: 'Courgette', cursive;
+    text-align: center;
+
+    margin-right: auto;
+}
+#logo_text  {
+    color: inherit;
+    text-decoration: none;
+}
+
+section {
+    width: 40%;
+    margin: 0 auto;
+    text-align: center;
+    font-family: 'TheJamsil5Bold';
+}
+
+#login-form-border  {
+    border: 2px solid rgba(63, 125, 217, 0.601);
+    border-radius: 7px;
+}
+
+#inputBox input[type=text], input[type=password] {
+    border: 2px solid rgb(171, 171, 171);
+
+    border-radius: 0px;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+}
+
+#login-id input::placeholder    {
+    background-image: url(https://ifh.cc/g/FVW7fW.png);
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+#login-pw input::placeholder    {
+    background-image: url(https://ifh.cc/g/shHqCV.png);
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+
+
+footer {
+   
+}
+
+.footer_text {
+    font-family: 'TheJamsil5Bold';
+}

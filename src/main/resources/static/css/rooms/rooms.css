@@ -1,0 +1,180 @@
+@charset "UTF-8";
+
+body {
+    background-image: url("/ChatService/images/chat.jpg");
+    background-repeat: no-repeat;
+    background-size: 100% 120%;
+    
+}
+
+.menu {
+    text-align: center; 
+}
+
+.pageindex, .createroom {
+    border: 2px solid goldenrod;
+    border-radius: 2px;
+    background-color: yellow;
+    display: inline-block;
+    width: 20%;
+    height: 50px;
+    margin-right: 2%;
+    font-size: 15px;
+    font-weight: bold;
+    position: relative;
+    left: -12%;
+    transition: transform 0.3s ease-in-out;
+}
+
+.pageindex:hover, .createroom:hover {
+    transform: scale(1.1);
+    background-color: #b7e697;
+}
+
+.shownickname {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 2px;
+    border: 2px solid blue;
+    background-color: skyblue;
+    width: 10%;
+    height: 40px;
+    position: relative;
+    top: -1px;
+    font-size: 15px;
+    font-weight: bold;
+    color: white;
+}
+
+#nickname {
+	
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 2px;
+    border: 3px solid gray;
+    background-color: white;
+    width: 20%;
+    height: 40px;
+  
+    font-size: 15px;
+    font-weight: bold;
+    color: #4c91af;
+}
+
+.shownickname, #nickname {
+	position: relative;
+    left: 4%;
+}
+
+.roominfo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 99%;
+    height: 50px;
+    position: relative;
+    left: 5px;
+}
+
+.roomNumber, .roomTitle, .roomPeople {
+    display: inline-flex;
+    border: 2px solid blue;
+    border-radius: 5px;
+    background-color: skyblue;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.roomNumber {
+    width: 10%;
+}
+
+.roomTitle, .roomPeople {
+    width: 30%;
+    position: relative;
+    left: -4%;
+}
+
+.roomTitle {
+    width: 50%;
+}
+
+.roomPeople {
+    width: 30%;
+    position: relative;
+    left: -8%;
+}
+
+/* 각 항목에 대한 실제 저장되는 값들. */
+/* roomlist : 실제 테이블 내용을 끌어와서 보여주는 전체 div */
+.roomlist {
+    background-color: #F5F5F5;
+    border: 4px solid slategray;
+    border-radius: 5px;
+    height: 770px;
+    width: 91%;
+    position: relative;
+    top: 15px;
+    left: 4px;
+}
+
+/* 'roomlist' 내 각각의 테이블 정보 담는 div */
+.roomEntity {
+    border: 2px solid skyblue;
+    width: 99.7%;
+    height: 8%;
+    position: relative;
+    top: 2px;
+    left: 1px;
+}
+
+/* 공통 적용. */
+.Number, .Title, .People {
+    border: 1px solid #D3D3D3;
+    font-size: 250%;
+    font-weight: bold;
+    position: relative;
+    top: 3px;
+    left: 2px;
+
+    display: inline-block;
+    text-align: center;
+}
+
+.Number {
+
+   width: 10.5%;
+}
+
+.Title {
+
+    position: relative;
+    left : 0.5%;
+    width : 55%;
+}
+
+.People {
+
+    width: 32%;
+
+    position: relative;
+    left : 1.2%;
+}
+
+.entranceBtn {
+
+    height: 90%;
+    width : 8%;
+
+    position: relative;
+    top : -85%;
+    left : 100.5%;
+
+    border : 3px solid gray;
+    border-radius: 5px;
+}

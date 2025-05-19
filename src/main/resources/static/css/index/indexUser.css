@@ -1,0 +1,236 @@
+@charset "UTF-8";
+
+/* 전체 레이아웃 스타일 */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* 좀 더 부드러운 폰트 사용 */
+    line-height: 1.6;
+    background-color: #e0e0e0; /* 배경색 조금 밝게 */
+    color: #333;
+    margin: 0;
+    padding: 0;
+    display: flex; /* Flexbox 레이아웃 사용 */
+    flex-direction: column; /* 요소를 세로로 배치 */
+    align-items: center; /* 가로축 중앙 정렬 */
+    justify-content: flex-start; /* 세로축 시작점에 정렬 */
+    min-height: 100vh; /* 최소 높이를 뷰포트 높이의 100%로 설정 */
+    padding-top: 40px; /* 상단 패딩 추가 (전체 내용을 약간 내림) */
+    box-sizing: border-box; /* 패딩과 테두리를 포함하여 요소 크기 계산 */
+    padding-bottom: 20px; /* 페이지 하단에 여백 추가 */
+}
+
+/* 제목 스타일 */
+.titles {
+    text-align: center;
+    color: #2c3e50; /* 제목 색상 어둡게 */
+    margin-top: 0; /* body padding으로 대체 */
+    margin-bottom: 25px; /* 하단 여백 (정보 영역과의 간격) */
+    font-size: 2.5rem; /* 제목 크기 키우기 */
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1); /* 그림자 효과 */
+
+    /* --- 여기에 얇은 테두리 추가 --- */
+    border: 1px solid #ccc; /* 1px 두께, 실선, 밝은 회색 테두리 */
+    padding: 10px 20px; /* 테두리 안쪽에 여백 추가 (상하 10px, 좌우 20px) */
+    border-radius: 5px; /* 모서리 살짝 둥글게 */
+    /*-----------------------------*/
+}
+
+/* --- 정보 표시 영역 
+스타일 (가로 정렬 및 중앙 정렬) --- */
+.information {
+    background-color: #ffffff; /* 정보 영역 배경색 흰색 */
+    padding: 1.5rem; /* 내부 여백 통일 */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 그림자 강화 */
+
+    display: flex; /* Flexbox 사용 */
+    flex-direction: row; /* 내부 요소(.info-item)를 가로로 배치 */
+    justify-content: center; /* .info-item 들을 중앙 정렬 */
+    align-items: center; /* .info-item 들을 세로 중앙 정렬 */
+    gap: 7px; /* 두 쌍 (.info-item) 사이의 간격 */
+    flex-wrap: wrap;
+
+    margin-top: 0; /* 제목 하단 여백은 titles의 margin-bottom으로 조정 */
+    margin-bottom: 25px; /* 하단 여백 (닉네임 영역과의 간격) */
+
+    /* 블록 자체를 가로 중앙으로 옮기기 */
+    margin-left: auto;
+    margin-right: auto;
+    /* 또는 줄여서 margin: 0 auto 30px auto; (상: 0, 좌우: auto, 하: 30px) */
+
+    max-width: 400px; /* 최대 너비 설정 (예시) */
+    width: 95%; /* 화면이 좁을 때를 위해 퍼센트 너비와 조합 */
+    box-sizing: border-box; /* 패딩과 테두리를 포함하여 너비 계산 */
+
+    /* --- User's explicit manual positioning --- */
+    position: relative; /* Keep relative position as user wants */
+    top: 120px; /* Keep user's vertical offset */
+    left: -70px; /* Keep user's horizontal offset */
+    /*---------------------------------------------*/
+}
+
+/* --- 새로 추가된 정보 영역 내부 각 쌍(.info-item) 스타일 --- */
+.information .info-item {
+    display: flex; /* <--- Make each label+span pair a Flexbox container */
+    flex-direction: row; /* <--- Arrange label and span horizontally (default) */
+    align-items: center; /* Align label and span vertically */
+    gap: 7px; /* Gap between label and span within the pair */
+
+    /* If they are stacking vertically, display: flex/flex-direction: row is key here */
+}
+
+/* 정보 영역 내부 라벨 스타일 */
+.information label {
+    background-color: #ffecb3; /* 라벨 배경색 (밝은 노란색 계열) */
+    padding: 10px 15px; /* 패딩 */
+    border: 1px solid #d3c087; /* 테두리 색상 조정 */
+    border-radius: 4px 0 0 4px; /* 왼쪽 모서리만 둥글게 */
+    font-weight: bold; /* 글자 진하게 */
+    text-align: center; /* 텍스트 오른쪽 정렬 */
+    white-space: nowrap; /* 줄 바꿈 방지 */
+    flex-shrink: 0; /* 너비 유지 */
+    margin: 0;
+    color: #5a4e31; /* 글자 색상 조정 */
+}
+
+/* 정보 영역 내부 값 표시 span 스타일 */
+.information span {
+    color: #c0392b; /* 글자 색상 강조 (빨간색 계열) */
+    background-color: #ecf0f1; /* 배경색 (아주 연한 회색) */
+    padding: 10px 15px; /* 패딩 (라벨과 동일) */
+    border: 1px solid #d3c087; /* 테두리 색상 조정 */
+    border-radius: 0 4px 4px 0; /* 오른쪽 모서리만 둥글게 */
+    text-align: center; /* 값 중앙 정렬 */
+    font-size: 1.1rem; /* 글자 크기 키우기 */
+    font-weight: bold;
+    white-space: nowrap; /* 줄 바꿈 방지 */
+    margin: 0;
+    
+    width: 100px;
+}
+
+
+/* --- 사용자 닉네임 표시를 위한 스타일 (정보 영역 하단 배치 및 균형 조정) --- */
+.user-nickname-display {
+    display: flex; /* Flexbox 컨테이너로 설정 */
+    flex-direction: row; /* 내부 요소(라벨, 스팬)를 가로로 배치 */
+    justify-content: center; /* 내부 요소들을 가로축 중앙 정렬 */
+    align-items: center; /* 내부 요소들을 세로축 중앙 정렬 */
+    gap: 7px; /* <--- 라벨과 스팬 사이의 간격 설정 (예시: 10px) */
+
+    /* 블록 자체의 가로 중앙 정렬 및 위아래 간격 조정 */
+    margin-bottom: 25px; /* 하단 여백 (버튼 영역과의 간격) */
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 0; /* 정보 영역 하단 여백은 information의 margin-bottom으로 조정 */
+
+    /* 배경, 그림자, 패딩, 모서리 둥글게 등 시각적 스타일 유지 */
+    background-color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+    padding: 1.5rem; /* 내부 여백 통일 */
+    border-radius: 8px;
+    overflow: hidden;
+
+    /* 너비 설정: 균형을 위해 적절한 너비 지정 */
+    max-width: 400px;
+    width: 90%;
+    box-sizing: border-box;
+    
+    position: relative;
+    top: 110px;
+    left: 10px;
+}
+
+/* 닉네임 표시 내부 라벨 스타일 */
+.user-nickname-display label {
+    background-color: #d6eaf8; /* 라벨 배경색 (밝은 파란색 계열) */
+    padding: 10px 15px; /* 패딩 */
+    border: 1px solid #aed6f1; /* 테두리 */
+    border-radius: 4px; /* <-- 모서리 둥글게 (오른쪽도 둥글게) */
+    font-weight: bold;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin: 0;
+    text-align: center;
+    color: #2874a6;
+    
+    width: 43%;
+}
+
+/* 닉네임 표시 내부 값 표시 span 스타일 */
+.user-nickname-display span {
+    color: #87CEEB; /* 글자 색상 */
+    background-color: #ecf0f1; /* 배경색 */
+    padding: 10px 15px; /* 패딩 */
+    border: 1px solid #aed6f1; /* 테두리 */
+    border-radius: 4px; /* <-- 모서리 둥글게 (왼쪽도 둥글게) */
+    font-size: 1.1rem;
+    white-space: nowrap;
+    margin: 0;
+    text-align: center;
+
+    width: 100px;
+}
+
+/* 버튼 영역 스타일 (Flexbox 중앙 정렬) */
+.button-area {
+    display: flex;
+    justify-content: center;
+    gap: 20px; /* 버튼 간 간격 */
+    margin-top: 0; /* 닉네임 영역 하단 여백은 user-nickname-display의 margin-bottom으로 조정 */
+    margin-bottom: 40px; /* 하단 여백 (페이지 하단과의 간격) */
+     /* 블록 자체 가로 중앙 정렬 */
+    margin-left: auto;
+    margin-right: auto;
+    
+    position: relative;
+    top: 110px;
+    left: 10px;
+}
+
+/* 버튼 공통 스타일 */
+.user-btn, .guest-btn {
+    padding: 12px 25px; /* 패딩 조정 */
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-size: 1.1rem; /* 글자 크기 키우기 */
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease; /* 호버 및 클릭 애니메이션 추가 */
+    /* margin: 0 10px; /* Flexbox gap으로 대체 */
+    min-width: 150px; /* 최소 너비 설정 */
+    text-align: center;
+}
+
+/* 사용자 버튼 스타일 */
+.user-btn {
+    background-color: #2ecc71; /* 좀 더 밝은 초록색 */
+}
+
+.user-btn:hover {
+    background-color: #27ae60;
+    transform: translateY(-2px); /* 살짝 위로 이동 */
+}
+.user-btn:active {
+    transform: translateY(0); /* 클릭 시 제자리 */
+}
+
+
+/* 게스트 버튼 스타일 */
+.guest-btn {
+    background-color: #3498db; /* 기존 색상 유지 */
+}
+
+.guest-btn:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px); /* 살짝 위로 이동 */
+}
+.guest-btn:active {
+    transform: translateY(0); /* 클릭 시 제자리 */
+}
+
+/* 정보 영역 내부 라벨과 값 사이 간격 제거 (gap으로 대체) */
+/* .information label + span { margin-left: 0; } */ /* gap 속성 사용 시 불필요 */
+
+/* 닉네임 영역 내부 라벨과 값 사이 간격 제거 (gap으로 대체) */
+/* .user-nickname-display label + span { margin-left: 0; } */ /* gap 속성 사용 시 불필요 */

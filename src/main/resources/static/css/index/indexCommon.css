@@ -1,0 +1,83 @@
+@charset "UTF-8";
+
+/* 공통 배경 설정 */
+body {
+    background-image: url("/ChatService/images/chat.jpg");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    position: relative;
+}
+
+/* 제목 스타일 */
+.titles {
+    position: absolute;
+    left: 40%;
+    top: 25px;
+    border-radius: 5px;
+    border: 5px solid blue;
+    background-color: skyblue;
+    font-size: 50px;
+    color: white;
+    padding: 20px;
+}
+
+/* 채팅방 및 사용자 정보 영역 */
+.information {
+    width: 30%; 
+    position: relative;
+    top: 250px;
+    left: 30%;
+    transform: translateX(20%);
+    text-align: center;
+    border-radius: 10px;
+    padding: 20px;
+    height: 70%;
+}
+
+label, span {
+    display: inline-block;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    color: black;
+    margin-bottom: 10px;
+}
+
+label {
+    border: 4px solid gray;
+    background-color: yellow;
+    height: 100%;
+    width: 150px;
+}
+
+span {
+    border: 4px solid gray;
+    background-color: white;
+    position: relative;
+    height: 20px;
+    width: 25%;
+}
+
+/* 닉네임 입력 영역 */
+.inputnickname {
+    width: 40%;
+    position: relative;
+    top: 250px;
+    left: 44%;
+    border-radius: 10px;
+}
+
+.nicklable {
+    background-color: orange;
+    position: relative;
+}
+
+#nickname {
+    height: 30px;
+    width: 30%;
+    text-align: center;
+    background-color: white;
+    border: 4px solid gray;
+    border-radius: 5px;
+    padding: 15px;
+}

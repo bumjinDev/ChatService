@@ -1,0 +1,128 @@
+@font-face {
+    font-family: 'TheJamsil5Bold';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2302_01@1.0/TheJamsil5Bold.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'MBC1961GulimM';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2304-01@1.0/MBC1961GulimM.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body {
+    /* height: 100vh; */
+    background-image: url(/ChatService/images/chat.jpg);
+    background-repeat: no-repeat;
+    background-size: cover;
+    /* backdrop-filter: blur(5px); */
+}
+
+#join-all-section {
+    border: 1px solid rgba(63, 125, 217, 0.601);
+    border-radius: 7px;
+   	background-color: rgba(255, 255, 110, 0.7) /* 노란색 RGB 값을 (255, 255, 150)으로 변경 */
+}
+
+
+#logo {
+    font-size: 50px;
+    line-height: 100px;
+    font-family: 'Courgette', cursive;
+    text-align: center;
+    color: #ffffff;
+    margin-right: auto;
+    text-shadow: -1px 0px black, 0px 1px black, 1px 0px black, 0px -1px black;
+}
+
+#logo_text {
+    color: inherit;
+    text-decoration: none;
+}
+
+#logo-img img {
+    width: 30%;
+    height: auto;
+}
+
+section {
+    width: 40%;
+    margin: 0 auto;
+    text-align: center;
+    font-family: 'TheJamsil5Bold';
+
+}
+
+#login-form-border {
+    border: 2px solid rgba(215, 217, 221, 0.252);
+    border-radius: 7px;
+}
+
+#inputBox {
+    /* background-color: rgba(255, 255, 0, 0.2); */ /* 수정: join-all-section에 배경을 적용했으므로 여기서는 제거 */
+    border-radius: 10px; /* form 전체 둥글게 */
+}
+
+#inputBox input[type=text],
+input[type=password] {
+    border: 2px solid rgb(128, 128, 128);
+    height: 55px;
+    border-radius: 10px;
+}
+
+#join-id input::placeholder {
+    color: #777777;
+    background-image: url(https://ifh.cc/g/FVW7fW.png);
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+#join-pw input::placeholder {
+    color: #777777;
+    background-image: url(https://ifh.cc/g/shHqCV.png);
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+#join-pwCheck input::placeholder {
+    color: #777777;
+    background-image: url(https://ifh.cc/g/8xo1ss.png);
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+#join-name input::placeholder {
+    color: #777777;
+    background-image: url(https://ifh.cc/g/JCJpZ7.png);
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+#join-nickName input::placeholder {
+    color: #777777;
+    background-image: url(https://ifh.cc/g/AKoLd0.png);
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+#join-tel input::placeholder {
+    color: #777777;
+    background-image: url(https://ifh.cc/g/kkfmgx.png);
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+#join-email input::placeholder {
+    color: #777777;
+    background-image: url(https://ifh.cc/g/DQvNoq.png);
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+
+
+#join-btn input[type=button] {
+    font-size: 1.4rem;
+}

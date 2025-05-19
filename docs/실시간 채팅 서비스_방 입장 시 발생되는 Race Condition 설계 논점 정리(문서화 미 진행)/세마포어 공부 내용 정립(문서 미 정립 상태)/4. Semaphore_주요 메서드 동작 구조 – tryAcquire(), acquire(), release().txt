@@ -1,0 +1,39 @@
+1. tryAcquire() – 자원 선점의 비차단적 허가자
+Java Semaphore의 tryAcquire()는 시스템 내 자원 사용 허가 구조에서 가장 단순하고 경량화된 진입 방식으로 정의된다. 이 메서드는 호출 즉시 현재 자원이 사용 가능 상태인지 확인하고, 단 한 번의 CAS 연산으로 permit 감소를 시도하며, 성공하면 true를 반환하고 실패하면 false를 반환한다. 핵심은 실패 시에도 대기나 큐 삽입 없이 즉시 반환된다는 점으로, 이는 내부적으로 AbstractQueuedSynchronizer의 tryAcquireShared()를 호출하되, 실패 후 doAcquireShared()로 넘어가지 않기 때문에 가능한 구조이다.
+
+실행 흐름은 다음과 같다:
+
+1. AQS의 state 값을 읽어 현재 permit 수 확인
+2. 요청 수량(acquires)만큼 감소 가능한지 계산
+3. 감소 가능 시 compareAndSetState()로 CAS 수행
+4. CAS 성공 → true 반환 / 실패 or 부족 → false 반환
+
+tryAcquire()는 이처럼 내부적으로 비차단 non-blocking 흐름을 유지하며, 실패를 자원 거절로 처리하고 로직 흐름을 분기시키는 데 적합한 인터페이스다. 따라서 WebSocket 기반 사용자 입장 처리, API rate limiter, connection slot 체크 등에서 "실패 시 거절 메시지를 반환하는 흐름"과 결합해 사용된다.
+
+2. acquire() – 자원 확보가 보장될 때까지 blocking 진입
+acquire()는 tryAcquire()와 동일한 내부 메서드인 tryAcquireShared()를 호출하지만, 실패 시의 흐름이 완전히 다르다. tryAcquireShared()가 false를 반환하면, AQS는 해당 스레드를 CLH 큐에 삽입하고, LockSupport.park()를 통해 스레드를 정지시킨다. 이후 permit이 회복되면 unpark()로 깨워지며, 다시 tryAcquireShared()를 재시도한다. 이 구조는 자원 확보가 성공할 때까지 강제 대기를 유도하므로, 실시간성이 요구되는 로직에는 부적합하지만, 자원이 확보될 때까지 반드시 대기해야 하는 진입 구조에서 사용된다.
+
+내부 구조 흐름은 다음과 같다:
+
+1. tryAcquireShared() 시도
+2. 실패 시 AQS의 doAcquireShared() 호출
+3. 현재 스레드를 CLH 큐에 삽입
+4. 스레드를 park() 상태로 전환
+5. 자원 회복 시 AQS가 unpark()으로 재시도 시점 제공
+
+이 흐름은 Semaphore를 락 대체 수준의 동기화 구조로 사용할 수 있게 하지만, 구조적으로는 완전히 큐 기반 blocking 설계이므로 tryAcquire()와는 철학적으로 완전히 다른 제어 패턴이다.
+
+3. release() – 자원 복원과 큐 해제 책임자
+permit이 사용되고 나면 반드시 release()를 호출하여 자원을 복원해야 한다. 이 메서드는 내부적으로 tryReleaseShared(int releases)를 호출하며, 현재 state 값에 반환 수량을 더한 후 compareAndSetState()로 CAS 연산을 통해 자원 수량을 증가시킨다. 성공 시 AQS의 doReleaseShared()가 호출되며, 이는 CLH 큐의 head 다음 노드를 unpark()하여 자원 대기를 해제한다.
+
+실행 흐름은 다음과 같다:
+1. 현재 state 읽기
+2. 반환 수량만큼 더한 값을 준비
+3. compareAndSetState()로 state 갱신 시도
+4. 성공 시 doReleaseShared()로 wake-up 트리거
+
+핵심은, release()가 호출되지 않으면 자원이 시스템 상에서 영구 소모되며, tryAcquire()든 acquire()든 모두 실패 상태를 유지한다는 점이다. 따라서 release()는 단순 옵션이 아닌, 자원 회복을 통해 전체 시스템 순환성을 복원하는 책임 메서드이다.
+
+4. 설계 효과 요약
+이 세 메서드는 단일한 자원 수치(state)를 조작하지만, 각기 다른 흐름 제어 조건과 시스템 반응 조건을 유도한다. tryAcquire()는 비차단 흐름, acquire()는 blocking 큐 기반 동기화, release()는 자원 회복을 각각 담당하며, 이들의 조합이 Semaphore를 단순한 카운터가 아니라, 고정합성 자원 통제 구조로 작동하게 만드는 핵심 제어 구성요소들이다.
+
