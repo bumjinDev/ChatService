@@ -6,15 +6,16 @@
 
 ## 🧭 목차
 
-1. [프로젝트 소개](#1-프로젝트-소개)
-2. [아키텍처 및 설계 개요](#2-아키텍처-및-설계-개요)
-3. [폴더 구조](#3-폴더-구조)
-4. [기술 스택](#4-기술-스택)
-5. [실행 및 체험 방법](#5-실행-및-체험-방법)
-6. [주요 기능](#6-주요-기능)
-7. [문제 해결 전략](#7-문제-해결-전략)
-8. [기술 검증 결과](#8-기술-검증-결과)
-9. [향후 계획](#9-향후-계획)
+1. [프로젝트 소개](#1-프로젝트-소개)  
+2. [아키텍처 및 설계 개요](#2-아키텍처-및-설계-개요)  
+3. [주요 기능](#3-주요-기능)  
+4. [폴더 구조](#4-폴더-구조)  
+5. [기술 스택](#5-기술-스택)  
+6. [실행 및 체험 방법](#6-실행-및-체험-방법)  
+7. [문제 해결 전략](#7-문제-해결-전략)  
+8. [기술 검증 결과](#8-기술-검증-결과)  
+9. [향후 계획](#9-향후-계획)  
+10. [문서 모음 및 상세 해설 링크](#-문서-모음-및-상세-해설-링크)
 
 ---
 
@@ -207,19 +208,19 @@ $ ./gradlew bootRun
 
 ### 🔍 구현 기반 설계 문서 목록
 
-- [1. RoomJoinService.java](docs/1.%20RoomJoinService.java.md) – 입장 자격 검증 및 permit 확보 흐름
-- [2. SemaphoreRegistry.java](docs/2.%20SemaphoreRegistry.java.md) – 동시 입장 제한 세마포어 제어 구조
-- [3. RoomJoinViewController.java](docs/3.%20RoomJoinViewController.java.md) – 입장 REST 엔드포인트 흐름 처리
-- [4. ChatTextWebSocketHandler.java](docs/4.%20ChatTextWebSocketHandler.java.md) – WebSocket 연결 수락 및 입장 확정
-- [5. ChatSessionRegistry.java](docs/5.%20ChatSessionRegistry.java.md) – 중복 로그인 탐지 및 기존 세션 종료
-- [6. InMemoryRoomQueueTracker.java](docs/6.%20InMemoryRoomQueueTracker.java.md) – 미연결 방 상태 추적 및 TTL 기반 복원
-- [7. ChatServiceScheduler.java](docs/7.%20ChatServiceScheduler.java.md) – permit 회수 주기 스케줄러
-- [8. RedisHandler.java](docs/8.%20RedisHandler.java.md) – JWT 서명값 Redis 저장 및 위조 탐지 연계
-- [9. JwtAuthProcessorFilter.java](docs/9.%20JwtAuthProcessorFilter.java.md) – WebSocket 연결 전 JWT 검증 필터
-- [10. ChatHandShakeIntercepter.java](docs/10.%20ChatHandShakeIntercepter.java.md) – 초기 WebSocket 세션 컨텍스트 주입
-- [11. WebSocketConfig.java](docs/11.%20WebSocketConfig.java.md) – 핸들러 및 인터셉터 설정 계층
-- [12. LoginFilter.java](docs/12.%20LoginFilter.java.md) – 로그인 처리, JWT 발급, 쿠키 삽입
-- [13. JwtAuthenticationFailureHandler.java](docs/13.%20JwtAuthenticationFailureHandler.java.md) – 인증 실패 시 쿠키 제거 및 경고 응답 처리
+- [1. RoomJoinService.java](docs/) – 입장 자격 검증 및 permit 확보 흐름
+- [2. SemaphoreRegistry.java](docs/) – 동시 입장 제한 세마포어 제어 구조
+- [3. RoomJoinViewController.java](docs/) – 입장 REST 엔드포인트 흐름 처리
+- [4. ChatTextWebSocketHandler.java](docs/) – WebSocket 연결 수락 및 입장 확정
+- [5. ChatSessionRegistry.java](docs/) – 중복 로그인 탐지 및 기존 세션 종료
+- [6. InMemoryRoomQueueTracker.java](docs/) – 미연결 방 상태 추적 및 TTL 기반 복원
+- [7. ChatServiceScheduler.java](docs/) – permit 회수 주기 스케줄러
+- [8. RedisHandler.java](docs/) – JWT 서명값 Redis 저장 및 위조 탐지 연계
+- [9. JwtAuthProcessorFilter.java](docs/) – WebSocket 연결 전 JWT 검증 필터
+- [10. ChatHandShakeIntercepter.java](docs/) – 초기 WebSocket 세션 컨텍스트 주입
+- [11. WebSocketConfig.java](docs/) – 핸들러 및 인터셉터 설정 계층
+- [12. LoginFilter.java](docs/) – 로그인 처리, JWT 발급, 쿠키 삽입
+- [13. JwtAuthenticationFailureHandler.java](docs/) – 인증 실패 시 쿠키 제거 및 경고 응답 처리
 
 > 위 문서들은 단순한 기능 설명이 아닌, 각 클래스가 시스템 자원 흐름 및 인증 구조 내에서 어떤 **설계적 책임**을 지니고 있고, 어떠한 **보안적·구조적 목적**을 달성하기 위해 존재하는지를 중심으로 서술되어 있습니다.
 
