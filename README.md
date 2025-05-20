@@ -203,19 +203,27 @@ $ ./gradlew bootRun
 
 ## 📄 문서 모음 및 상세 해설 링크
 
-아래 문서는 프로젝트 핵심 기능에 대한 구조적 설명과 내부 구성 요소별 역할을 상세히 분석한 `.md` 또는 `.txt` 기반의 기술 문서입니다. `./docs/` 디렉토리 내 문서로 연결됩니다:
+아래 문서는 실시간 채팅 시스템의 주요 핵심 클래스에 대한 구조 설계 분석을 담은 `.md` 기반 기술 문서입니다. 각 문서는 `docs/` 디렉토리 내에 위치하며, 실제 구현 코드 기반으로 작성된 내부 구성 책임, 실행 흐름, 시스템 내 위상 등을 포함합니다:
 
-- [입장 동시성 문제 및 해결 설계](docs/%EC%8B%A4%EC%8B%9C%EA%B0%84%20%EC%B1%84%ED%8C%85%20%EC%8B%9C%EC%8A%A4%ED%85%9C%20%EC%9E%85%EC%9E%A5%20%EB%8F%99%EC%8B%9C%EC%84%B1%20%EC%84%A4%EA%B3%84.md)  🔍 핵심 구조 흐름, permit 분기, 유령 방 회수 구조 설명
-- [중복 로그인 문제 정의 및 제어 설계](docs/실시간채팅%20시스템%20중복%20로그인%20제어%20설계%20문서.md)  🔐 `ChatSessionRegistry` 및 Redis 인증 상태 연계 구조 설명
+### 🔍 구현 기반 설계 문서 목록
 
-향후 다음과 같은 문서가 추가될 예정입니다:
+- [1. RoomJoinService.java](docs/1.%20RoomJoinService.java.md) – 입장 자격 검증 및 permit 확보 흐름
+- [2. SemaphoreRegistry.java](docs/2.%20SemaphoreRegistry.java.md) – 동시 입장 제한 세마포어 제어 구조
+- [3. RoomJoinViewController.java](docs/3.%20RoomJoinViewController.java.md) – 입장 REST 엔드포인트 흐름 처리
+- [4. ChatTextWebSocketHandler.java](docs/4.%20ChatTextWebSocketHandler.java.md) – WebSocket 연결 수락 및 입장 확정
+- [5. ChatSessionRegistry.java](docs/5.%20ChatSessionRegistry.java.md) – 중복 로그인 탐지 및 기존 세션 종료
+- [6. InMemoryRoomQueueTracker.java](docs/6.%20InMemoryRoomQueueTracker.java.md) – 미연결 방 상태 추적 및 TTL 기반 복원
+- [7. ChatServiceScheduler.java](docs/7.%20ChatServiceScheduler.java.md) – permit 회수 주기 스케줄러
+- [8. RedisHandler.java](docs/8.%20RedisHandler.java.md) – JWT 서명값 Redis 저장 및 위조 탐지 연계
+- [9. JwtAuthProcessorFilter.java](docs/9.%20JwtAuthProcessorFilter.java.md) – WebSocket 연결 전 JWT 검증 필터
+- [10. ChatHandShakeIntercepter.java](docs/10.%20ChatHandShakeIntercepter.java.md) – 초기 WebSocket 세션 컨텍스트 주입
+- [11. WebSocketConfig.java](docs/11.%20WebSocketConfig.java.md) – 핸들러 및 인터셉터 설정 계층
+- [12. LoginFilter.java](docs/12.%20LoginFilter.java.md) – 로그인 처리, JWT 발급, 쿠키 삽입
+- [13. JwtAuthenticationFailureHandler.java](docs/13.%20JwtAuthenticationFailureHandler.java.md) – 인증 실패 시 쿠키 제거 및 경고 응답 처리
 
-- `RoomJoinService.java` 해설 문서: `./docs/RoomJoinService-구조해설.md`
-- `InMemoryRoomQueueTracker.java` 해설 문서
-- `WebSocketHandler.java` 동작 흐름 정리
+> 위 문서들은 단순한 기능 설명이 아닌, 각 클래스가 시스템 자원 흐름 및 인증 구조 내에서 어떤 **설계적 책임**을 지니고 있고, 어떠한 **보안적·구조적 목적**을 달성하기 위해 존재하는지를 중심으로 서술되어 있습니다.
 
-> 이 문서 모음은 각 구성 요소별 책임 분리를 검토하고, 설계 근거를 외부 참조 없이 단독으로 설명할 수 있는 구조를 목표로 구성됩니다.
+이를 통해 외부 참조 없이 각 기술 컴포넌트의 동작 원리, 설계 이유, 구조적 위치를 일관되게 파악할 수 있도록 구성되어 있습니다.
 
----
 
 > 본 프로젝트는 단순한 기능 구현을 넘어서, 실시간 자원 통제와 인증 정합성 유지를 목적으로 한 **구조 설계 기반 실무형 시스템**으로 작성되었습니다.
