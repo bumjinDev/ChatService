@@ -40,7 +40,9 @@ public class WebSocketConfig implements WebSocketConfigurer {
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(textWebSocketHandler(roomJoinService, chatSessionRegistry), "/chat")
                 .addInterceptors(handshakeInterceptor())
-                .setAllowedOrigins("*");
+                .setAllowedOrigins("*")
+				.withSockJS()
+				.setHeartbeatTime(10_000); // 30초 하트비트 간격
     }
     @Bean
     public WebSocketHandler textWebSocketHandler (
