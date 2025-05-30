@@ -25,17 +25,20 @@
 
 ---
 
-## 2. 설계 개요
+## 2. 설계 개요 및 Architecture
 
 > 이 프로젝트의 설계는 단일 사용자의 단일 연결 보장, 실시간 인원 제한, 비정상 연결의 자원 반환이라는 세 가지 핵심 문제를 다루며, 구조적 동기화와 상태 정합성을 중심으로 구성되어 있습니다.
 
 ### 📌 시스템 구성 요소 요약
+
+![architecture]([https://github.com/user-attachments/assets/ba80f94d-8d03-4b97-9e73-659a0b793782)
 
 - 2️⃣ `WebSocketHandler` – WebSocket 연결 및 입장 최종 확정 처리
 - 3️⃣ `SemaphoreRegistry` – roomId별 동시 입장 제한자 관리
 - 4️⃣ `ChatSessionRegistry` – 중복 로그인 세션 관리 및 강제 종료
 - 5️⃣ `InMemoryRoomQueueTracker` – WebSocket 미연결 방의 상태 추적 및 TTL 만료 처리
 - 6️⃣ `RedisHandler` – JWT 서명값 중앙 저장소 및 인증 상태 동기화
+
 
 ### 📐 입장 흐름 시퀀스 다이어그램
 
