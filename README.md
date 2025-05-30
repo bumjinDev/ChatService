@@ -31,7 +31,7 @@
 
 ### 📌 시스템 구성 요소 요약
 
-![architecture]([https://github.com/user-attachments/assets/ba80f94d-8d03-4b97-9e73-659a0b793782)
+![architecture](https://github.com/user-attachments/assets/ba80f94d-8d03-4b97-9e73-659a0b793782)
 
 - 2️⃣ `WebSocketHandler` – WebSocket 연결 및 입장 최종 확정 처리
 - 3️⃣ `SemaphoreRegistry` – roomId별 동시 입장 제한자 관리
