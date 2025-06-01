@@ -28,6 +28,7 @@ public class ChatServiceScheduler {
 			InMemoryRoomQueueTracker tracker,
 			RoomQueueEntityJpa roomQueueEntityJpa,
 			SemaphoreRegistry semaphoreRegistry) {
+
 		this.inMemoryRoomQueueTracker = tracker;
 		this.roomQueueEntityJpa = roomQueueEntityJpa;
 		this.semaphoreRegistry = semaphoreRegistry;
@@ -69,8 +70,11 @@ public class ChatServiceScheduler {
 			long createdAt = entry.getValue();
 
 			if (now - createdAt > TTL_LIMIT_MS) {
-				semaphoreRegistry.releasePermitOnly(key.getRoomId());	// 자원 반환
-				semaphoreRegistry.removePermitTracking(key);			// 추적 정보 제거
+
+				semaphoreRegistry.releasePermitOnly(key.getRoomId());	// 자원 반환.(재 확인 필요)
+
+				semaphoreRegistry.removePermitTracking(key);			// 방 번호 별 개인 세션 시도 자료 구조, 추적 정보 제거
+
 				System.out.println("[TTL 만료] 사용자 permit 회수됨: " + key);
 			}
 		}

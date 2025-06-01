@@ -41,6 +41,7 @@ public class ChatHandShakeIntercepter implements HandshakeInterceptor {
         attributes.put("roomNumber", roomNumber);
         attributes.put("userName", userName);
         attributes.put("userId", userId);
+        attributes.put("exitBoolean", true);
 
         return true;
     }

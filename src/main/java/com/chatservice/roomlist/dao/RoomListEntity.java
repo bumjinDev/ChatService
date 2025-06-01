@@ -7,7 +7,7 @@ import jakarta.persistence.Entity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+///
 @Entity					// JPA 사용
 @Data					// setter / getter 생성
 @NoArgsConstructor

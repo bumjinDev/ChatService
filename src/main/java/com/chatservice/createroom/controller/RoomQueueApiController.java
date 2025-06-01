@@ -30,7 +30,7 @@ public class RoomQueueApiController {
 	@PostMapping("rooms/new")
 	public ResponseEntity<Integer> createRoom(@RequestBody RoomQueueDTO roomCreateDto) {
 		
-		int dummyRoomNumber = roomQueueService.creationQueueService(roomCreateDto); // 예시 방 번호
-		return ResponseEntity.status(HttpStatus.CREATED).body(dummyRoomNumber); // 201 Created와 방 번호 반환 예시
+		int dummyRoomNumber = roomQueueService.creationQueueService(roomCreateDto);
+		return ResponseEntity.status(HttpStatus.CREATED).body(dummyRoomNumber);
 	}
 }

@@ -9,6 +9,7 @@ public class RoomQueueViewController {
 	/* 채팅 방 생성 페이지 요청 처리 */
 	@GetMapping("rooms/new")
 	public String createRoom() {
+
 		return "chatservice/new/newRoom";
 	}
 }

@@ -75,6 +75,7 @@ public class ChatTextWebSocketHandler extends TextWebSocketHandler {
      * 4. 세마포어 permit 추적 정보 제거 (입장 확정)
      * 5. 인원수/입장 메시지 broadcast
      */
+    @SuppressWarnings("resource")
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         String roomNumber = Optional.ofNullable((String) session.getAttributes().get("roomNumber"))
@@ -90,22 +91,47 @@ public class ChatTextWebSocketHandler extends TextWebSocketHandler {
 
         roomJoinService.joinRoom(roomId); // DB 인원 증가
 
+        /* "chatSessionRegistry" : 현재 방 번호에 대한 세션 목록(HashMap) 없을 경우 초기화 하여 저장 하는데 쓰이며, 바로 다음 줄에서 검사 하는 데,
+                "roomUserSessions.get(roomNumber)" 이거 자체가 null 이 발생해 버리면 NullPointException 이 발생할 우려가 있음으로 미리 없는 경우 대비 해서 선언 하는 것임,
+                한 개의 Id 로 하나의 방에 동시에 2개 이상 접속(탭 2개) 금지 목적.  */
         chatSessionRegistry.roomUserSessions.computeIfAbsent(roomNumber, k -> new HashMap<>());
-        WebSocketSession prevSession = chatSessionRegistry.roomUserSessions.get(roomNumber).get(userName);
 
-        if (prevSession != null && prevSession.isOpen()) {
+        /* 웹 소켓 중복 성립 여부를 검사 후 close() 실행 */
+        if (chatSessionRegistry.containsUser(roomNumber, userId)) {
+
             logger.warn("[중복 세션] 기존 세션 종료: userName={}, roomId={}", userName, roomId);
+
+            WebSocketSession prevSession = chatSessionRegistry.roomUserSessions.get(roomNumber).get(userId);
+
+            /* 방 내 재 접속이 되었음으로 기존 접속 중이던 페이지 내 안내 메시지 전달 */
             JSONObject reasonMsg = new JSONObject();
             reasonMsg.put("type", "FORCE_DISCONNECT");
-            reasonMsg.put("content", "다른 탭에서 접속하여 연결이 종료되었습니다.");
+            reasonMsg.put("content", "다른 탭에서 접속하여 연결이 종료 합니다.");
             prevSession.sendMessage(new TextMessage(reasonMsg.toString()));
+
+            /* 기존 세션 종료 : 모든 closed() 발생 시 ExportRoomService.exportRoom() 호출 하게 되는 데, 이때 만약 현재 종료는 세션 중복 상황 인데,
+                ExportRoomService.exportRoom() 내 무조건 인원수 가 0 명이라서 방을 삭제 하게 되면 재 진입이 불가능 해 지므로 플래그를 사용하여 해결.
+            * */
+            prevSession.getAttributes().put("exitBoolean", false); // 현재 세션 인스턴스에는 삽입됨
+            /* 각 방 번호 별 브로드 캐스트 도메인 에서 삭제. ! */
+            chatSessionRegistry.roomList.get(roomNumber).remove(prevSession);
+            /* 각 방 번호 별 해당 사용자(Map) 을 삭제. */
+            HashMap<String, WebSocketSession> userMap = (HashMap<String, WebSocketSession>) chatSessionRegistry.roomUserSessions.get(roomNumber);
+            if (userMap != null) {
+                userMap.remove(userId);
+            }
+
             prevSession.close(CloseStatus.NORMAL);
         }
 
-        chatSessionRegistry.roomUserSessions.get(roomNumber).put(userName, session);
+        /* 각 방 번호 별 브로드 캐스트 도메인 추가. */
         chatSessionRegistry.roomList.computeIfAbsent(roomNumber, k -> new HashSet<>()).add(session);
+        /* WebSocketSession 리스트 관리 자료 구조 내 각 채팅 방 번호 별 새롭게 접속한 접속한 사용자(Id) 목록 추가.  */
+        chatSessionRegistry.roomUserSessions.get(roomNumber).put(userName, session);
 
+        /* WebSocketSession 이 정상적으로 수립되었으니 스케줄러에서 제외하지 않도록 해당 목록에서 제거 */
         semaphoreRegistry.removePermitTracking(new UserRoomKey(userId, roomId));
+
         logger.info("[세마포어 추가] permit : userId={}, roomId={}, 남은 permit={}",
                 userId, roomId, semaphoreRegistry.getAvailablePermits(roomId));
 
@@ -147,11 +173,11 @@ public class ChatTextWebSocketHandler extends TextWebSocketHandler {
         }
 
         semaphoreRegistry.releasePermitOnly(roomId);
-        semaphoreRegistry.removePermitTracking(new UserRoomKey(userId, roomId));
+        //semaphoreRegistry.removePermitTracking(new UserRoomKey(userId, roomId));
         logger.info("[세마포어 반환] roomId={}, 현재 permit={}", roomId, semaphoreRegistry.getAvailablePermits(roomId));
 
         try {
-            exportRoomService.exportRoom(roomId);
+            exportRoomService.exportRoom(roomId, (boolean) session.getAttributes().get("exitBoolean"));
         } catch (IllegalStateException e) {
             logger.warn("[DB 인원 감소 실패] roomId={}, 이유={}", roomId, e.getMessage());
         }

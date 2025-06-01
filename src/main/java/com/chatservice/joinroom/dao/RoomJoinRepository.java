@@ -15,22 +15,23 @@ public class RoomJoinRepository implements IRoomJoinRepository{
 	public RoomJoinRepository(RoomJoinJpa roomJoinJpa) {
 		this.roomJoinJpa = roomJoinJpa;
 	}
+
 	/* 인원수 1 증가 : update 문 */
 	@Override
-	public void incrementParticipantCount(int roomNumber) {
-		roomJoinJpa.incrementCurrentPeople(roomNumber);
-	}
+	public void incrementParticipantCount(int roomNumber) {roomJoinJpa.incrementCurrentPeople(roomNumber);	}
 	
 	@Override
 	public JoinRoomEntity createRoomTable(JoinRoomEntity roomEntity) {
 		return roomJoinJpa.save(roomEntity);
 	}
-	
+
+	/* "findRoomTable" 메소드는 단순 기존 방 여부만 확인 목적 이므로, 추후 세마포어로 대체  */
 	@Override
 	public Optional<JoinRoomEntity> findRoomTable(int roomNumber) {
 		return roomJoinJpa.findByRoomNumber(roomNumber);
 	}
-	
+
+	/* "loadPeopleInfo" 은 필요 없음..추후 "findRoomTable" 으로 모두 사용. */
 	@Override
     public Optional<RoomPeopleProjection> loadPeopleInfo(int roomNumber) {
         return roomJoinJpa.findPeopleInfoByRoomNumber(roomNumber);

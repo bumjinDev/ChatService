@@ -6,10 +6,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "ROOMS")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "ROOMS")
 public class ExportRoomEntity {
 
 	@Id

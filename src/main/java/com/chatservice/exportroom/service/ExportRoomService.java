@@ -26,6 +26,9 @@ public class ExportRoomService implements IExportRoomService{
 
 	IExportRoomRepository exportRoomRepository;
 
+    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ExportRoomService.class);
+
+
     public ExportRoomService(IExportRoomRepository exportRoomRepository) {
         this.exportRoomRepository = exportRoomRepository;
     }
@@ -37,16 +40,31 @@ public class ExportRoomService implements IExportRoomService{
      */
     @Transactional
     @Override
-    public synchronized void exportRoom(int roomNumber) {
-    	
+    public synchronized void exportRoom(int roomNumber, boolean exitBoolean) {
+
+        int currentCount = 0;
+
         // 1. 인원 수 감소 (userCount > 0 조건 하에)
         if (exportRoomRepository.decreaseUserCount(roomNumber) == 0) {
-            throw new IllegalStateException("'ROOMS' 인원수 감소(update) 실패, 해당 roomNumber가 존재하지 않거나, 이미 인원이 0입니다.");
+            currentCount = exportRoomRepository.getUserCount(roomNumber);
         }
         // 2. 현재 인원 수 확인
-        int currentCount = exportRoomRepository.getUserCount(roomNumber);
-        // 3. 인원 수 0 → 삭제 조건 판단
-        if (currentCount <= 0) {
+        logger.info("현재 roomNumber [{}]의 인원 수 조회 결과: {}", roomNumber, currentCount);
+
+
+        String flag;
+
+        if(exitBoolean)
+            flag = "true";
+        else
+            flag = "false";
+
+        System.out.print("flages : " + flag);
+
+        // 3. 인원 수 0 → 삭제 조건 판단 : 단순 새로 고침 이거나 혹은 채팅 방 중복 입장 이면 삭제 하지 않는 다.
+        if (currentCount <= 0 && exitBoolean) {
+
+            logger.info("roomNumber [{}]의 인원 수가 0명으로 확인 되어, 방을 삭제 합니다.", roomNumber);
             exportRoomRepository.deleteRoom(roomNumber);
         }
     }
