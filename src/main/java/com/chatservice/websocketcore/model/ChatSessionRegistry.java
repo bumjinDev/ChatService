@@ -18,7 +18,7 @@ public class ChatSessionRegistry {
 
     /**
      * [roomList] : 브로드 캐스티 목적 - 방 번호 → 해당 방의 WebSocket 세션 집합
-     * 
+     *
      * 목적:
      * 1. 방별 전체 사용자에게 메시지 브로드캐스트를 하기 위한 기준 세션 목록
      * 2. WebSocket 연결 시점(afterConnectionEstablished)에서 인원 수 증가
@@ -27,20 +27,20 @@ public class ChatSessionRegistry {
     public Map<String, HashSet<WebSocketSession>> roomList = new HashMap<>();
     /**
      * [roomUserSessions] : 방 번호 → (userId → WebSocket 세션) 맵
-     * 
+     *
      * 목적:
      * 1. 동일 사용자가 브라우저 탭을 여러 개 열어 중복 접속할 경우 선제적 감지 및 차단
      * 2. 동일 사용자가 새로 고침 시 중복 세션 접근 방지
      * 2. 비정상 종료된 세션(브라우저 강제 종료, 재부팅 등) 이후 빠른 중복 감지
      * 3. beforeHandshake 시 userName 기반 중복 여부 확인 → 이미 존재 시 이전 세션 강제 종료
-     * 
+     *
      * Map<RoomNumber, Map<userId, WebSocketSession>>
      */
     public Map<String, Map<String, WebSocketSession>> roomUserSessions = new HashMap<>();
 
     /**
      * @method containsUser
-     * @brief 특정 방에 특정 사용자가 이미 연결되어 있는지 여부 확인
+     * @brief 특정 방에 특정 사용자가 이미 연결되어 있는지 여부 확인, 즉 2중 탭 접속 시도 확인.
      *
      * @param roomId 방 번호 (String 형태)
      * @param userId 사용자 ID

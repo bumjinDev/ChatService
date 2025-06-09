@@ -58,7 +58,8 @@ const ChatManager = {
             };
         });
 
-        this.socket.close();
+        /* 정상 나가기 버튼이라면 1000 번 전송, 만약 새로고침이거나 단순 탭, 브라우저 등의 종료는 별도의 로직 적용.. */
+        this.socket.close(1000, JSON.stringify({ type: "USER_EXIT", user: this.userInfo.nickName }));
 
         //alert("채팅방에서 나왔습니다.");
         window.location.href = "/ChatService/rooms";
@@ -86,6 +87,7 @@ const ChatManager = {
             this.socket.onmessage = this.onWebSocketMessage.bind(this);
             this.socket.onerror = this.onWebSocketError.bind(this);
             this.socket.onclose = this.onWebSocketClose.bind(this);
+
         } catch (error) {
             console.error("WebSocket 생성 오류:", error);
             alert("WebSocket 연결 실패. 대기방으로 이동합니다.");

@@ -1,5 +1,6 @@
 package com.chatservice.scheduler;
 
+import com.chatservice.joinroom.dao.ChatRoomMemoryRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -16,6 +17,7 @@ public class ChatServiceScheduler {
 	private final InMemoryRoomQueueTracker inMemoryRoomQueueTracker;
 	private final RoomQueueEntityJpa roomQueueEntityJpa;
 	private final SemaphoreRegistry semaphoreRegistry;
+	ChatRoomMemoryRegistry chatRoomMemoryRegistry;
 
 	// TTL 기준 (정책성 상수) - 추후 Config로 이동 고려
 	private static final int EXPIRATION_MINUTES = 2;
@@ -25,13 +27,16 @@ public class ChatServiceScheduler {
 	private static final Logger logger = LoggerFactory.getLogger(ChatServiceScheduler.class);
 
 	public ChatServiceScheduler(
+
 			InMemoryRoomQueueTracker tracker,
 			RoomQueueEntityJpa roomQueueEntityJpa,
-			SemaphoreRegistry semaphoreRegistry) {
+			SemaphoreRegistry semaphoreRegistry,
+			ChatRoomMemoryRegistry chatRoomMemoryRegistry) {
 
 		this.inMemoryRoomQueueTracker = tracker;
 		this.roomQueueEntityJpa = roomQueueEntityJpa;
 		this.semaphoreRegistry = semaphoreRegistry;
+		this.chatRoomMemoryRegistry = chatRoomMemoryRegistry;
 	}
 
 	/**
@@ -99,5 +104,17 @@ public class ChatServiceScheduler {
 				// 회수 정책 수립 전: 로그만 출력
 			}
 		}
+	}
+
+	/**
+	 * [roomUserVOMap 기반 사용자 TTL 만료 및 방 자동 정리]
+	 *
+	 * - 모든 방의 사용자별 TTL 만료자를 순회하며, 만료자마다 removeUserFromRoom() 호출
+	 * - 이 과정에서 방 내 모든 사용자가 제거되면 roomMap/roomUserVOMap 자체도 동기화 삭제됨
+	 * - 인원수, permit, 방 객체의 상태가 항상 일치하도록 설계
+	 */
+	@Scheduled(fixedRate = 20000) // 20초마다 실행(정책에 따라 조정)
+	public void cleanupExpiredRoomUsersAndRooms() {
+		chatRoomMemoryRegistry.cleanupExpiredUsers();
 	}
 }

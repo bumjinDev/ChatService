@@ -3,6 +3,8 @@ package com.chatservice.auth.filter.customfilter;
 import java.io.IOException;
 import java.security.Key;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -96,6 +98,12 @@ public class JwtAuthProcessorFilter extends OncePerRequestFilter {
         
         logger.info("JWT 인증 성공: 사용자 ID = {}", userId);
         logger.info("JWT 인증 성공: 사용자 이름 = {}", userName);
+
+        /* 동작을 수행 했으니 세션 시간 초기화. */
+        /* 실제 인증 정보 저장 [ 키 : JWT - 값 : key(문자열) ]. */
+        redisHandler.getValueOperations().set(token,jwtUtil.encodeKeyToBase64(key), 30, TimeUnit.MINUTES);
+        /* 매핑 정보 저장 [ 키 : userId - 값 : JWT ] */
+        redisHandler.getValueOperations().set(userId, token, 30, TimeUnit.MINUTES);
 
         // 필터 체인 계속 실행
         filterChain.doFilter(request, response);

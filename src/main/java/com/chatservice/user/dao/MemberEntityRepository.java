@@ -12,8 +12,7 @@ import com.chatservice.user.model.MembersEntity;
 /* 1. JWT 인증 위한 "UserEntityDetailService" 사용
  * 2. 회원 관리 서비스인 "MembersRepository" 사용 */
 public interface MemberEntityRepository extends JpaRepository<MembersEntity, String>{
-	
-	Optional<MembersEntity> findById(String userId); // MembersRepository.confimMember : 회원가입 요청 시 id 값으로 검색해서 존재하는 유저인지 확인.  
+
 	
 	Optional<MembersEntity> findByNickName(String nickname);	// "UserEntityDetailService.loadUserByUsername" 에서 UserEntity 생성 위한 호출.
 

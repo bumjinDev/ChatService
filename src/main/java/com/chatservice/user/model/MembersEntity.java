@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor		// 생성자 생성을 대신 하는 어노테이션, 매개변수가 아에 없는 생성자를 생성한다, JPA 할 때 반드시 포함해야 된다.
 @Entity
 @Builder
-@Table(name="membertbl")
+@Table(name="MEMBERBTBL")
 public class MembersEntity {
 	
 	@Id

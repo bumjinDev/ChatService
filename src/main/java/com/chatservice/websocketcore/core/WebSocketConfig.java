@@ -1,6 +1,7 @@
 package com.chatservice.websocketcore.core;
 
 import com.chatservice.concurrency.SemaphoreRegistry;
+import com.chatservice.joinroom.dao.ChatRoomMemoryRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.WebSocketHandler;
@@ -8,9 +9,6 @@ import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 import org.springframework.web.socket.server.HandshakeInterceptor;
-
-import com.chatservice.exportroom.service.ExportRoomService;
-import com.chatservice.exportroom.service.IExportRoomService;
 import com.chatservice.joinroom.service.IRoomJoinService;
 import com.chatservice.websocketcore.model.ChatSessionRegistry;
 
@@ -19,7 +17,7 @@ import com.chatservice.websocketcore.model.ChatSessionRegistry;
 public class WebSocketConfig implements WebSocketConfigurer {
 	
 	IRoomJoinService roomJoinService;
-	IExportRoomService exportRoomService;
+	ChatRoomMemoryRegistry chatRoomMemoryRegistry;
 	
 	ChatSessionRegistry chatSessionRegistry;
 
@@ -27,12 +25,12 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
 	public WebSocketConfig(
 			IRoomJoinService roomJoinService,
-			ExportRoomService exportRoomService,
+			ChatRoomMemoryRegistry chatRoomMemoryRegistry,
 			ChatSessionRegistry chatSessionRegistry,
 			SemaphoreRegistry semaphoreRegistry) {
 		
 		this.roomJoinService = roomJoinService;
-		this.exportRoomService = exportRoomService;
+		this.chatRoomMemoryRegistry = chatRoomMemoryRegistry;
 		this.chatSessionRegistry = chatSessionRegistry;
 		this.semaphoreRegistry = semaphoreRegistry;
 	}
@@ -47,7 +45,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
     public WebSocketHandler textWebSocketHandler (
     		IRoomJoinService roomJoinService,
     		ChatSessionRegistry chatSessionRegistry) {
-        return new ChatTextWebSocketHandler(roomJoinService, exportRoomService, chatSessionRegistry, semaphoreRegistry);
+        return new ChatTextWebSocketHandler(roomJoinService, chatRoomMemoryRegistry, chatSessionRegistry, semaphoreRegistry);
     }
     @Bean
     public HandshakeInterceptor handshakeInterceptor () {

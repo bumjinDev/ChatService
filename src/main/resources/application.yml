@@ -35,6 +35,12 @@ spring:
     hibernate:
       ddl-auto: none
     properties:
+      # Hibernate 2차 캐시 비활성화 (글로벌 캐시 OFF)
+      hibernate.cache.use_second_level_cache: false
+      hibernate.cache.use_query_cache: false
+      hibernate.cache.region.factory_class: org.hibernate.cache.internal.NoCachingRegionFactory
+
+
       hibernate:
         dialect: org.hibernate.dialect.OracleDialect
         format_sql: true

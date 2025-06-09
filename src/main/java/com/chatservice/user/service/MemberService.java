@@ -9,6 +9,8 @@ import java.time.Duration;
 
 import javax.crypto.spec.SecretKeySpec;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -31,11 +33,11 @@ import org.slf4j.Logger;
 
 /**
  * MemberService
- *
+
  * 회원 관련 핵심 비즈니스 로직을 담당하는 서비스 클래스.
  * 회원 가입, 정보 수정, JWT 갱신 등 주요 기능을 제공하며,
  * 인증 정보와 회원 정보를 동시에 관리한다.
- *
+
  * 기술 구성:
  * - JWT 기반 인증 구조 (Redis 연동)
  * - 회원 테이블 + Spring Security 인증 테이블 동시 갱신
@@ -55,8 +57,8 @@ public class MemberService implements IMemberService {
     private final MemberConverter memberConverter;
     private final AuthenticationEntityConverter authenticationEntityConverter;
 
-    public final int USER_ID_DUPLICATE = 1;
-    public final int NICKNAME_DUPLICATE = 2;
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public MemberService(
     		
@@ -91,18 +93,24 @@ public class MemberService implements IMemberService {
      */
     @Override
     public void validJoin(MemberDTO memberDTO) {
+
+        entityManager.clear();
+
         logger.info("MemberService.validJoin()");
 
         if (memberEntityRepository.findById(memberDTO.getId()).isPresent()) {
+            logger.info("이미 사용 중인 아이디로 회원 가입 요청 시도 : {}", memberDTO.getId());
             throw new UserIdAlreadyExistsException("이미 사용 중인 아이디입니다.");
         }
         if (memberEntityRepository.findByNickName(memberDTO.getNickName()).isPresent()) {
+            logger.info("이미 사용 중인 닉네임으로 회원 가입 요청 시도 : {}", memberDTO.getNickName());
             throw new NicknameAlreadyExistsException("이미 사용 중인 닉네임입니다.");
         }
 
         memberDTO.setPw(passwordEncoder.encode(memberDTO.getPw()));
         memberDTO.setJoinDate(new Date(System.currentTimeMillis()));
 
+        logger.info("회원 가입 수행 : {} {}", memberDTO.getId(), memberDTO.getNickName());
         membersRepository.addMember(
             memberConverter.toEntity(memberDTO),
             authenticationEntityConverter.toEntity(memberDTO, List.of("ROLE_USER"))
@@ -120,7 +128,7 @@ public class MemberService implements IMemberService {
      */
     @Override
     public MemberDTO searchEditMember(String editId) {
-    	
+
         return memberConverter.toDTO(membersRepository.getMember(editId)
                 						.orElseThrow(() -> new MemberNotFoundException("현재 존재하지 않는 사용자 ID 입니다")));
     }

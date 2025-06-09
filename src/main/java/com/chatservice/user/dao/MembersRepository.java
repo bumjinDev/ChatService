@@ -31,6 +31,7 @@ public class MembersRepository implements IMembersRepository {
     private final MemberEntityRepository memberEntityRepository;
     private final UserEntityRepository userEntityRepository;
 
+
     public MembersRepository(MemberEntityRepository memberEntityRepository,
                              UserEntityRepository userEntityRepository) {
         this.memberEntityRepository = memberEntityRepository;
@@ -92,8 +93,7 @@ public class MembersRepository implements IMembersRepository {
     public Optional<MembersEntity> isNEditickNameAllowed(MembersEntity membersEntity, AuthenticationEntity userEntity) {
         return memberEntityRepository.findByNicknameAndNotIdNative(
             membersEntity.getNickName(),
-            membersEntity.getId()
-        );
+            membersEntity.getId());
     }
 
     /**
