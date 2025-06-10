@@ -1,7 +1,6 @@
 package com.chatservice.websocketcore.core;
 
 import com.chatservice.concurrency.SemaphoreRegistry;
-import com.chatservice.joinroom.dao.ChatRoomMemoryRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.WebSocketHandler;
@@ -17,7 +16,6 @@ import com.chatservice.websocketcore.model.ChatSessionRegistry;
 public class WebSocketConfig implements WebSocketConfigurer {
 	
 	IRoomJoinService roomJoinService;
-	ChatRoomMemoryRegistry chatRoomMemoryRegistry;
 	
 	ChatSessionRegistry chatSessionRegistry;
 
@@ -25,12 +23,10 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
 	public WebSocketConfig(
 			IRoomJoinService roomJoinService,
-			ChatRoomMemoryRegistry chatRoomMemoryRegistry,
 			ChatSessionRegistry chatSessionRegistry,
 			SemaphoreRegistry semaphoreRegistry) {
 		
 		this.roomJoinService = roomJoinService;
-		this.chatRoomMemoryRegistry = chatRoomMemoryRegistry;
 		this.chatSessionRegistry = chatSessionRegistry;
 		this.semaphoreRegistry = semaphoreRegistry;
 	}
@@ -45,7 +41,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
     public WebSocketHandler textWebSocketHandler (
     		IRoomJoinService roomJoinService,
     		ChatSessionRegistry chatSessionRegistry) {
-        return new ChatTextWebSocketHandler(roomJoinService, chatRoomMemoryRegistry, chatSessionRegistry, semaphoreRegistry);
+        return new ChatTextWebSocketHandler(roomJoinService, chatSessionRegistry, semaphoreRegistry);
     }
     @Bean
     public HandshakeInterceptor handshakeInterceptor () {

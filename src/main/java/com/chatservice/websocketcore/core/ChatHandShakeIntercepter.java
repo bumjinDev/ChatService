@@ -50,6 +50,5 @@ public class ChatHandShakeIntercepter implements HandshakeInterceptor {
                                WebSocketHandler wsHandler, Exception exception) {
         logger.debug("afterHandshake()!");
         /* 현재 방 번호로 접속 요청 해온 사용자의 userName 을 확인하여 Socket 세션을 있는 리스트를 사용자 ID 로 추가 */
-        
     }
 }

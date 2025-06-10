@@ -3,8 +3,7 @@ package com.chatservice.roomlist.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.chatservice.joinroom.dao.ChatRoom;
-import com.chatservice.joinroom.dao.ChatRoomMemoryRegistry;
+import com.chatservice.websocketcore.model.ChatSessionRegistry;
 import org.springframework.stereotype.Service;
 
 import com.chatservice.roomlist.model.ChatRoomDTO;
@@ -13,12 +12,12 @@ import com.chatservice.roomlist.model.ChatRoomDTO;
 @Service
 public class RoomListApiService implements IRoomListApiService{
 
-	ChatRoomMemoryRegistry chatRoomMemoryRegistry;
+	ChatSessionRegistry chatSessionRegistry;
 	
-	public RoomListApiService(ChatRoomMemoryRegistry chatRoomMemoryRegistry) {
-		this.chatRoomMemoryRegistry = chatRoomMemoryRegistry;
+	public RoomListApiService(ChatSessionRegistry chatSessionRegistry) {
+		this.chatSessionRegistry = chatSessionRegistry;
 	}
-	
+
 	@Override
 	public List<ChatRoomDTO> getRoomList() {
 
@@ -27,7 +26,7 @@ public class RoomListApiService implements IRoomListApiService{
 
 	// roomMap의 값들을 ChatRoomDTO로 변환하여 리스트로 반환
 	private List<ChatRoomDTO> roomConverter() {
-		return chatRoomMemoryRegistry.getRooms().values()
+		return chatSessionRegistry.getRooms().values()
 				.stream()
 				.map(ChatRoomDTO::from) // ChatRoom → ChatRoomDTO로 변환
 				.collect(Collectors.toList());
