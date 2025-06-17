@@ -3,52 +3,42 @@ package com.chatservice.joinroom.service;
 import com.chatservice.concurrency.SemaphoreRegistry;
 import com.chatservice.createroom.model.RoomQueueVO;
 import com.chatservice.createroom.memory.InMemoryRoomQueueTracker;
-import com.chatservice.joinroom.dao.IRoomJoinRepository;
-import com.chatservice.joinroom.dao.RoomPeopleProjection;
+import com.chatservice.joinroom.converter.RoomConverter;
+import com.chatservice.joinroom.dao.*;
 import com.chatservice.joinroom.exception.RoomBadJoinFullException;
-import com.chatservice.joinroom.model.JoinRoomConverter;
-
 import com.chatservice.websocketcore.model.ChatSessionRegistry;
 import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
- * @class RoomJoinService
- * @brief 채팅방 입장 요청에 대한 사전 검증 및 세마포어 자원 점유를 담당하는 도메인 서비스
- *
- * @responsibility
- * - 입장 가능성 검증 및 SemaphoreRegistry 등록 및 permit 점유
- * - 실질적인 DB방 생성/참여 인원 수 증가 처리는 joinRoom()에서 수행
- *
- * @called_by
- * - WebSocket Handshake 직전 컨트롤러 or 미리 입장 검사 수행하는 계층
+ * RoomJoinService
+ * ──────────────────────────────────────────────────────────────
+ * 채팅방 입장 요청에 대한 사전 검증(permit 점유) 및 입장 확정(DB/메모리 인원수 반영) 도메인 서비스
+ * - 입장 전(REST/Handshake): permit(동시 인원) 사전 확보
+ * - 연결 확정(WebSocket established): DB/메모리/세션 동기화 및 인원수 증가
  */
 @Service
 public class RoomJoinService implements IRoomJoinService {
 
-    private final IRoomJoinRepository roomJoinRepository;
-    private final JoinRoomConverter roomConverter;
     private final InMemoryRoomQueueTracker inMemoryRoomQueueTracker;
     private final SemaphoreRegistry semaphoreRegistry;
-
+    private final RoomConverter roomConverter;
     private final ChatSessionRegistry chatSessionRegistry;
 
     private static final Logger logger = LoggerFactory.getLogger(RoomJoinService.class);
 
     public RoomJoinService(
-            IRoomJoinRepository roomJoinRepository,
-            JoinRoomConverter roomConverter,
+            RoomConverter roomConverter,
             InMemoryRoomQueueTracker inMemoryRoomQueueTracker,
             SemaphoreRegistry semaphoreRegistry,
             ChatSessionRegistry chatSessionRegistry) {
 
-        this.roomJoinRepository = roomJoinRepository;
         this.roomConverter = roomConverter;
         this.inMemoryRoomQueueTracker = inMemoryRoomQueueTracker;
         this.semaphoreRegistry = semaphoreRegistry;
@@ -56,48 +46,42 @@ public class RoomJoinService implements IRoomJoinService {
     }
 
     /**
-     * @method confirmJoinRoom
-     * @brief 사용자가 입장 요청 시, 세마포어 permit을 점유하여 사전 입장 가능성을 확인함
-     *
-     * @param roomNumber 입장 요청 대상 방 번호
-     * @param userId 사용자 식별자
-     *
-     * @steps
-     * 1. 메모리 대기열 조회 → 신규 방 여부 판단
-     * 2. 신규 방: 세마포어 등록 + createdAtMap 등록
-     * 3. 기존 방: 등록된 세마포어에서 permit 점유 시도
-     * 4. 점유 실패 시 예외
-     *
-     * @throws RoomBadJoinFullException 방이 유효하지 않거나, permit 점유 실패한 경우
-     *
-     * @called_by WebSocket 연결 전 필수 선행 로직
+     * confirmJoinRoom
+     * ──────────────────────────────────────────────────────────────
+     * [입장 사전 검증 및 permit 점유]
+     * - 실제 WebSocket 연결/세션 확정 전, 인원 초과 방지와 race condition 차단을 위해 동시 입장 permit(세마포어) 확보 시도
+     * - 새로고침, 2중 탭, 임시 세션, race, 비정상 방번호 등 실시간 이벤트 분기 처리
+     * - 성공 시 permit 점유, 실패(정원 초과/비정상 방) 시 예외
      */
     @Override
     @Transactional
     public synchronized void confirmJoinRoom(int roomNumber, String userId) {
 
-        logger.info("입장 요청 수신: roomNumber={}, userId={}", roomNumber, userId);
+        logger.info("[입장 요청 수신] 시각={} roomNumber={}, userId={}", LocalDateTime.now(), roomNumber, userId);
 
-        Optional<RoomQueueVO> roomQueueVO =
-                Optional.ofNullable(inMemoryRoomQueueTracker.getRoom(roomNumber));
-        Optional<RoomPeopleProjection> roomPeopleProjection =
-                roomJoinRepository.loadPeopleInfo(roomNumber);
-
-        // 이미 세션이 존재하는 경우 중복 입장 허용 (세션은 WebSocketHandler에서 먼저 생성)
-        if (chatSessionRegistry.containsUser(String.valueOf(roomNumber), userId)) {
-            logger.info("중복 입장 시도 허용 - 이미 접속 중: roomNumber={}, userId={}", roomNumber, userId);
+        /*
+            1) 중복 이라 판단 시 별도의 입장 과정 미 수행
+            ** 단순 새로 고침이라 판단은 단순 방 인원수 갱신 목적 이니 그냥 통과.
+         */
+        if(chatSessionRegistry.containsUser(String.valueOf(roomNumber), userId)){
             return;
         }
 
-        // [1] 신규 방
+        // 신규 방(아직 DB에 실체 없음) 대기열 확인
+        Optional<RoomQueueVO> roomQueueVO =
+                Optional.ofNullable(inMemoryRoomQueueTracker.getRoom(roomNumber));
+        // 기존 방(DB/메모리 실체) 확인
+        Optional<ChatRoom> chatRoom =
+                Optional.ofNullable(chatSessionRegistry.getRoom(roomNumber));
+
         if (roomQueueVO.isPresent()) {
+            logger.warn("[신규 방 입장 생성 요청] : roomNumber={}, userId={}", roomNumber, userId);
             int maxPeople = roomQueueVO.get().getMaxPeople();
 
-            // TTL 추적 등록
-            semaphoreRegistry.registerWithTimestamp(roomNumber, maxPeople);
+            /* 실제로 세션을 맺기 전 단계에서 입장 가능 여부를 확인 해야 한다. */
+            semaphoreRegistry.registerWithTimestamp(roomNumber, maxPeople); // 세마포어 등록 및 생성 시각 기록
+            boolean acquired = semaphoreRegistry.tryAcquire(roomNumber, userId); // permit 점유
 
-            // 점유 시도
-            boolean acquired = semaphoreRegistry.tryAcquire(roomNumber, userId);
             if (!acquired) {
                 logger.warn("[입장 거부] 신규 방 permit 점유 실패: roomNumber={}, userId={}", roomNumber, userId);
                 throw new RoomBadJoinFullException("입장 실패: 방 정원이 가득 찼습니다.");
@@ -105,9 +89,11 @@ public class RoomJoinService implements IRoomJoinService {
             return;
         }
 
-        // [2] 기존 방
-        else if (roomPeopleProjection.isPresent()) {
-            boolean acquired = semaphoreRegistry.tryAcquire(roomNumber, userId);
+        else if (chatRoom.isPresent()) {
+
+            logger.warn("[기존 방 입장 요청] : roomNumber={}, userId={}", roomNumber, userId);
+            boolean acquired = semaphoreRegistry.tryAcquire(roomNumber, userId); // permit 점유
+            logger.warn("[방 여유 인원수] : roomNumber={}, 방 여유 인원수={}", roomNumber, semaphoreRegistry.getAvailablePermits(roomNumber));
             if (!acquired) {
                 logger.warn("[입장 거부] 기존 방 permit 점유 실패: roomNumber={}, userId={}", roomNumber, userId);
                 throw new RoomBadJoinFullException("입장 실패: 방 정원이 가득 찼습니다.");
@@ -115,7 +101,6 @@ public class RoomJoinService implements IRoomJoinService {
             return;
         }
 
-        // [3] 비정상 방 번호
         else {
             logger.error("존재하지 않는 방에 대한 입장 시도 감지: roomNumber={}", roomNumber);
             throw new RoomBadJoinFullException("유효하지 않은 방 번호입니다. roomNumber=" + roomNumber);
@@ -123,39 +108,34 @@ public class RoomJoinService implements IRoomJoinService {
     }
 
     /**
-     * @method joinRoom
-     * @brief 실제 WebSocket 연결 수립 후 확정 입장 → DB 내 방 생성 또는 인원 수 증가 처리
-     *
-     * @param roomNumber 입장 대상 방 번호
-     *
-     * @steps
-     * 1. DB에 존재하지 않으면 새 방 생성 (대기열 기준)
-     * 2. 인원 수 증가 처리
-     *
-     * @called_by WebSocketHandler.afterConnectionEstablished()
+     * joinRoom
+     * ──────────────────────────────────────────────────────────────
+     * [실제 입장 확정, DB/메모리 인원 반영]
+     * - WebSocket 연결 완료(세션 수립) 후 호출
+     * - 방 실체(DB/메모리) 생성 및 인원수 동기화
+     * - permit 기반 인원수 보정(중복/누락 방지)
      */
     @Override
     @Transactional
     public synchronized void joinRoom(int roomNumber) {
 
-        // [1] DB 테이블 존재 여부 확인 (물리적 방 유무)
-        boolean existsInDB = roomJoinRepository.findRoomTable(roomNumber).isPresent();
+        // 기존 방(DB/메모리 실체) 존재 여부 확인
+        Optional<ChatRoom> chatRoom = Optional.ofNullable(chatSessionRegistry.getRoom(roomNumber));
 
-        if (!existsInDB) {
-            // [1-1] 생성 대기열에서 메타정보 조회 (실패 시 치명적)
-            logger.info("신규 방 생성 처리 진행: roomNumber={}", roomNumber);
+        // [1] 기존 방 없음 → 방 생성(대기열 메타 정보 기반)
+        if (chatRoom.isEmpty()) {
+
+            logger.info("신규 방 생성 과정 진행 - roomNumber={}", roomNumber);
+            // 방 생성 대기열에서 메타 정보 조회 (없으면 치명적 오류)
             RoomQueueVO roomVO = Optional.ofNullable(inMemoryRoomQueueTracker.getRoom(roomNumber))
                     .orElseThrow(() -> new IllegalStateException("방 생성 대기열에서 해당 방을 찾을 수 없습니다. roomNumber=" + roomNumber));
-
-            // [1-2] DB에 방 테이블 생성
-            roomJoinRepository.createRoomTable(roomConverter.toEntity(roomConverter.toDTO(roomVO)));
-
-            // [1-3] 대기열에서 해당 방은 "생성 완료" 상태로 전환
+            // inMemoryRoomQueueTracker(방 생성 대기열) 내 방 정보를 실제 방으로 생성
+            chatSessionRegistry.createRoom(roomNumber, roomConverter.toChatRoom(roomVO));
+            // 대기열 방 상태를 "생성 완료"로 전환(플래그)
             roomVO.setJoined(true);
         }
-
-        // [2] DB 내 인원 수 증가
-        roomJoinRepository.incrementParticipantCount(roomNumber);
-        logger.info("DB 인원수 증가 완료: roomNumber={}", roomNumber);
+        // [2] 신규/기존 방 상관 없이 세마포어 기반 permit으로 인원수 동기화 : 방 생성 혹은 입장 완료 시점에 이미 동기화.
+        chatSessionRegistry.updateRoomCurrentPeople(roomNumber, chatSessionRegistry.getRoom(roomNumber).getMaxPeople() -  semaphoreRegistry.getAvailablePermits(roomNumber));
+        logger.info("[updateRoomCurrentPeople] 동기화: roomNumber={}, availablePermits={}", roomNumber, semaphoreRegistry.getAvailablePermits(roomNumber));
     }
 }
