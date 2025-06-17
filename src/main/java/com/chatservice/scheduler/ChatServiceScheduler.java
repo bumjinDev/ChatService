@@ -1,5 +1,6 @@
 package com.chatservice.scheduler;
 
+import com.chatservice.websocketcore.model.ChatSessionRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -21,16 +22,19 @@ public class ChatServiceScheduler {
 	private static final int EXPIRATION_MINUTES = 2;
 	private static final long TTL_MILLIS = EXPIRATION_MINUTES * 60 * 1000L;
 	private static final long TTL_LIMIT_MS = 120_000L;
+	ChatSessionRegistry chatSessionRegistry;
 
 	private static final Logger logger = LoggerFactory.getLogger(ChatServiceScheduler.class);
 
 	public ChatServiceScheduler(
 			InMemoryRoomQueueTracker tracker,
 			RoomQueueEntityJpa roomQueueEntityJpa,
-			SemaphoreRegistry semaphoreRegistry) {
+			SemaphoreRegistry semaphoreRegistry,
+			ChatSessionRegistry chatSessionRegistry) {
 		this.inMemoryRoomQueueTracker = tracker;
 		this.roomQueueEntityJpa = roomQueueEntityJpa;
 		this.semaphoreRegistry = semaphoreRegistry;
+		this.chatSessionRegistry = chatSessionRegistry;
 	}
 
 	/**
@@ -76,24 +80,18 @@ public class ChatServiceScheduler {
 		}
 	}
 
-	/**
-	 * [createdAtMap 기반 dead room 감지]
-	 *
-	 * - 생성된 세마포어 중, 즉 방 생성 혹은 입장 요청에 따라 생성된(JoinService.confirmJoinRoom()) 세션이 일정 시간 이상 WebSocket 연결이 이루어지지 않은 방 감지
-	 * - 자원 자체는 회수하지 않으며, 이 상태로 남은 방은 수동 정리가 필요할 수 있음
-	 * - 현재는 로그 출력만 수행, 추후 정책 수립 가능
-	 */
-	@Scheduled(fixedRate = 60000) // 60초마다 실행
-	public void logExpiredCreatedRooms() {
-		long now = System.currentTimeMillis();
-
-		for (Integer roomId : semaphoreRegistry.getRegisteredRoomIds()) {
-			Long createdAt = semaphoreRegistry.getCreatedAt(roomId);
-
-			if (createdAt != null && (now - createdAt > TTL_MILLIS)) {
-				System.out.println("[경고] 생성 후 TTL 초과 방 감지됨: roomId=" + roomId);
-				// 회수 정책 수립 전: 로그만 출력
-			}
+	 /* [사용자 세션 TTL 만료 정리]
+			*
+			* - 0.5초(500ms)마다 ChatSessionRegistry의 cleanupExpiredUsers() 호출
+     * - 비명시적 종료, TTL 만료, race condition 등 세션/인원수/VO 상태 정합성 유지
+     */
+	@Scheduled(fixedRate = 500) // 0.5초마다 실행
+	public void cleanupExpiredUsersJob() {
+		try {
+			chatSessionRegistry.cleanupExpiredUsers();
+		} catch (Exception e) {
+			logger.error("[cleanupExpiredUsersJob] 실행 중 예외 발생", e);
 		}
 	}
+
 }
