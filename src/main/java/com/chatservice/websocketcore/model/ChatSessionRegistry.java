@@ -148,14 +148,13 @@ public class ChatSessionRegistry {
     public void handleUserSessionOnConnect(String roomId, String userId, WebSocketSession session) throws Exception {
         // 서버 저장 sessionKey 조회(최초 입장 or 기존 세션 판별 기준)
         String serverSessionKey = getSessionKey(roomId, userId);
-        logger.info("[세션키 조회] 서버 세션키 로드 완료: roomId={}, userId={}, serverSessionKey={}", roomId, userId, serverSessionKey);
+        logger.info("[서버 측 세션키 조회] 서버 세션키 로드 완료: roomId={}, userId={}, serverSessionKey={}", roomId, userId, serverSessionKey);
 
         Object rawKey = session.getAttributes().get("sessionKey"); // 핸드셰이크 중 설정된 클라이언트 세션키
-        logger.info("[세션키 조회] 클라이언트 rawKey 추출: rawKey={}", rawKey);
+        logger.info("[클라이언트 세션키 조회] 클라이언트 rawKey 추출: rawKey={}", rawKey);
 
         String clientSessionKey = (rawKey == null) ? "null" : rawKey.toString(); // null 방어 및 명시적 문자열화
-        logger.info("[세션키 확정] 클라이언트 세션키 처리 완료: clientSessionKey={}", clientSessionKey);
-
+        logger.info("[클라이언트 세션키 확정] 클라이언트 세션키 처리 완료: clientSessionKey={}", clientSessionKey);
 
         /* [서버 측 유효성 검사]
          *
@@ -271,7 +270,7 @@ public class ChatSessionRegistry {
          *   - roomUserVOMap, roomUserSessions, roomList의 NPE 가능성 대비
          */
         if (clientSessionKey.equals(serverSessionKey)) {
-            logger.info("[정상 복귀 진입] 동일 sessionKey 감지: roomId={}, userId={}", roomId, userId);
+            logger.info("[새로 고침 복귀] 동일 sessionKey 감지: roomId={}, userId={}", roomId, userId);
 
             int roomNum = Integer.parseInt(roomId);
             int maxWaitMs = 100, waited = 0;
@@ -344,36 +343,27 @@ public class ChatSessionRegistry {
         if (clientSessionKey.equals("null")) {
             logger.info("[중복탭 진입] clientSessionKey=null, serverSessionKey 존재 → 기존 세션 제거 시작: roomId={}, userId={}", roomId, userId);
 
-            // 이전 세션 강제 종료 수행.
+            /* 이전 세션 강제 종료 수행 */
             WebSocketSession prevSession = roomUserSessions.get(roomId).get(userId);
             if (prevSession != null) {
                 prevSession.close(new CloseStatus(3000, "중복 세션 강제 종료"));
                 logger.info("[세션 종료] 기존 prevSession 강제 close 완료");
             }
 
-            // 새로운 탭 갱신 따라 세션 스토리지 갱신.
-            String newSessionKey = UUID.randomUUID().toString();
-            saveSessionKey(roomId, userId, newSessionKey);
+            /* 새로운 탭 접속 했으므로, 세션 스토리지 내 값 또한 새로운 값으로 갱신 */
+            String newSessionKey = UUID.randomUUID().toString();        // 새로운 세션 스토리지 값
+            saveSessionKey(roomId, userId, newSessionKey);              // 새로운 세션 스토리지 값을 서버 내 저장.
             logger.info("[세션키 갱신] sessionKey 재발급 완료: sessionKey={}", newSessionKey);
-
+            /* 새로운 세션 스토리지 값을 클라이언트 내 저장 : 이후 새로 고침 혹은 추가적인 중복 탭 방지 목적. */
             session.sendMessage(new TextMessage(
                     String.format("{\"type\":\"SESSION_KEY\",\"sessionKey\":\"%s\"}", newSessionKey)
             ));
             logger.info("[클라이언트 전달] sessionKey 전송 완료");
 
-            // 기존 브로드 캐스트 도메인 제거
-            roomUserSessions.get(roomId).remove(userId);
+            // 기존 과거의 브로드 캐스트 도메인 제거
+            try { roomUserSessions.get(roomId).remove(userId); } catch (Exception e) { logger.error(e.getMessage()); }
             roomList.get(roomId).remove(session);
             logger.info("[세션 제거] 중복탭 이전 세션 제거 완료");
-
-            if(roomUserSessions.get(roomId).isEmpty()) {
-                roomUserSessions.remove(roomId);
-                logger.info("[roomUserSessions 삭제] 사용자 없음 → 제거됨");
-            }
-            if(roomList.get(roomId).isEmpty()) {
-                roomList.remove(roomId);
-                logger.info("[roomList 삭제] 세션 없음 → 제거됨");
-            }
 
             // 새롭운 브로드 캐스트 도메인 갱신
             roomUserSessions.computeIfAbsent(roomId, k -> new ConcurrentHashMap<>()).put(userId, session);
@@ -384,15 +374,18 @@ public class ChatSessionRegistry {
         }
 
 
-        // [5] 예외/동기화불일치 : 클라 sessionKey 존재, 서버와 불일치 or 서버엔 없음 → 세션키 강제 재발급·동기화
+        /* [5] 예외/동기화불일치 : 클라이언트 sessionKey는 포함하나, 서버 측에 존재하지 않는다. 즉 새로운 접속 / 새로고침 / 중복 탭 접근에 해당되지 않는,
+            인위적인 접근이라 간주 후 서버 측은 별도의 데이터 저장 안하고, 클라이언트 내 SessionStorage "null" 초기화, 그리고 현재 세션 closd() 수행.
+        */
         else {
+            logger.info("[예외/동기화 불일치] clientSessionKey={}, serverSessionKey={} ", clientSessionKey, serverSessionKey);
 
-            String newSessionKey = UUID.randomUUID().toString();
-            saveSessionKey(roomId, userId, newSessionKey);
-            session.getAttributes().put("sessionKey", newSessionKey);
-            roomUserSessions.computeIfAbsent(roomId, k -> new ConcurrentHashMap<>()).put(userId, session);
-            roomList.computeIfAbsent(roomId, k -> new HashSet<>()).add(session);
-            // 클라이언트에 newSessionKey 전달 필요(JS sessionStorage 저장)
+            String newSessionKey = "null";
+            /* 새로운 세션 스토리지 값을 클라이언트 내 저장 : 이후 새로 고침 혹은 추가적인 중복 탭 방지 목적. */
+            session.sendMessage(new TextMessage(
+                    String.format("{\"type\":\"SESSION_KEY\",\"sessionKey\":\"%s\"}", newSessionKey)
+            ));
+            session.close(new CloseStatus(3001, "중복 세션 강제 종료"));
             return;
         }
     }
@@ -438,7 +431,8 @@ public class ChatSessionRegistry {
             서버 측에서 close(3000) 호출로 인해 현 위치 실행하는 것.  */
         else if (closeStatus.getCode() == 3000) {
             logger.info("[중복 탭 따른 접속 종료] roomId={}, 현재 방 인원수={}", roomId, getRoom(roomNum).getCurrentPeople());
-        }
+
+        } else if(closeStatus.getCode() == 3001) { logger.info("잘못된 세션 접근 방지 차원 종료"); }
         /* 3. 비 명시적 종료 - 새로고침 또는 단순 탭 혹은 브라우저 단위로 종료, 즉 진짜로 나간 건지, 혹은 새로고침 상태로써 바로 재 접속할 건지, 서버 측에서는 js 에서 별다른 차별점을 주지 못하기 때문에
                 이를 서버 측에서 구현해야 된다.
         */
@@ -475,6 +469,7 @@ public class ChatSessionRegistry {
         // [4] 실제 등록/갱신 처리
         userMap.put(userId, new RoomUserStateVO(userId, expireAt));
         logger.info("[markImplicitExitUser] roomUserVOMap 등록 완료: roomNumber={}, userId={}, expireAt={}", roomNumber, userId, userMap.get(userId).getExpireAt());
+
         /* 일단 현재 브로드 캐스트 도메인을 제외 한다, 새로 고침으로 인해 발생된 close() 이든, 단순 종료에 의한 close() 발생이든 간에, 불 필요한 브로드 캐스트 전달 방지 목적 */
         // [A] 방 번호 기준으로 sessionSet 추출
         HashSet<WebSocketSession> sessionSet = roomList.get(String.valueOf(roomNumber));
@@ -497,7 +492,6 @@ public class ChatSessionRegistry {
         /* 방 인원 수 감소 : 현 위치에서 삭제를 하지 않으면 기술상, 새로 고침과 진짜 탭 단위 종료 시 구분이 안되는 상황에서 나중에 재 인원수 갱신을 할 지 언정, 사용자 경험에 결함이 생기기 때문.
          *   ** 단, 실제 접속 판별은 TTL 기반으로 일정 시간 내 새로고침으로써 재 접속하지 않으면 "userMap" 에 의해서 실제로 삭제 된다. */
         getRoom(roomNumber).setCurrentPeople(semaphoreRegistry.getAvailablePermits(roomNumber) + 1);
-
         /* 중복 세션 리스트는 삭제하지 않음, 근거는 JoinService.confirm() 접근 시 새로 고침은 결국 현재 존재하는 세션 리스트 목록을 기반하여 판별하기 때문. */
     }
 
@@ -714,13 +708,13 @@ public class ChatSessionRegistry {
      * @return sessionKey (UUID 등, String), 저장된 값 없으면 null
      */
     public String getSessionKey(String roomId, String userId) {
-        logger.debug("[getSessionKey] 진입: roomId={}, userId={}", roomId, userId);
+        logger.info("[getSessionKey] 진입: roomId={}, userId={}", roomId, userId);
 
         // [1] 방 번호(roomId) 기준, 서버에 등록된 <userId, sessionKey> 맵 조회
         Map<String, String> userKeyMap = roomUserSessionKeyMap.get(roomId);
         if (userKeyMap == null) {
             // [2] 해당 방 번호에 대한 세션키 맵이 존재하지 않음(=등록된 적 없음, 또는 전체 방 삭제 등)
-            logger.debug("[getSessionKey] userKeyMap==null: roomId={}, userId={}", roomId, userId);
+            logger.info("[getSessionKey] userKeyMap==null: roomId={}, userId={}", roomId, userId);
             return null;
         }
 
@@ -761,7 +755,6 @@ public class ChatSessionRegistry {
         for (Integer roomNumber : roomsToCheck) {           // 각 방 번호를 기준으로 순차적으로 조회.
             /* 각 방 번호에 대한 <사용자 ID. VO 객체> 집합 추출 */
             Map<String, RoomUserStateVO> userMap = roomUserVOMap.get(roomNumber);
-
 
             /* VO TTL 검사 후 삭제 대상 리스트업 : 현재 위치에서 삭제 진행하지 않고 이후에 삭제 진행할 리스트 업 */
             List<String> expiredUserIds = new ArrayList<>();    // 리스터 업, 즉 "roomUserVOMap" 순회 하면서 각 방 번호 저장 된 자료구조 객체 내부를 확인해서 TTL 초과된 VO 객체들 검사 수행.
@@ -805,9 +798,8 @@ public class ChatSessionRegistry {
                     else { logger.info("[cleanupExpiredUsers] 방 종료 - roomNumber={}, userId={}", roomNumber, userId); }
 
                 } catch (Exception e) { logger.error("[cleanupExpiredUsers] 예외: roomNumber={}, userId={}, err={}", roomNumber, userId, e.toString(), e); }
+                logger.info("[cleanupExpiredUsers] 종료: 남은 방 개수={}", roomUserVOMap.size());
             }
-            logger.info("[cleanupExpiredUsers] 종료: 남은 방 개수={}", roomUserVOMap.size());
         }
-
     }
 }

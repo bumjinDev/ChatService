@@ -11,6 +11,9 @@ const ChatManager = {
         if (!this.getUserAndRoomInfo()) return;
         this.setupEventListeners();
         this.connectWebSocket();
+        // [여기서 세션 스토리지의 'sessionKey' 값을 콘솔에 즉시 출력]
+        const sessionKey = sessionStorage.getItem("sessionKey");
+        console.log("현재 세션스토리지 sessionKey 값:", sessionKey);
     },
 
     checkSessionStorageKey() {
@@ -64,8 +67,12 @@ const ChatManager = {
         });
 
         this.socket.close(1000, JSON.stringify({ type: "USER_EXIT", user: this.userInfo.nickName }));
+
+        /* 명시적 종료 혹은 중복 탭으로 나가지는 경우는 실제로 완전히 나가는 것이니 SessionStorage 값을 "null" 로 초기화 해야 된다. 근거는 이후 새롭게 들어오는
+        *   경우를 마련해야 되기 때문에.. */
         sessionStorage.setItem("sessionKey", "null");
         console.log('명시적 종료로 인한 sessionKey 초기화 - ' + sessionStorage.getItem("sessionKey"));
+
         window.location.href = "/ChatService/rooms";
 
         await socketClosed; // 실질적 전환 기다리려면 이 위치에서 사용
@@ -105,6 +112,7 @@ const ChatManager = {
 
     onWebSocketOpen(event) {
         console.log("WebSocket 연결 성공!");
+        console.log('연결 성공 시점 SessionKey :' + sessionStorage.getItem("sessionKey"));
     },
 
     onWebSocketMessage(event) {
@@ -118,12 +126,20 @@ const ChatManager = {
 
         if (messageData.type === 'SESSION_KEY' && messageData.sessionKey) {
             sessionStorage.setItem("sessionKey", messageData.sessionKey);
-            console.log("신규 sessionKey를 sessionStorage에 저장:", sessionStorage.getItem("sessionKey"));
+            console.log("신규 sessionKey를 sessionStorage에 저장 완료 :", sessionStorage.getItem("sessionKey"));
             return;
         }
 
         if (messageData.type === 'FORCE_DISCONNECT') {
             alert(messageData.content || "다른 탭에서 접속되어 연결이 종료됩니다.");
+
+            /* 명시적 종료 혹은 중복 탭으로 나가지는 경우는 실제로 완전히 나가는 것이니 SessionStorage 값을 "null" 로 초기화 해야 된다. 근거는 이후 새롭게 들어오는
+        *   경우를 마련해야 되기 때문에.. */
+            sessionStorage.setItem("sessionKey", "null");
+            console.log('명시적 종료로 인한 sessionKey 초기화 - ' + sessionStorage.getItem("sessionKey"));
+
+            console.log("중복 탭 - sessionKey :", sessionStorage.getItem("sessionKey"));
+
             window.location.href = "/ChatService/rooms";
             return;
         }
@@ -173,10 +189,16 @@ const ChatManager = {
     },
 
     onWebSocketClose(event) {
+
         console.log("WebSocket 연결 종료:", event.code, event.reason);
 
         if (event.code === 3000 && event.reason) {
             alert("중복 접속을 시도 하셨음으로 현재 채팅방은 종료 됩니다.");
+
+            /* 반드시 초기화 */
+            sessionStorage.setItem("sessionKey", "null");
+            console.log('명시적 종료로 인한 sessionKey 초기화 - ' + sessionStorage.getItem("sessionKey"));
+
             window.location.href = "/ChatService/rooms";
             return;
         }

@@ -66,6 +66,7 @@ public class ChatHandShakeIntercepter implements HandshakeInterceptor {
         // @step3: 사용자 이름, 아이디 추출(세션/필터 등에서 미리 설정되었다고 가정)
         String userName = (String) servletRequest.getAttribute("userName");
         String userId = (String) servletRequest.getAttribute("userId");
+
         logger.info("[beforeHandshake] roomNumber 파라미터 추출: roomNumber={}", roomNumber);
         logger.info("[beforeHandshake] userName={}, userId={}", userName, userId);
 
@@ -77,28 +78,20 @@ public class ChatHandShakeIntercepter implements HandshakeInterceptor {
         }
         logger.info("[beforeHandshake] 필수 파라미터 존재 - 핸드셰이크 진행");
 
-        // @step5: 세션 단위 랜덤 sessionKey 생성(UUID)
-        String sessionKey = java.util.UUID.randomUUID().toString();
-        logger.info("[beforeHandshake] sessionKey 생성: sessionKey={}", sessionKey);
+        // @step5: 클라이언트가 전달한 sessionKey 파라미터 추출
+        String sessionKey = servletRequest.getParameter("sessionKey");
+        logger.info("[beforeHandshake] sessionKey 파라미터 추출: sessionKey={}", sessionKey);
 
         // @step6: 모든 필수 속성/파라미터를 attributes에 등록(WebSocketSession.getAttributes()로 복사됨)
         attributes.put("roomNumber", roomNumber);      // @ 세션용 방번호
         attributes.put("userName", userName);          // @ 세션용 사용자이름
         attributes.put("userId", userId);              // @ 세션용 사용자ID
+
         attributes.put("sessionKey", sessionKey);      // @ 세션 식별 고유키
-        logger.info("[beforeHandshake] attributes 등록 완료: roomNumber={}, userName={}, userId={}, sessionKey={}",
+
+        logger.info("[beforeHandshake] attributes 등록 완료: roomNumber={}, userName={}, userId={}, clientSessionKey={}",
                 roomNumber, userName, userId, sessionKey);
 
-        // @step7: ChatSessionRegistry의 (roomId, userId) 별 sessionKey 등록(상태 일치화)
-        chatSessionRegistry.saveSessionKey(roomNumber, userId, sessionKey);
-        logger.info("[beforeHandshake] sessionKey ChatSessionRegistry 저장 완료: roomNumber={}, userId={}, sessionKey={}",
-                roomNumber, userId, sessionKey);
-
-        logger.debug("[beforeHandshake] sessionKey 생성/저장: roomNumber={}, userId={}, sessionKey={}",
-                roomNumber, userId, sessionKey
-        );
-
-        // @return true: 정상 진행(핸드셰이크 허용)
         logger.info("[beforeHandshake] 핸드셰이크 정상 종료 - true 반환");
         return true;
     }

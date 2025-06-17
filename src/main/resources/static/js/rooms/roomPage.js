@@ -54,6 +54,7 @@ window.onload = function() {
             }
 			*/
             rooms.forEach(room => {
+
                 const roomEntityDiv = document.createElement('div');
                 roomEntityDiv.classList.add('roomEntity');
 
@@ -88,6 +89,10 @@ window.onload = function() {
 
                 roomListContainer.appendChild(roomEntityDiv);
             });
+
+            // [여기가 '모든 방 목록이 완전히 그려진 이후' 시점]
+            const sessionKey = sessionStorage.getItem("sessionKey");
+            console.log("방 목록 로딩 후 sessionStorage.sessionKey =", sessionKey);
 
         } catch (error) {
             // fetch 실패, 응답 오류 (response.ok가 false인 경우), JSON 파싱 오류 등 발생 시

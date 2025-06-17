@@ -81,17 +81,17 @@ public class ChatServiceScheduler {
 	}
 
 	 /* [사용자 세션 TTL 만료 정리]
-			*
 			* - 0.5초(500ms)마다 ChatSessionRegistry의 cleanupExpiredUsers() 호출
      * - 비명시적 종료, TTL 만료, race condition 등 세션/인원수/VO 상태 정합성 유지
      */
 	@Scheduled(fixedRate = 500) // 0.5초마다 실행
 	public void cleanupExpiredUsersJob() {
-		try {
-			chatSessionRegistry.cleanupExpiredUsers();
-		} catch (Exception e) {
-			logger.error("[cleanupExpiredUsersJob] 실행 중 예외 발생", e);
+		if(!chatSessionRegistry.getRoomUserVOMap().isEmpty()) {
+			try {
+				chatSessionRegistry.cleanupExpiredUsers();
+			} catch (Exception e) {
+				logger.error("[cleanupExpiredUsersJob] 실행 중 예외 발생", e);
+			}
 		}
 	}
-
 }
