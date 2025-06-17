@@ -9,8 +9,6 @@ import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
-import com.chatservice.exportroom.service.ExportRoomService;
-import com.chatservice.exportroom.service.IExportRoomService;
 import com.chatservice.joinroom.service.IRoomJoinService;
 import com.chatservice.websocketcore.model.ChatSessionRegistry;
 
@@ -19,20 +17,15 @@ import com.chatservice.websocketcore.model.ChatSessionRegistry;
 public class WebSocketConfig implements WebSocketConfigurer {
 	
 	IRoomJoinService roomJoinService;
-	IExportRoomService exportRoomService;
-	
 	ChatSessionRegistry chatSessionRegistry;
-
 	SemaphoreRegistry semaphoreRegistry;
 
 	public WebSocketConfig(
 			IRoomJoinService roomJoinService,
-			ExportRoomService exportRoomService,
 			ChatSessionRegistry chatSessionRegistry,
 			SemaphoreRegistry semaphoreRegistry) {
 		
 		this.roomJoinService = roomJoinService;
-		this.exportRoomService = exportRoomService;
 		this.chatSessionRegistry = chatSessionRegistry;
 		this.semaphoreRegistry = semaphoreRegistry;
 	}
