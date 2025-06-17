@@ -46,10 +46,10 @@ public class WebSocketConfig implements WebSocketConfigurer {
     public WebSocketHandler textWebSocketHandler (
     		IRoomJoinService roomJoinService,
     		ChatSessionRegistry chatSessionRegistry) {
-        return new ChatTextWebSocketHandler(roomJoinService, exportRoomService, chatSessionRegistry, semaphoreRegistry);
+        return new ChatTextWebSocketHandler(roomJoinService, chatSessionRegistry, semaphoreRegistry);
     }
     @Bean
     public HandshakeInterceptor handshakeInterceptor () {
-        return new ChatHandShakeIntercepter();
+        return new ChatHandShakeIntercepter(chatSessionRegistry);
     }
 }
