@@ -33,12 +33,10 @@ public class ChatTextWebSocketHandler extends TextWebSocketHandler {
     private static final Logger logger = LogManager.getLogger(ChatTextWebSocketHandler.class);
 
     private final IRoomJoinService roomJoinService;
-
     private final ChatSessionRegistry chatSessionRegistry;
     private final SemaphoreRegistry semaphoreRegistry;
 
     public ChatTextWebSocketHandler(
-
             IRoomJoinService roomJoinService,
             ChatSessionRegistry chatSessionRegistry,
             SemaphoreRegistry semaphoreRegistry) {
@@ -103,8 +101,8 @@ public class ChatTextWebSocketHandler extends TextWebSocketHandler {
                 userId, roomId, semaphoreRegistry.getAvailablePermits(roomId));
 
         /* ===== 방 내 전체 인원들에게 방 접속했다는 알림. */
-
         int currnetPeople = chatSessionRegistry.getRoom(roomId).getMaxPeople() - semaphoreRegistry.getAvailablePermits(roomId);
+
         logger.info("[디버깅] currentPeople 계산: roomId={}, maxPeople={}, availablePermits={}, currentPeople(전체 인원수 - 세마포어 '남은'' 수)={}, currentPeople(ChatRoom.getCurrentPeople={}",
                 roomId,
                 chatSessionRegistry.getRoom(roomId).getMaxPeople(),

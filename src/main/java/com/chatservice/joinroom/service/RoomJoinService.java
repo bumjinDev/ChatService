@@ -55,10 +55,9 @@ public class RoomJoinService implements IRoomJoinService {
      */
     @Override
     @Transactional
-    public synchronized void confirmJoinRoom(int roomNumber, String userId) {
+    public void confirmJoinRoom(int roomNumber, String userId) {
 
         logger.info("[입장 요청 수신] 시각={} roomNumber={}, userId={}", LocalDateTime.now(), roomNumber, userId);
-
         /*
             1) 중복 이라 판단 시 별도의 입장 과정 미 수행
             ** 단순 새로 고침이라 판단은 단순 방 인원수 갱신 목적 이니 그냥 통과.
@@ -66,7 +65,6 @@ public class RoomJoinService implements IRoomJoinService {
         if(chatSessionRegistry.containsUser(String.valueOf(roomNumber), userId)){
             return;
         }
-
         // 신규 방(아직 DB에 실체 없음) 대기열 확인
         Optional<RoomQueueVO> roomQueueVO =
                 Optional.ofNullable(inMemoryRoomQueueTracker.getRoom(roomNumber));
@@ -75,17 +73,22 @@ public class RoomJoinService implements IRoomJoinService {
                 Optional.ofNullable(chatSessionRegistry.getRoom(roomNumber));
 
         if (roomQueueVO.isPresent()) {
+
             logger.warn("[신규 방 입장 생성 요청] : roomNumber={}, userId={}", roomNumber, userId);
             int maxPeople = roomQueueVO.get().getMaxPeople();
 
-            /* 실제로 세션을 맺기 전 단계에서 입장 가능 여부를 확인 해야 한다. */
-            semaphoreRegistry.registerWithTimestamp(roomNumber, maxPeople); // 세마포어 등록 및 생성 시각 기록
-            boolean acquired = semaphoreRegistry.tryAcquire(roomNumber, userId); // permit 점유
-
+            /* 실제로 세션을 맺기 전 단계에서 입장 가능 여부를 확인하면서 가능하면 permit 점유를 시도한다. */
+            boolean acquired = semaphoreRegistry.tryAcquire(roomNumber, userId);
             if (!acquired) {
                 logger.warn("[입장 거부] 신규 방 permit 점유 실패: roomNumber={}, userId={}", roomNumber, userId);
                 throw new RoomBadJoinFullException("입장 실패: 방 정원이 가득 찼습니다.");
             }
+           /*
+               1. 새로운 방이니 그에 따라 새로운 방 ID에 해당하는 객체 세마포어 생성.
+               2. 새로운 방을 생성 했는데 안 들어올 것을 대비해서 자료구조 "createdAtMap" 내 저장..실제로 방에 들어왔으면 해당 객체를 이후 createroom 도메인 내에서 삭제함.
+           * */
+            semaphoreRegistry.registerWithTimestamp(roomNumber, maxPeople);
+
             return;
         }
 
@@ -117,7 +120,7 @@ public class RoomJoinService implements IRoomJoinService {
      */
     @Override
     @Transactional
-    public synchronized void joinRoom(int roomNumber) {
+    public void joinRoom(int roomNumber) {
 
         // 기존 방(DB/메모리 실체) 존재 여부 확인
         Optional<ChatRoom> chatRoom = Optional.ofNullable(chatSessionRegistry.getRoom(roomNumber));
