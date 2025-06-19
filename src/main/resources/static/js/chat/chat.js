@@ -5,11 +5,19 @@ const ChatManager = {
     roomNumber: null,
 
     init() {
+        this.checkSessionStorageKey(); // ← F5 또는 최초 진입 시 sessionKey 상태 로그
         console.log("ChatManager 초기화 시작!");
         this.setupDomElements();
         if (!this.getUserAndRoomInfo()) return;
         this.setupEventListeners();
         this.connectWebSocket();
+        // [여기서 세션 스토리지의 'sessionKey' 값을 콘솔에 즉시 출력]
+        const sessionKey = sessionStorage.getItem("sessionKey");
+        console.log("현재 세션스토리지 sessionKey 값:", sessionKey);
+    },
+
+    checkSessionStorageKey() {
+        // 필요 시 구현, 없으면 무시
     },
 
     setupDomElements() {
@@ -39,16 +47,16 @@ const ChatManager = {
     setupEventListeners() {
         this.dom.exitButton.addEventListener("click", this.handleExitClick.bind(this));
         this.dom.sendButton.addEventListener("click", this.handleSendClick.bind(this));
-        this.dom.chatInput.addEventListener("keypress", function (event) {
+        this.dom.chatInput.addEventListener("keypress", (event) => {
             if (event.key === "Enter") {
                 event.preventDefault();
                 this.handleSendClick();
             }
-        }.bind(this));
+        });
     },
 
     async handleExitClick() {
-        console.log(`'채팅 방 나가기' 버튼 클릭. 방 번호: ${this.roomNumber}`);
+        console.log(`채팅 방 나가기 버튼 클릭. 방 번호: ${this.roomNumber}`);
         if (!confirm("정말 채팅방에서 나가시겠습니까?")) return;
 
         const socketClosed = new Promise((resolve) => {
@@ -58,10 +66,16 @@ const ChatManager = {
             };
         });
 
-        this.socket.close();
+        this.socket.close(1000, JSON.stringify({ type: "USER_EXIT", user: this.userInfo.nickName }));
 
-        //alert("채팅방에서 나왔습니다.");
+        /* 명시적 종료 혹은 중복 탭으로 나가지는 경우는 실제로 완전히 나가는 것이니 SessionStorage 값을 "null" 로 초기화 해야 된다. 근거는 이후 새롭게 들어오는
+        *   경우를 마련해야 되기 때문에.. */
+        sessionStorage.setItem("sessionKey", "null");
+        console.log('명시적 종료로 인한 sessionKey 초기화 - ' + sessionStorage.getItem("sessionKey"));
+
         window.location.href = "/ChatService/rooms";
+
+        await socketClosed; // 실질적 전환 기다리려면 이 위치에서 사용
     },
 
     handleSendClick() {
@@ -77,7 +91,9 @@ const ChatManager = {
     },
 
     connectWebSocket() {
-        const websocketUrl = `ws://localhost:8186/ChatService/chat?roomNumber=${this.roomNumber}`;
+        const sessionKeyForSend = sessionStorage.getItem("sessionKey");
+        // ws:// URI 내 템플릿 리터럴 백틱(`) 필수
+        const websocketUrl = `ws://localhost:8186/ChatService/chat?roomNumber=${this.roomNumber}&sessionKey=${sessionKeyForSend}`;
         try {
             this.socket = new WebSocket(websocketUrl);
             console.log(`WebSocket 연결 시도: ${websocketUrl}`);
@@ -86,6 +102,7 @@ const ChatManager = {
             this.socket.onmessage = this.onWebSocketMessage.bind(this);
             this.socket.onerror = this.onWebSocketError.bind(this);
             this.socket.onclose = this.onWebSocketClose.bind(this);
+
         } catch (error) {
             console.error("WebSocket 생성 오류:", error);
             alert("WebSocket 연결 실패. 대기방으로 이동합니다.");
@@ -95,22 +112,37 @@ const ChatManager = {
 
     onWebSocketOpen(event) {
         console.log("WebSocket 연결 성공!");
+        console.log('연결 성공 시점 SessionKey :' + sessionStorage.getItem("sessionKey"));
     },
 
-	onWebSocketMessage(event) {
-	    let messageData;
-	    try {
-	        messageData = JSON.parse(event.data);
-	    } catch (e) {
-	        console.error("JSON 파싱 실패", e);
-	        return;
-	    }
+    onWebSocketMessage(event) {
+        let messageData;
+        try {
+            messageData = JSON.parse(event.data);
+        } catch (e) {
+            console.error("JSON 파싱 실패", e);
+            return;
+        }
 
-	    if (messageData.type === 'FORCE_DISCONNECT') {
-	        alert(messageData.content || "다른 탭에서 접속되어 연결이 종료됩니다.");
-	        window.location.href = "/ChatService/rooms";
-	        return;
-	    }
+        if (messageData.type === 'SESSION_KEY' && messageData.sessionKey) {
+            sessionStorage.setItem("sessionKey", messageData.sessionKey);
+            console.log("신규 sessionKey를 sessionStorage에 저장 완료 :", sessionStorage.getItem("sessionKey"));
+            return;
+        }
+
+        if (messageData.type === 'FORCE_DISCONNECT') {
+            alert(messageData.content || "다른 탭에서 접속되어 연결이 종료됩니다.");
+
+            /* 명시적 종료 혹은 중복 탭으로 나가지는 경우는 실제로 완전히 나가는 것이니 SessionStorage 값을 "null" 로 초기화 해야 된다. 근거는 이후 새롭게 들어오는
+        *   경우를 마련해야 되기 때문에.. */
+            sessionStorage.setItem("sessionKey", "null");
+            console.log('명시적 종료로 인한 sessionKey 초기화 - ' + sessionStorage.getItem("sessionKey"));
+
+            console.log("중복 탭 - sessionKey :", sessionStorage.getItem("sessionKey"));
+
+            window.location.href = "/ChatService/rooms";
+            return;
+        }
 
         switch (messageData.type) {
             case 'CHAT':
@@ -157,23 +189,24 @@ const ChatManager = {
     },
 
     onWebSocketClose(event) {
+
         console.log("WebSocket 연결 종료:", event.code, event.reason);
 
-        if (event.code === 4000 && event.reason) {
-            try {
-                const reasonObj = JSON.parse(event.reason);
-                if (reasonObj.type === "DUPLICATE") {
-                    alert("다른 탭에서 접속하여 현재 채팅방 연결이 종료되었습니다.");
-                    window.location.href = "/ChatService/rooms";
-                    return;
-                }
-            } catch (e) {
-                console.warn("CloseEvent reason JSON 파싱 실패:", e);
-            }
+        if (event.code === 3000 && event.reason) {
+            alert("중복 접속을 시도 하셨음으로 현재 채팅방은 종료 됩니다.");
+
+            /* 반드시 초기화 */
+            sessionStorage.setItem("sessionKey", "null");
+            console.log('명시적 종료로 인한 sessionKey 초기화 - ' + sessionStorage.getItem("sessionKey"));
+
+            window.location.href = "/ChatService/rooms";
+            return;
         }
 
         if (!event.wasClean) {
             alert("채팅 연결이 끊어졌습니다. 대기방으로 이동합니다.");
+            sessionStorage.setItem("sessionKey", "null");
+            console.log("신규 sessionKey를 sessionStorage에 저장:", sessionStorage.getItem("sessionKey"));
             window.location.href = "/ChatService/rooms";
         } else {
             console.log("정상 종료");
