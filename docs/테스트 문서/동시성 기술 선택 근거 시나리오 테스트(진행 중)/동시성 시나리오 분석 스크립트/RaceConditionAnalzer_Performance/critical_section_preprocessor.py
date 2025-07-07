@@ -1,266 +1,281 @@
-import pandas as pd  # 데이터 처리를 위한 라이브러리
-import re             # 정규 표현식을 위한 라이브러리
-import os             # 운영체제 기능을 위한 라이브러리
-import shutil         # 파일 복사/이동을 위한 라이브러리
-import argparse       # 명령줄 인자 처리를 위한 라이브러리
-from openpyxl import load_workbook  # Excel 파일 처리를 위한 라이브러리
+import pandas as pd
+import re
+import os
+import shutil
+import argparse
+from openpyxl import load_workbook
 
-# 상수 정의
-LOG_FILE = 'ChatService.log'  # 기본 로그 파일명
-NEW_LOG_PATH = r'E:\devSpace\ChatServiceTest\log\ChatService.log'  # 새 로그 파일 경로
+LOG_FILE = 'ChatService.log'
+NEW_LOG_PATH = r'E:\devSpace\ChatServiceTest\log\ChatService.log'
 
 def replace_log_file():
-    """
-    로그 파일을 새로운 버전으로 교체하는 함수
-    - 기존 로그 파일이 있으면 삭제
-    - 새 로그 파일을 복사해서 가져옴
-    """
-    # 기존 로그 파일이 존재하면 삭제
     if os.path.exists(LOG_FILE):
         os.remove(LOG_FILE)
-    
-    # 새 로그 파일을 현재 디렉토리로 복사
     shutil.copy(NEW_LOG_PATH, LOG_FILE)
 
-def parse_logs(filepath, room_number=None):
-    """
-    로그 파일을 파싱해서 동시성 제어 구조별 시간 측정 이벤트들을 추출하는 함수
-    
-    🔧 동시성 제어 시간 측정 목적:
-    - INCREMENT_BEFORE: 실제 증가 작업 직전 (동시성 제어 시작점)
-    - INCREMENT_AFTER: 실제 증가 작업 직후 (동시성 제어 종료점)
-    
-    입력:
-    - filepath: 로그 파일 경로
-    - room_number: 특정 방 번호만 필터링 (None이면 모든 방)
-    
-    출력: DataFrame - 파싱된 이벤트 데이터
-    """
-    
-    # 정규 표현식 패턴 정의
-    # 동시성 제어 구조별 시간 측정을 위한 핵심 이벤트:
-    # - INCREMENT_BEFORE: 실제 증가 작업 직전
-    # - INCREMENT_AFTER: 실제 증가 작업 직후
-    pattern = re.compile(
-        r'timestampIso=(?P<timestamp>\S+).*?'  # 시간 정보 추출
-        r'event=(?P<event>INCREMENT_BEFORE|INCREMENT_AFTER).*?'  # 동시성 제어 핵심 이벤트만
-        r'roomNumber=(?P<roomNumber>\d+).*?'    # 방 번호
-        r'userId=(?P<userId>\S+).*?'            # 사용자 ID
-        r'currentPeople=(?P<currentPeople>\d+).*?'  # 현재 인원수
-        r'maxPeople=(?P<maxPeople>\d+)'         # 최대 정원
+def parse_five_events_clean(filepath, room_number=None):
+    critical_pattern = re.compile(
+        r'CRITICAL_SECTION_MARK tag=(?P<tag>WAITING_START|CRITICAL_ENTER|CRITICAL_LEAVE)'
+        r' timestampIso=(?P<timestamp>[\w\-\:\.TZ]+)'
+        r' event=(?P<event>\w+)'
+        r'.* roomNumber=(?P<roomNumber>\d+)'
+        r' userId=(?P<userId>[\w\-\_]+)'
+        r'.* nanoTime=(?P<nanoTime>\d+)'
+        r'.* epochNano=(?P<epochNano>\d+)'
     )
     
-    records = []  # 파싱된 레코드들을 저장할 리스트
+    increment_pattern = re.compile(
+        r'timestampIso=(?P<timestamp>[\w\-\:\.TZ]+)'
+        r' event=(?P<tag>INCREMENT_BEFORE|INCREMENT_AFTER)'
+        r' roomNumber=(?P<roomNumber>\d+)'
+        r' userId=(?P<userId>[\w\-\_]+)'
+        r'.* epochNano=(?P<epochNano>\d+)'
+        r'.* nanoTime=(?P<nanoTime>\d+)'
+    )
     
-    # 로그 파일을 한 줄씩 읽으면서 파싱
+    records = []
+    
     with open(filepath, encoding='utf-8') as f:
         for line in f:
-            # 정규식으로 매칭 시도
-            match = pattern.search(line)
+            data = None
+            
+            match = critical_pattern.search(line)
             if match:
-                # 매칭된 그룹들을 딕셔너리로 변환
                 data = match.groupdict()
-                
-                # 문자열로 추출된 숫자들을 정수형으로 변환
+                data['event_type'] = data['event']
+            else:
+                match = increment_pattern.search(line)
+                if match:
+                    data = match.groupdict()
+                    data['event_type'] = None
+            
+            if data:
                 data['roomNumber'] = int(data['roomNumber'])
-                data['currentPeople'] = int(data['currentPeople'])
-                data['maxPeople'] = int(data['maxPeople'])
+                # 나노초 값들을 문자열로 유지 (정밀도 보존)
+                data['nanoTime'] = data['nanoTime']
+                data['epochNano'] = data['epochNano']
                 
-                # 🔧 나노초 정밀도 정보 추출 (동시성 제어 시간 측정 정밀도)
-                nano_match = re.search(r'nanoTime=(\d+)', line)
-                epoch_match = re.search(r'epochNano=(\d+)', line)
-                thread_match = re.search(r'threadId=(\d+)', line)
-                
-                if nano_match:
-                    data['nanoTime'] = int(nano_match.group(1))
-                if epoch_match:
-                    data['epochNano'] = int(epoch_match.group(1))
-                if thread_match:
-                    data['threadId'] = int(thread_match.group(1))
-                
-                # 방 번호 필터링 적용
                 if room_number is None or data['roomNumber'] == room_number:
                     records.append(data)
     
-    # 리스트를 DataFrame으로 변환해서 반환
     return pd.DataFrame(records)
 
-def build_paired_data_with_enhanced_binning(df):
-    """
-    🔧 동시성 제어 구조별 시간 측정을 위한 페어링 로직
-    - 방 번호별로 각각 10개 구간으로 분할
-    - 각 방 내에서 타임스탬프 기준 정렬 및 구간 할당
-    - INCREMENT_BEFORE ↔ INCREMENT_AFTER 페어링으로 실제 동시성 제어 시간 측정
-    
-    입력: df (DataFrame) - 파싱된 로그 데이터
-    출력: DataFrame - 페어링된 동시성 제어 시간 측정 데이터
-    """
-    
-    # 빈 데이터면 빈 DataFrame 반환
+def build_clean_performance_data(df):
     if df.empty:
         return pd.DataFrame()
     
-    # === 타임스탬프 변환 ===
     df['timestamp'] = pd.to_datetime(df['timestamp'])
     
-    # === 동시성 제어 이벤트별로 데이터 분리 ===
-    before = df[df['event'] == 'INCREMENT_BEFORE'].copy()    # 증가 작업 직전
-    after = df[df['event'] == 'INCREMENT_AFTER'].copy()      # 증가 작업 직후
-
-    # === 🎯 방 번호별 타임스탬프 기준 정렬 및 구간 분할 ===
-    enhanced_results = []
+    # nanoTime과 epochNano를 숫자로 변환하여 정렬에 사용
+    df['nanoTime_num'] = df['nanoTime'].astype(float)
+    df['epochNano_num'] = df['epochNano'].astype(float)
     
-    # 각 방 번호별로 처리
+    # 전체 데이터를 타임스탬프와 나노타임 기준으로 정렬
+    df = df.sort_values(['timestamp', 'nanoTime_num', 'epochNano_num']).reset_index(drop=True)
+    
+    performance_results = []
     unique_rooms = df['roomNumber'].unique()
     
     for room_num in unique_rooms:
-        print(f"  처리 중: 방 번호 {room_num}")
+        room_df = df[df['roomNumber'] == room_num].copy()
         
-        # 해당 방의 INCREMENT_BEFORE 이벤트만 추출
-        room_before = before[before['roomNumber'] == room_num].copy()
-        room_after = after[after['roomNumber'] == room_num].copy()
+        # 방별로도 타임스탬프 기준 정렬
+        room_df = room_df.sort_values(['timestamp', 'nanoTime_num', 'epochNano_num']).reset_index(drop=True)
         
-        if room_before.empty:
-            continue
+        user_groups = room_df.groupby('userId')
+        room_sequence = 0
         
-        # === 방별 타임스탬프 기준 정렬 ===
-        room_before = room_before.sort_values('timestamp').reset_index(drop=True)
+        # 사용자별 첫 번째 이벤트 시간으로 사용자 순서 결정
+        user_first_times = []
+        for user_id, user_data in user_groups:
+            first_time = user_data.sort_values(['timestamp', 'nanoTime_num', 'epochNano_num']).iloc[0]
+            user_first_times.append((first_time['timestamp'], first_time['nanoTime_num'], first_time['epochNano_num'], user_id, user_data))
         
-        # === 🎯 방별 10개 구간 분할 ===
-        total_requests = len(room_before)
-        if total_requests <= 10:
-            # 요청이 10개 이하면 각각 하나씩 구간 할당
-            room_before['bin'] = range(1, total_requests + 1)
-        else:
-            # 10개 구간으로 균등 분할
-            room_before['bin'] = pd.cut(range(total_requests), bins=10, labels=range(1, 11)).astype(int)
+        # 첫 번째 이벤트 시간 순으로 사용자 정렬
+        user_first_times.sort(key=lambda x: (x[0], x[1], x[2]))
         
-        # === 방별 순번 부여 ===
-        room_before['room_entry_sequence'] = range(1, len(room_before) + 1)
-        
-        # === 페어링을 위한 인덱스 생성 ===
-        # 같은 방, 같은 사용자의 이벤트들을 순서대로 연결하기 위한 인덱스
-        for event_df in [room_before, room_after]:
-            if not event_df.empty:
-                # 사용자 ID별로 그룹화해서 순차 번호 부여
-                event_df['pair_idx'] = event_df.groupby('userId').cumcount()
-
-        # === INCREMENT_BEFORE ↔ INCREMENT_AFTER 페어링 ===
-        room_paired = pd.DataFrame()
-        if not room_after.empty:
-            # userId, pair_idx가 같은 레코드들을 연결
-            room_paired = pd.merge(room_before, room_after, on=['userId', 'pair_idx'], suffixes=('_before', '_after'))
+        for first_time, first_nano, first_epoch, user_id, user_data in user_first_times:
+            # 사용자별 이벤트를 시간순으로 정렬
+            user_data = user_data.sort_values(['timestamp', 'nanoTime_num', 'epochNano_num']).reset_index(drop=True)
+            room_sequence += 1
             
-            # 동시성 제어 시간 측정 필드 생성
-            room_paired['concurrency_result'] = 'COMPLETED'
-            room_paired['before_people'] = room_paired['currentPeople_before']
-            room_paired['after_people'] = room_paired['currentPeople_after']
-            room_paired['people_increment'] = room_paired['after_people'] - room_paired['before_people']
-
-        if not room_paired.empty:
-            enhanced_results.append(room_paired)
+            events = {}
+            for _, row in user_data.iterrows():
+                event_name = row['tag']
+                events[event_name] = {
+                    'timestamp': row['timestamp'],
+                    'nanoTime': str(int(float(row['nanoTime']))),
+                    'epochNano': str(int(float(row['epochNano']))),
+                    'event_type': row.get('event_type')
+                }
+            
+            profile = {
+                'roomNumber': room_num,
+                'user_id': user_id,
+                'room_entry_sequence': room_sequence
+            }
+            
+            if 'WAITING_START' in events:
+                profile.update({
+                    'waiting_start_time': events['WAITING_START']['timestamp'],
+                    'waiting_start_nanoTime': events['WAITING_START']['nanoTime'],
+                    'waiting_start_epochNano': events['WAITING_START']['epochNano'],
+                    'waiting_start_event_type': events['WAITING_START']['event_type']
+                })
+            
+            if 'CRITICAL_ENTER' in events:
+                profile.update({
+                    'critical_enter_time': events['CRITICAL_ENTER']['timestamp'],
+                    'critical_enter_nanoTime': events['CRITICAL_ENTER']['nanoTime'],
+                    'critical_enter_epochNano': events['CRITICAL_ENTER']['epochNano'],
+                    'critical_enter_event_type': events['CRITICAL_ENTER']['event_type']
+                })
+            
+            if 'CRITICAL_LEAVE' in events:
+                profile.update({
+                    'critical_leave_time': events['CRITICAL_LEAVE']['timestamp'],
+                    'critical_leave_nanoTime': events['CRITICAL_LEAVE']['nanoTime'],
+                    'critical_leave_epochNano': events['CRITICAL_LEAVE']['epochNano'],
+                    'critical_leave_event_type': events['CRITICAL_LEAVE']['event_type']
+                })
+                
+                if events['CRITICAL_LEAVE']['event_type'] == 'SUCCESS':
+                    profile['join_result'] = 'SUCCESS'
+                elif events['CRITICAL_LEAVE']['event_type'] == 'FAIL_OVER_CAPACITY':
+                    profile['join_result'] = 'FAIL_OVER_CAPACITY'
+                else:
+                    profile['join_result'] = 'UNKNOWN'
+            
+            if 'INCREMENT_BEFORE' in events:
+                profile.update({
+                    'increment_before_time': events['INCREMENT_BEFORE']['timestamp'],
+                    'increment_before_nanoTime': events['INCREMENT_BEFORE']['nanoTime'],
+                    'increment_before_epochNano': events['INCREMENT_BEFORE']['epochNano']
+                })
+            
+            if 'INCREMENT_AFTER' in events:
+                profile.update({
+                    'increment_after_time': events['INCREMENT_AFTER']['timestamp'],
+                    'increment_after_nanoTime': events['INCREMENT_AFTER']['nanoTime'],
+                    'increment_after_epochNano': events['INCREMENT_AFTER']['epochNano']
+                })
+            
+            performance_results.append(profile)
     
-    # === 모든 방 결과 통합 ===
-    if not enhanced_results:
+    if not performance_results:
         return pd.DataFrame()
     
-    result = pd.concat(enhanced_results, ignore_index=True)
+    result_df = pd.DataFrame(performance_results)
     
-    # === 🔧 방 번호별 구간별 스레드 정렬 ===
-    # 방 번호 → 구간 번호 → 타임스탬프 순으로 정렬
-    result['timestamp_before'] = pd.to_datetime(result['timestamp_before'])
-    result = result.sort_values(['roomNumber_before', 'bin', 'timestamp_before']).reset_index(drop=True)
+    # 모든 나노초 컬럼을 문자열로 확실히 변환
+    nano_columns = [col for col in result_df.columns if 'nanoTime' in col or 'epochNano' in col]
+    for col in nano_columns:
+        if col in result_df.columns:
+            result_df[col] = result_df[col].astype(str)
     
-    # === 🔧 최종 컬럼 정리 (동시성 제어 시간 측정 중심) ===
-    final_columns = {
-        'roomNumber_before': 'roomNumber',
-        'bin': 'bin',
-        'userId': 'user_id',
-        'before_people': 'before_people',
-        'after_people': 'after_people',
-        'people_increment': 'people_increment',
-        'maxPeople_before': 'max_people',
-        'room_entry_sequence': 'room_entry_sequence',
-        'concurrency_result': 'concurrency_result',
-        'timestamp_before': 'increment_start_time',
-        'timestamp_after': 'increment_end_time'
-    }
+    # 방별 10개 구간 분할
+    for room_num in result_df['roomNumber'].unique():
+        room_mask = result_df['roomNumber'] == room_num
+        room_data = result_df[room_mask]
+        
+        total_requests = len(room_data)
+        if total_requests <= 10:
+            bins = range(1, total_requests + 1)
+        else:
+            bins = pd.cut(range(total_requests), bins=10, labels=range(1, 11)).astype(int)
+        
+        result_df.loc[room_mask, 'bin'] = bins
     
-    # === 🔧 동시성 제어 나노초 정밀도 필드 추가 ===
-    if 'nanoTime_before' in result.columns:
-        final_columns['nanoTime_before'] = 'increment_nanoTime_start'
-    if 'epochNano_before' in result.columns:
-        final_columns['epochNano_before'] = 'increment_epochNano_start'
-    if 'threadId_before' in result.columns:
-        final_columns['threadId_before'] = 'thread_id_start'
+    base_columns = ['roomNumber', 'bin', 'user_id', 'room_entry_sequence', 'join_result']
     
-    if 'nanoTime_after' in result.columns:
-        final_columns['nanoTime_after'] = 'increment_nanoTime_end'
-    if 'epochNano_after' in result.columns:
-        final_columns['epochNano_after'] = 'increment_epochNano_end'
-    if 'threadId_after' in result.columns:
-        final_columns['threadId_after'] = 'thread_id_end'
+    event_columns = [
+        'waiting_start_time', 'waiting_start_nanoTime', 'waiting_start_epochNano', 'waiting_start_event_type',
+        'critical_enter_time', 'critical_enter_nanoTime', 'critical_enter_epochNano', 'critical_enter_event_type',
+        'critical_leave_time', 'critical_leave_nanoTime', 'critical_leave_epochNano', 'critical_leave_event_type',
+        'increment_before_time', 'increment_before_nanoTime', 'increment_before_epochNano',
+        'increment_after_time', 'increment_after_nanoTime', 'increment_after_epochNano'
+    ]
     
-    # === 최종 컬럼 선택 및 이름 변경 ===
-    existing_columns = {old: new for old, new in final_columns.items() if old in result.columns}
+    all_columns = base_columns + event_columns
+    existing_columns = [col for col in all_columns if col in result_df.columns]
     
-    # 원하는 순서대로 컬럼 정렬 (동시성 제어 시간 측정 중심)
-    desired_order = ['roomNumber', 'bin', 'user_id', 'before_people', 'after_people', 'people_increment', 'max_people', 
-                     'room_entry_sequence', 'concurrency_result', 'increment_start_time', 'increment_end_time',
-                     'thread_id_start', 'thread_id_end',
-                     'increment_nanoTime_start', 'increment_epochNano_start',
-                     'increment_nanoTime_end', 'increment_epochNano_end']
+    result_df = result_df[existing_columns]
     
-    # DataFrame 재구성
-    result = result[list(existing_columns.keys())].rename(columns=existing_columns)
+    # 최종 정렬: 방 번호 -> 첫 번째 이벤트 시간 순서
+    if 'waiting_start_time' in result_df.columns:
+        result_df['waiting_start_nanoTime_num'] = pd.to_numeric(result_df['waiting_start_nanoTime'])
+        result_df['waiting_start_epochNano_num'] = pd.to_numeric(result_df['waiting_start_epochNano'])
+        
+        result_df = result_df.sort_values([
+            'roomNumber', 
+            'waiting_start_time', 
+            'waiting_start_nanoTime_num', 
+            'waiting_start_epochNano_num'
+        ])
+        
+        result_df = result_df.drop(columns=['waiting_start_nanoTime_num', 'waiting_start_epochNano_num'])
+    elif 'critical_enter_time' in result_df.columns:
+        result_df['critical_enter_nanoTime_num'] = pd.to_numeric(result_df['critical_enter_nanoTime'])
+        result_df['critical_enter_epochNano_num'] = pd.to_numeric(result_df['critical_enter_epochNano'])
+        
+        result_df = result_df.sort_values([
+            'roomNumber', 
+            'critical_enter_time', 
+            'critical_enter_nanoTime_num', 
+            'critical_enter_epochNano_num'
+        ])
+        
+        result_df = result_df.drop(columns=['critical_enter_nanoTime_num', 'critical_enter_epochNano_num'])
+    else:
+        result_df = result_df.sort_values(['roomNumber', 'room_entry_sequence'])
     
-    # 존재하는 컬럼들만 원하는 순서로 재배열
-    final_order = [col for col in desired_order if col in result.columns]
-    result = result[final_order]
+    result_df = result_df.reset_index(drop=True)
     
-    return result
+    return result_df
 
-def get_enhanced_desc_table():
-    """
-    🔧 동시성 제어 시간 측정 중심 설명 테이블
-    """
+def get_clean_event_desc_table():
     return [
-        ["속성명", "분석 목적", "도출 방법"],
+        ["속성명", "측정 목적", "도출 방법"],
         ["roomNumber", "방 번호 식별", "로그 필드: roomNumber"],
         ["bin", "방별 분석 구간", "각 방의 요청을 10개 구간으로 균등 분할"],
         ["user_id", "사용자 식별", "로그 필드: userId"],
-        ["before_people", "증가 작업 전 인원수", "INCREMENT_BEFORE의 currentPeople"],
-        ["after_people", "증가 작업 후 인원수", "INCREMENT_AFTER의 currentPeople"],
-        ["people_increment", "실제 증가량", "after_people - before_people"],
-        ["max_people", "최대 정원", "로그 필드: maxPeople"],
         ["room_entry_sequence", "방별 처리 순번", "방별 타임스탬프 기준 순번"],
-        ["concurrency_result", "동시성 제어 결과", "COMPLETED (성공적으로 페어링됨)"],
-        ["increment_start_time", "증가 작업 시작 시간", "INCREMENT_BEFORE 타임스탬프"],
-        ["increment_end_time", "증가 작업 완료 시간", "INCREMENT_AFTER 타임스탬프"],
-        ["thread_id_start", "시작 스레드 ID", "INCREMENT_BEFORE의 threadId"],
-        ["thread_id_end", "종료 스레드 ID", "INCREMENT_AFTER의 threadId"],
-        ["increment_nanoTime_start", "증가 작업 시작 나노초", "INCREMENT_BEFORE의 nanoTime"],
-        ["increment_epochNano_start", "증가 작업 시작 Epoch 나노초", "INCREMENT_BEFORE의 epochNano"],
-        ["increment_nanoTime_end", "증가 작업 완료 나노초", "INCREMENT_AFTER의 nanoTime"],
-        ["increment_epochNano_end", "증가 작업 완료 Epoch 나노초", "INCREMENT_AFTER의 epochNano"]
+        ["join_result", "입장 결과 구분", "SUCCESS/FAIL_OVER_CAPACITY/UNKNOWN"],
+        ["waiting_start_*", "대기 시작 시점", "WAITING_START 이벤트 속성들"],
+        ["critical_enter_*", "임계구역 진입 시점", "CRITICAL_ENTER 이벤트 속성들"],
+        ["critical_leave_*", "임계구역 진출 시점", "CRITICAL_LEAVE 이벤트 속성들"],
+        ["increment_before_*", "증가 작업 시작 시점", "INCREMENT_BEFORE 이벤트 속성들"],
+        ["increment_after_*", "증가 작업 완료 시점", "INCREMENT_AFTER 이벤트 속성들"],
+        ["*_time", "이벤트 발생 시간", "timestampIso (스레드 요청 순서)"],
+        ["*_nanoTime", "나노초 정밀도 시간", "System.nanoTime()"],
+        ["*_epochNano", "Epoch 나노초 시간", "Epoch 기준 나노초"],
+        ["*_event_type", "이벤트 상세 타입", "SUCCESS/FAIL_OVER_CAPACITY 등"]
     ]
 
 def save_with_side_table(df_result, out_xlsx, desc_table):
-    """
-    Excel 파일에 데이터와 설명 테이블을 함께 저장하는 함수
-    results 폴더에 저장
-    """
-    # results 폴더 생성
     results_dir = 'results'
     if not os.path.exists(results_dir):
         os.makedirs(results_dir)
-        print(f"[폴더 생성] '{results_dir}' 폴더가 생성되었습니다.")
     
-    # 파일 경로를 results 폴더 안으로 설정
     full_path = os.path.join(results_dir, out_xlsx)
     
-    df_result.to_excel(full_path, index=False)
+    # Excel 저장 시에도 나노초 값들을 문자열로 처리
+    with pd.ExcelWriter(full_path, engine='openpyxl') as writer:
+        df_result.to_excel(writer, index=False)
+        
+        # 워크북과 시트 가져오기
+        workbook = writer.book
+        worksheet = writer.sheets['Sheet1']
+        
+        # 나노초 컬럼들을 텍스트 형식으로 설정
+        nano_columns = [col for col in df_result.columns if 'nanoTime' in col or 'epochNano' in col]
+        for col_name in nano_columns:
+            col_idx = df_result.columns.get_loc(col_name) + 1  # Excel은 1부터 시작
+            for row in range(2, len(df_result) + 2):  # 헤더 제외
+                cell = worksheet.cell(row=row, column=col_idx)
+                cell.number_format = '@'  # 텍스트 형식
     
+    # 설명 테이블 추가
     wb = load_workbook(full_path)
     ws = wb.active
     
@@ -274,79 +289,89 @@ def save_with_side_table(df_result, out_xlsx, desc_table):
     
     return full_path
 
-def analyze_enhanced_results(df):
-    """
-    동시성 제어 시간 측정 분석 결과 출력
-    """
+def analyze_clean_results(df):
     if df.empty:
         print("분석할 데이터가 없습니다.")
         return
     
-    # 기본 통계 계산
     total_operations = len(df)
-    completed_count = len(df[df['concurrency_result'] == 'COMPLETED'])
     
-    print(f"\n=== 🔧 동시성 제어 시간 측정 분석 결과 ===")
-    print(f"전체 동시성 제어 작업 수: {total_operations}")
-    print(f"완료된 작업: {completed_count}건 ({completed_count/total_operations*100:.1f}%)")
+    print(f"\n=== 레이스 컨디션 지표 제거된 5개 이벤트 성능 측정 분석 결과 ===")
+    print(f"전체 처리 작업 수: {total_operations}")
     
-    # 방별 통계
+    if 'join_result' in df.columns:
+        print(f"\n=== 입장 결과별 분석 ===")
+        join_result_counts = df['join_result'].value_counts()
+        for result, count in join_result_counts.items():
+            print(f"{result}: {count}건 ({count/total_operations*100:.1f}%)")
+    
+    events = ['waiting_start_time', 'critical_enter_time', 'critical_leave_time', 'increment_before_time', 'increment_after_time']
+    
+    print(f"\n=== 이벤트 완성도 분석 ===")
+    for event in events:
+        if event in df.columns:
+            complete_count = df[event].notna().sum()
+            print(f"{event}: {complete_count}건 ({complete_count/total_operations*100:.1f}%)")
+    
+    if 'critical_leave_event_type' in df.columns:
+        print(f"\n=== CRITICAL_LEAVE 이벤트 타입별 분석 ===")
+        critical_leave_types = df['critical_leave_event_type'].value_counts()
+        for event_type, count in critical_leave_types.items():
+            if pd.notna(event_type):
+                print(f"{event_type}: {count}건")
+    
+    complete_sessions = 0
+    success_complete_sessions = 0
+    fail_complete_sessions = 0
+    
+    for _, row in df.iterrows():
+        if all(pd.notna(row.get(event)) for event in events):
+            complete_sessions += 1
+            if row.get('join_result') == 'SUCCESS':
+                success_complete_sessions += 1
+            elif row.get('join_result') == 'FAIL_OVER_CAPACITY':
+                fail_complete_sessions += 1
+    
+    print(f"\n=== 완전한 5개 이벤트 세션 분석 ===")
+    print(f"완전한 5개 이벤트 세션: {complete_sessions}건 ({complete_sessions/total_operations*100:.1f}%)")
+    print(f"  └ 성공 세션: {success_complete_sessions}건")
+    print(f"  └ 실패 세션: {fail_complete_sessions}건")
+    
     room_stats = df.groupby('roomNumber').agg({
         'user_id': 'count',
-        'people_increment': ['sum', 'mean'],
         'bin': 'nunique'
     })
-    room_stats.columns = ['total_operations', 'total_increment', 'avg_increment', 'bin_count']
+    room_stats.columns = ['total_operations', 'bin_count']
     
-    print(f"\n=== 방별 동시성 제어 통계 ===")
+    print(f"\n=== 방별 성능 통계 ===")
     for room_num, stats in room_stats.iterrows():
-        print(f"방 {room_num}: 총 {stats['total_operations']}회 작업, "
-              f"총 증가량 {stats['total_increment']}, "
-              f"평균 증가량 {stats['avg_increment']:.1f}, "
-              f"구간 수: {stats['bin_count']}")
-    
-    # 구간별 통계 (대표적인 방 하나만)
-    if 'bin' in df.columns and not df.empty:
-        sample_room = df['roomNumber'].iloc[0]
-        sample_room_data = df[df['roomNumber'] == sample_room]
+        print(f"방 {room_num}: 총 {stats['total_operations']}회 작업, 구간 수: {stats['bin_count']}")
         
-        print(f"\n=== 방 {sample_room} 구간별 동시성 제어 통계 (샘플) ===")
-        bin_stats = sample_room_data.groupby('bin').agg({
-            'user_id': 'count',
-            'people_increment': 'sum'
-        }).rename(columns={'user_id': 'operations', 'people_increment': 'total_increment'})
-        
-        for bin_num, stats in bin_stats.iterrows():
-            print(f"  구간 {bin_num}: {stats['operations']}회 작업, 총 증가량 {stats['total_increment']}")
+        if 'join_result' in df.columns:
+            room_data = df[df['roomNumber'] == room_num]
+            room_results = room_data['join_result'].value_counts()
+            for result, count in room_results.items():
+                print(f"  └ {result}: {count}건")
     
-    # 동시성 이슈 분석
-    if 'people_increment' in df.columns:
-        # 정상적이지 않은 증가량 (1이 아닌 경우)
-        abnormal_increments = df[df['people_increment'] != 1]
-        if not abnormal_increments.empty:
-            print(f"\n비정상적인 증가량 감지: {len(abnormal_increments)}건")
-            increment_counts = abnormal_increments['people_increment'].value_counts()
-            for increment, count in increment_counts.items():
-                print(f"  증가량 {increment}: {count}건")
-        else:
-            print(f"\n모든 증가량이 정상적임 (증가량 1)")
+    print(f"\n=== 타임스탬프 정렬 확인 ===")
+    if 'waiting_start_time' in df.columns:
+        first_time = df['waiting_start_time'].iloc[0] if len(df) > 0 else None
+        last_time = df['waiting_start_time'].iloc[-1] if len(df) > 0 else None
+        print(f"첫 번째 이벤트 시간: {first_time}")
+        print(f"마지막 이벤트 시간: {last_time}")
     
-    # 스레드 분석
-    if 'thread_id_start' in df.columns:
-        unique_threads = df['thread_id_start'].nunique()
-        print(f"\n스레드 분석: {unique_threads}개 고유 스레드 활동")
-        
-        # 스레드별 작업량
-        thread_stats = df.groupby('thread_id_start').size().sort_values(ascending=False)
-        print("스레드별 작업량 (상위 5개):")
-        for thread_id, count in thread_stats.head().items():
-            print(f"  스레드 {thread_id}: {count}회 작업")
+    # 나노초 값 샘플 출력 (정밀도 확인)
+    print(f"\n=== 나노초 정밀도 확인 (첫 5개 샘플) ===")
+    nano_columns = [col for col in df.columns if 'nanoTime' in col]
+    if nano_columns:
+        for i in range(min(5, len(df))):
+            print(f"샘플 {i+1}:")
+            for col in nano_columns[:2]:
+                if col in df.columns:
+                    print(f"  {col}: {df.iloc[i][col]}")
 
 def main():
-    """
-    🔧 동시성 제어 시간 측정 중심 메인 함수
-    """
-    parser = argparse.ArgumentParser(description="동시성 제어 시간 측정 전처리기 (INCREMENT_BEFORE ↔ INCREMENT_AFTER)")
+    parser = argparse.ArgumentParser(description="레이스 컨디션 지표 제거된 5개 이벤트 성능 측정 전처리기")
     parser.add_argument('--room', type=int, help='특정 방 번호만 처리 (옵션)')
     parser.add_argument('--csv', type=str, help='추가 CSV 파일명 (옵션)')
     parser.add_argument('--xlsx', type=str, help='Excel 파일명 (옵션)')
@@ -354,64 +379,43 @@ def main():
     args = parser.parse_args()
     
     try:
-        print("🔧 동시성 제어 시간 측정 전처리기 시작...")
-        print("📋 INCREMENT_BEFORE ↔ INCREMENT_AFTER 페어링으로 동시성 제어 시간 측정")
-        print("📋 각 방별로 10개 구간 분할, 타임스탬프 기준 스레드 정렬")
-        
-        # 1단계: 로그 파일 교체
-        print("1. 로그 파일 교체 중...")
         replace_log_file()
+        df = parse_five_events_clean(LOG_FILE, room_number=args.room)
+        result = build_clean_performance_data(df)
         
-        # 2단계: 로그 파싱 (동시성 제어 이벤트)
-        print("2. 동시성 제어 이벤트 파싱 중...")
-        df = parse_logs(LOG_FILE, room_number=args.room)
-        print(f"   파싱된 이벤트 수: {len(df)}")
-        
-        # 3단계: 방별 구간 분할 및 페어링
-        print("3. 방별 구간 분할 및 동시성 제어 페어링 처리 중...")
-        result = build_paired_data_with_enhanced_binning(df)
-        print(f"   페어링된 작업 수: {len(result)}")
-        
-        # 4단계: 결과 저장
-        print("4. 결과 저장 중...")
-        
-        # results 폴더 생성
         results_dir = 'results'
         if not os.path.exists(results_dir):
             os.makedirs(results_dir)
-            print(f"[폴더 생성] '{results_dir}' 폴더가 생성되었습니다.")
         
-        # 기본 CSV 파일 저장
         if args.room:
-            base_filename = f'concurrency_timing_room{args.room}.csv'
+            base_filename = f'clean_five_events_performance_room{args.room}.csv'
         else:
-            base_filename = 'concurrency_timing_all_rooms.csv'
+            base_filename = 'clean_five_events_performance_all_rooms.csv'
         
-        # CSV 파일도 results 폴더에 저장
         csv_path = os.path.join(results_dir, base_filename)
-        result.to_csv(csv_path, index=False, encoding='utf-8-sig')
-        print(f"   CSV 저장 완료: {csv_path}")
         
-        # 추가 파일 저장
+        nano_columns = [col for col in result.columns if 'nanoTime' in col or 'epochNano' in col]
+        
+        # 나노초 컬럼들이 이미 문자열인지 확인하고, 아니면 변환하여 정밀도 유지
+        for col in nano_columns:
+            if col in result.columns and pd.api.types.is_numeric_dtype(result[col]):
+                result[col] = result[col].astype(str).str.replace(r'\.0$', '', regex=True)
+        
+        # CSV 저장 (문자열로 저장하여 정밀도 유지)
+        result.to_csv(csv_path, index=False, encoding='utf-8-sig')
+        
         if args.csv:
             additional_csv_path = os.path.join(results_dir, args.csv)
             result.to_csv(additional_csv_path, index=False, encoding='utf-8-sig')
-            print(f"   추가 CSV 저장 완료: {additional_csv_path}")
         
         if args.xlsx:
-            desc_table = get_enhanced_desc_table()
-            xlsx_full_path = save_with_side_table(result, args.xlsx, desc_table)
-            print(f"   Excel 저장 완료: {xlsx_full_path}")
+            desc_table = get_clean_event_desc_table()
+            save_with_side_table(result, args.xlsx, desc_table)
         
-        # 5단계: 결과 분석
-        print("5. 결과 분석 중...")
-        analyze_enhanced_results(result)
-        
-        print("\n✅ 동시성 제어 시간 측정 전처리 완료!")
-        print("🎯 방별 10개 구간 분할 및 INCREMENT 이벤트 페어링 완료!")
+        analyze_clean_results(result)
         
     except Exception as e:
-        print(f"❌ 오류 발생: {e}")
+        print(f"오류 발생: {e}")
         import traceback
         traceback.print_exc()
 
