@@ -356,10 +356,14 @@ def create_per_room_stats(df_total, df_success, df_capacity_failed, df_lock_fail
             'entry_failed_rate(%)': calculate_rate(len(room_lock_failed), len(room_total)),
             'success_avg_wait_time(ns)': room_success['wait_time_ns'].mean() if len(room_success) > 0 else 0,
             'success_median_wait_time(ns)': room_success['wait_time_ns'].median() if len(room_success) > 0 else 0,
+            'success_max_wait_time(ns)': room_success['wait_time_ns'].max() if len(room_success) > 0 else 0,
             'success_avg_dwell_time(ns)': room_success['dwell_time_ns'].mean() if len(room_success) > 0 else 0,
             'success_median_dwell_time(ns)': room_success['dwell_time_ns'].median() if len(room_success) > 0 else 0,
+            'success_max_dwell_time(ns)': room_success['dwell_time_ns'].max() if len(room_success) > 0 else 0,
             'capacity_failed_avg_wait_time(ns)': room_capacity_failed['wait_time_ns'].mean() if len(room_capacity_failed) > 0 else 0,
-            'capacity_failed_avg_fail_processing_time(ns)': room_capacity_failed['fail_processing_time_ns'].mean() if len(room_capacity_failed) > 0 else 0
+            'capacity_failed_max_wait_time(ns)': room_capacity_failed['wait_time_ns'].max() if len(room_capacity_failed) > 0 else 0,
+            'capacity_failed_avg_fail_processing_time(ns)': room_capacity_failed['fail_processing_time_ns'].mean() if len(room_capacity_failed) > 0 else 0,
+            'capacity_failed_max_fail_processing_time(ns)': room_capacity_failed['fail_processing_time_ns'].max() if len(room_capacity_failed) > 0 else 0
         }
         
         room_stats_list.append(stats)
@@ -410,10 +414,14 @@ def create_per_bin_stats(df_total, df_success, df_capacity_failed, df_lock_faile
             'entry_failed_rate(%)': calculate_rate(len(combo_lock_failed), len(combo_total)),
             'success_avg_wait_time(ns)': combo_success['wait_time_ns'].mean() if len(combo_success) > 0 else 0,
             'success_median_wait_time(ns)': combo_success['wait_time_ns'].median() if len(combo_success) > 0 else 0,
+            'success_max_wait_time(ns)': combo_success['wait_time_ns'].max() if len(combo_success) > 0 else 0,
             'success_avg_dwell_time(ns)': combo_success['dwell_time_ns'].mean() if len(combo_success) > 0 else 0,
             'success_median_dwell_time(ns)': combo_success['dwell_time_ns'].median() if len(combo_success) > 0 else 0,
+            'success_max_dwell_time(ns)': combo_success['dwell_time_ns'].max() if len(combo_success) > 0 else 0,
             'capacity_failed_avg_wait_time(ns)': combo_capacity_failed['wait_time_ns'].mean() if len(combo_capacity_failed) > 0 else 0,
-            'capacity_failed_avg_fail_processing_time(ns)': combo_capacity_failed['fail_processing_time_ns'].mean() if len(combo_capacity_failed) > 0 else 0
+            'capacity_failed_max_wait_time(ns)': combo_capacity_failed['wait_time_ns'].max() if len(combo_capacity_failed) > 0 else 0,
+            'capacity_failed_avg_fail_processing_time(ns)': combo_capacity_failed['fail_processing_time_ns'].mean() if len(combo_capacity_failed) > 0 else 0,
+            'capacity_failed_max_fail_processing_time(ns)': combo_capacity_failed['fail_processing_time_ns'].max() if len(combo_capacity_failed) > 0 else 0
         }
         
         bin_stats_list.append(stats)
@@ -498,8 +506,25 @@ def format_excel_file(output_path):
                 if cell.value is not None:
                     cell.number_format = '0.00"%"'
         
-        # 시간 컬럼들 (I~N)
-        for col in ['I', 'J', 'K', 'L', 'M', 'N']:
+        # 시간 컬럼들 (I~S) - 정원초과 실패 최대값 컬럼 추가로 범위 확장
+        for col in ['I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S']:
+            for row in range(2, ws.max_row + 1):
+                cell = ws[f'{col}{row}']
+                if cell.value is not None:
+                    cell.number_format = '#,##0'
+    
+    # Per_Bin_Stats 시트의 포맷
+    if 'Per_Bin_Stats' in wb.sheetnames:
+        ws = wb['Per_Bin_Stats']
+        # 비율 컬럼들 (G, H, I)
+        for col in ['G', 'H', 'I']:
+            for row in range(2, ws.max_row + 1):
+                cell = ws[f'{col}{row}']
+                if cell.value is not None:
+                    cell.number_format = '0.00"%"'
+        
+        # 시간 컬럼들 (J~T) - 정원초과 실패 최대값 컬럼 추가로 범위 확장
+        for col in ['J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T']:
             for row in range(2, ws.max_row + 1):
                 cell = ws[f'{col}{row}']
                 if cell.value is not None:
