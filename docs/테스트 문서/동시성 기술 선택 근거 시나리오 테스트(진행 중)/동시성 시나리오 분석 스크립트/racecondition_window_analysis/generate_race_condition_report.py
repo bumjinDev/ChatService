@@ -24,11 +24,14 @@ def setup_korean_font():
 setup_korean_font()
 
 class RaceConditionAnalyzer:
-    def __init__(self, room_number=None):
+    def __init__(self, room_number=None, preprocessor_file=None, result_file=None, output_dir=None):
         self.room_number = room_number
+        self.preprocessor_file = preprocessor_file if preprocessor_file else 'racecondition_event_preprocessor_result.csv'
+        self.result_file = result_file if result_file else 'anomaly_result.csv'
+        
         self.df_preprocessor = None
         self.df_result = None
-        self.base_folder = 'race_condition_analysis_results'
+        self.base_folder = output_dir if output_dir else 'race_condition_analysis_results'
         self.rule_stats_folder = os.path.join(self.base_folder, '1_rule_statistics')
         self.rule1_folder = os.path.join(self.base_folder, '2_rule1_lost_update')
         self.rule2_folder = os.path.join(self.base_folder, '3_rule2_contention')
@@ -50,8 +53,8 @@ class RaceConditionAnalyzer:
     def load_data(self):
         """CSV 파일들을 로드하고 전처리"""
         try:
-            self.df_preprocessor = pd.read_csv('racecondition_event_preprocessor_result.csv')
-            self.df_result = pd.read_csv('anomaly_result.csv')
+            self.df_preprocessor = pd.read_csv(self.preprocessor_file)
+            self.df_result = pd.read_csv(self.result_file)
             
             if any('nanoTime' in col or 'epochNano' in col for col in self.df_preprocessor.columns):
                 self.has_high_precision = True
@@ -1089,8 +1092,34 @@ def main():
        help='분석할 특정 방 번호 (생략시 전체 방 종합 분석)'
    )
    
+   parser.add_argument(
+       '--preprocessor_file',
+       type=str,
+       default='racecondition_event_preprocessor_result.csv',
+       help='전처리 결과 CSV 파일 경로 (기본값: racecondition_event_preprocessor_result.csv)'
+   )
+   
+   parser.add_argument(
+       '--result_file',
+       type=str,
+       default='anomaly_result.csv',
+       help='이상 현상 분석 결과 CSV 파일 경로 (기본값: anomaly_result.csv)'
+   )
+   
+   parser.add_argument(
+       '--output_dir',
+       type=str,
+       default='race_condition_analysis_results',
+       help='분석 결과를 저장할 디렉토리 경로 (기본값: race_condition_analysis_results)'
+   )
+   
    args = parser.parse_args()
-   analyzer = RaceConditionAnalyzer(room_number=args.room_number)
+   analyzer = RaceConditionAnalyzer(
+       room_number=args.room_number,
+       preprocessor_file=args.preprocessor_file,
+       result_file=args.result_file,
+       output_dir=args.output_dir
+   )
    success = analyzer.run_analysis()
    
    if not success:

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Race Condition 분석기 (완전 수정 버전)
-- 디버깅된 CSV 구조에 맞춰 완전히 새로 작성
-- 4가지 규칙으로 동시성 문제를 탐지
+Race Condition 분석기 (원본 데이터 그대로 사용)
+- 원본 CSV 데이터 항목을 그대로 가져와서 요구사항만 수행
+- 어떤 계산이나 수정도 하지 않음
 """
 
 import pandas as pd
@@ -13,10 +13,7 @@ from openpyxl import load_workbook
 
 def detect_race_condition_anomalies(df):
     """
-    4가지 규칙으로 이상 현상을 탐지
-    
-    입력: df (DataFrame) - 분석할 데이터
-    출력: (anomalies, detailed_analysis) - 이상 현상 목록과 상세 분석
+    4가지 규칙으로 이상 현상을 탐지 (원본 데이터 그대로 사용)
     """
     
     print("🔍 이상 현상 탐지 시작...")
@@ -35,14 +32,6 @@ def detect_race_condition_anomalies(df):
     for room_num in df['roomNumber'].unique():
         print(f"  방 {room_num} 분석 중...")
         room_df = df[df['roomNumber'] == room_num].copy()
-        
-        # === 규칙 4를 위한 시간 순서 매핑 ===
-        room_df_sorted = room_df.sort_values('curr_entry_time').reset_index(drop=True)
-        sorted_sequence_map = {}
-        for sorted_idx, row in room_df_sorted.iterrows():
-            user_id = row['user_id']
-            sorted_position = sorted_idx + 1
-            sorted_sequence_map[user_id] = sorted_position
         
         # === 규칙 2를 위한 경합 그룹 찾기 ===
         contention_groups = find_contention_groups(room_df)
@@ -77,18 +66,14 @@ def detect_race_condition_anomalies(df):
                 anomaly_details['over_capacity_curr'] = row['curr_people']
                 anomaly_details['over_capacity_max'] = row['max_people']
             
-            # 규칙 4: 상태 전이 오류
-            if user_id in sorted_sequence_map:
-                sorted_position = sorted_sequence_map[user_id]
-                expected_curr_people = 1 + sorted_position  # 초기 1명 + 순번
-                
-                if expected_curr_people <= row['max_people']:
-                    if row['curr_people'] != expected_curr_people:
-                        anomaly_types.append('상태 전이 오류')
-                        anomaly_details['expected_curr_by_sequence'] = expected_curr_people
-                        anomaly_details['actual_curr_people'] = row['curr_people']
-                        anomaly_details['curr_sequence_diff'] = row['curr_people'] - expected_curr_people
-                        anomaly_details['sorted_sequence_position'] = sorted_position
+            # 규칙 4: 상태 전이 오류 (원본 room_entry_sequence 그대로 사용)
+            expected_curr_people = 1 + row['room_entry_sequence']
+            if row['curr_people'] != expected_curr_people:
+                anomaly_types.append('상태 전이 오류')
+                anomaly_details['expected_curr_by_sequence'] = expected_curr_people
+                anomaly_details['actual_curr_people'] = row['curr_people']
+                anomaly_details['curr_sequence_diff'] = row['curr_people'] - expected_curr_people
+                anomaly_details['sorted_sequence_position'] = row['room_entry_sequence']
             
             # 임계구역 분석
             critical_analysis = analyze_critical_section(row, room_df, idx)
@@ -200,7 +185,7 @@ def generate_analysis_text(row, anomaly_types, anomaly_details, room_num):
     """상세 분석 텍스트 생성"""
     text = f"""
 ================================================================================
-경쟁 상태 이상 현상 분석 (수정된 요구사항 기반)
+경쟁 상태 이상 현상 분석 (원본 데이터 그대로 사용)
 ================================================================================
 방 번호: {room_num}
 사용자 ID: {row['user_id']}
@@ -250,7 +235,7 @@ Bin: {row['bin']}
             pos = anomaly_details.get('sorted_sequence_position', 'N/A')
             text += f"""
  [규칙 4: 상태 전이 오류 (Stale Read / Inconsistent State)]
-  - curr_entry_time 기준 정렬 순번: {pos}번째
+  - 원본 room_entry_sequence: {pos}번째
   - 예상 curr_people: 1 + {pos} = {anomaly_details.get('expected_curr_by_sequence', 'N/A')}명
   - 실제 curr_people: {anomaly_details.get('actual_curr_people', 'N/A')}명
   - 차이: {anomaly_details.get('curr_sequence_diff', 'N/A')}명
@@ -306,7 +291,7 @@ def print_statistics(df, anomaly_df):
 
 def main():
     """메인 함수"""
-    parser = argparse.ArgumentParser(description="Race Condition 분석기 (완전 수정 버전)")
+    parser = argparse.ArgumentParser(description="Race Condition 분석기 (원본 데이터 그대로 사용)")
     parser.add_argument('input_csv', help='입력 CSV 파일')
     parser.add_argument('output_csv', help='출력 CSV 파일 (이상 현상만)')
     parser.add_argument('--detailed_output', default='detailed_analysis.txt', help='상세 분석 텍스트 파일')
@@ -377,7 +362,7 @@ def main():
                     ["규칙 1: 값 불일치", "curr_people ≠ expected_people", "다른 사용자 작업으로 의도한 갱신이 누락/덮어쓰여짐"],
                     ["규칙 2: 경합 발생 자체", "진짜 임계구역이 1나노초라도 겹침", "동시성 제어 부재로 잠재적 위험 노출"],
                     ["규칙 3: 정원 초과 오류", "curr_people > max_people", "비즈니스 규칙을 명백히 위반한 심각한 오류"],
-                    ["규칙 4: 상태 전이 오류", "curr_people ≠ 1+curr_entry_time기준순번", "올바른 상태를 읽지 못하고 오염된 상태로 작업"]
+                    ["규칙 4: 상태 전이 오류", "curr_people ≠ 1+room_entry_sequence", "올바른 상태를 읽지 못하고 오염된 상태로 작업"]
                 ]
                 
                 anomaly_df.to_excel(args.xlsx_output, index=False)
