@@ -1,4 +1,4 @@
-# RaceCondition Event Preprocessor 요구사항 명세서
+# racecondition_event_preprocessor.py 요구사항 명세서
 
 ## 1. 배경 및 목적
 
