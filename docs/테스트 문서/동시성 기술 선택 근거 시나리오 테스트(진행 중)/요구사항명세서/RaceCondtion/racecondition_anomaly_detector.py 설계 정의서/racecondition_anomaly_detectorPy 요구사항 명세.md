@@ -100,7 +100,6 @@ FOR each thread A:
 | 항목명 | 데이터 타입 | 설명 | 계산식 |
 |--------|-------------|------|--------|
 | true_critical_section_duration_nanos | Float | 나노초 단위 지속 시간 | `nanoTime_end - nanoTime_start` |
-| true_critical_section_epoch_duration_nanos | Float | Epoch 나노초 지속 시간 | `epochNano_end - epochNano_start` |
 
 ## 5. 출력 파일 구조
 
@@ -109,7 +108,7 @@ FOR each thread A:
 - **파일명 예시**: `racecondition_analysis_IF_ELSE.csv`
 - **내용**: 탐지된 모든 이상 현상의 상세 정보
 
-### 5.2 컬럼 구성 (총 34개 컬럼)
+### 5.2 컬럼 구성 (총 31개 컬럼)
 #### 5.2.1 기본 정보 컬럼 (원본 데이터에서 가져옴)
 1. roomNumber - 분석 대상 방 번호
 2. bin - 분석 구간 번호
@@ -121,44 +120,41 @@ FOR each thread A:
 8. prev_entry_time - 임계 구역 진입 시각
 9. curr_entry_time - 임계 구역 종료 시각
 10. true_critical_section_nanoTime_start - 나노초 정밀도 시작 시각
-11. true_critical_section_epochNano_start - Epoch 나노초 시작 시각
-12. true_critical_section_nanoTime_end - 나노초 정밀도 종료 시각
-13. true_critical_section_epochNano_end - Epoch 나노초 종료 시각
+11. true_critical_section_nanoTime_end - 나노초 정밀도 종료 시각
 
 #### 5.2.2 이상 현상 분류 컬럼
-14. anomaly_type - 발견된 이상 현상 유형 (복수 유형은 쉼표로 구분)
+12. anomaly_type - 발견된 이상 현상 유형 (복수 유형은 쉼표로 구분)
 
 #### 5.2.3 순서 관련 컬럼
-15. room_entry_sequence - 방 입장 순서 (원본 데이터의 값 그대로 사용)
+13. room_entry_sequence - 방 입장 순서 (원본 데이터의 값 그대로 사용)
 
 #### 5.2.4 규칙 1 (값 불일치) 관련 컬럼
-16. lost_update_expected - 스레드가 기대했던 결과값
-17. lost_update_actual - 실제로 기록된 결과값
-18. lost_update_diff - 기대값과 실제값의 차이
+14. lost_update_expected - 스레드가 기대했던 결과값
+15. lost_update_actual - 실제로 기록된 결과값
+16. lost_update_diff - 기대값과 실제값의 차이
 
 #### 5.2.5 규칙 2 (경합 발생) 관련 컬럼
-19. contention_group_size - 해당 경합에 포함된 총 스레드 수
-20. contention_user_ids - 경합에 포함된 모든 스레드의 ID 목록
+17. contention_group_size - 해당 경합에 포함된 총 스레드 수
+18. contention_user_ids - 경합에 포함된 모든 스레드의 ID 목록
 
 #### 5.2.6 규칙 3 (정원 초과) 관련 컬럼
-21. over_capacity_amount - 정원을 초과한 인원수
-22. over_capacity_curr - 정원을 초과한 실제 인원수
-23. over_capacity_max - 방의 최대 정원
+19. over_capacity_amount - 정원을 초과한 인원수
+20. over_capacity_curr - 정원을 초과한 실제 인원수
+21. over_capacity_max - 방의 최대 정원
 
 #### 5.2.7 규칙 4 (상태 전이 오류) 관련 컬럼
-24. expected_curr_by_sequence - 시간 순서상 기대되었던 결과값
-25. actual_curr_people - 실제로 기록된 결과값
-26. curr_sequence_diff - 시간 순서 기대값과 실제값의 차이
-27. sorted_sequence_position - curr_entry_time 기준 실제 처리 완료 순번
+22. expected_curr_by_sequence - 시간 순서상 기대되었던 결과값
+23. actual_curr_people - 실제로 기록된 결과값
+24. curr_sequence_diff - 시간 순서 기대값과 실제값의 차이
+25. sorted_sequence_position - curr_entry_time 기준 실제 처리 완료 순번
 
 #### 5.2.8 임계 구역 분석 컬럼
-28. true_critical_section_start - 임계 구역 진입 시각
-29. true_critical_section_end - 임계 구역 종료 시각
-30. true_critical_section_duration - 임계 구역 지속 시간(초)
-31. intervening_users_in_critical_section - 개입한 사용자 ID 목록
-32. intervening_user_count_critical - 개입한 사용자 수
-33. true_critical_section_duration_nanos - 나노초 단위 지속 시간
-34. true_critical_section_epoch_duration_nanos - Epoch 나노초 지속 시간
+26. true_critical_section_start - 임계 구역 진입 시각
+27. true_critical_section_end - 임계 구역 종료 시각
+28. true_critical_section_duration - 임계 구역 지속 시간(초)
+29. intervening_users_in_critical_section - 개입한 사용자 ID 목록
+30. intervening_user_count_critical - 개입한 사용자 수
+31. true_critical_section_duration_nanos - 나노초 단위 지속 시간
 
 ### 5.3 데이터 정렬 순서
 - 1차: roomNumber (오름차순)
@@ -216,7 +212,6 @@ xlsx 출력 시 10열(J열)부터 규칙 설명 테이블 추가:
 
 ### 8.3 선택적 입력 컬럼
 - true_critical_section_nanoTime_start/end
-- true_critical_section_epochNano_start/end
 
 ### 8.4 오류 처리
 - 필수 컬럼 누락 시 프로그램 종료

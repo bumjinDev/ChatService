@@ -54,7 +54,7 @@ def detect_race_condition_anomalies(df):
             # 규칙 2: 경합 발생 자체
             user_id = row['user_id']
             if user_id in contention_groups:
-                anomaly_types.append('경합 발생 자체')
+                anomaly_types.append('경합 발생 오류')
                 contention_info = contention_groups[user_id]
                 anomaly_details['contention_group_size'] = contention_info['group_size']
                 anomaly_details['contention_user_ids'] = ', '.join(contention_info['user_ids'])
@@ -172,12 +172,6 @@ def analyze_critical_section(base_row, room_df, base_idx):
     
     if not pd.isna(start_nano) and not pd.isna(end_nano):
         result['true_critical_section_duration_nanos'] = end_nano - start_nano
-        
-        start_epoch = base_row.get('true_critical_section_epochNano_start')
-        end_epoch = base_row.get('true_critical_section_epochNano_end')
-        
-        if not pd.isna(start_epoch) and not pd.isna(end_epoch):
-            result['true_critical_section_epoch_duration_nanos'] = end_epoch - start_epoch
     
     return result
 
@@ -249,7 +243,6 @@ Bin: {row['bin']}
 타이밍 상세 정보:
  진짜 임계구역 지속시간: {duration_formatted}초
  나노초 지속시간: {anomaly_details.get('true_critical_section_duration_nanos', 'N/A')}ns
- Epoch 나노초 지속시간: {anomaly_details.get('true_critical_section_epoch_duration_nanos', 'N/A')}ns
  개입 사용자: {anomaly_details.get('intervening_user_count_critical', 'N/A')}개
  개입 사용자 목록: {anomaly_details.get('intervening_users_in_critical_section', 'N/A') or '없음'}
 """
@@ -331,11 +324,10 @@ def main():
         if anomalies:
             anomaly_df = pd.DataFrame(anomalies)
             
-            # 컬럼 정리
+            # 컬럼 정리 (epochNano 관련 제거)
             basic_cols = ['roomNumber', 'bin', 'user_id', 'prev_people', 'curr_people', 'expected_people', 
                          'max_people', 'prev_entry_time', 'curr_entry_time', 
-                         'true_critical_section_nanoTime_start', 'true_critical_section_epochNano_start',
-                         'true_critical_section_nanoTime_end', 'true_critical_section_epochNano_end',
+                         'true_critical_section_nanoTime_start', 'true_critical_section_nanoTime_end',
                          'anomaly_type', 'room_entry_sequence']
             
             detail_cols = ['lost_update_expected', 'lost_update_actual', 'lost_update_diff',
@@ -345,7 +337,7 @@ def main():
                           'sorted_sequence_position',
                           'true_critical_section_start', 'true_critical_section_end', 'true_critical_section_duration',
                           'intervening_users_in_critical_section', 'intervening_user_count_critical',
-                          'true_critical_section_duration_nanos', 'true_critical_section_epoch_duration_nanos']
+                          'true_critical_section_duration_nanos']
             
             existing_cols = [col for col in basic_cols + detail_cols if col in anomaly_df.columns]
             anomaly_df = anomaly_df[existing_cols]

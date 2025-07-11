@@ -1,4 +1,4 @@
-# RaceCondition 분석표 개선 - 완전한 요구사항 명세
+# racecondition_statistical_analyzerPy 요구사항 명세
 
 ## 1. 배경 및 목적
 
@@ -59,7 +59,7 @@
 ### 4.2 규칙 2: 경합 발생 (Contention) 상세 분석
 
 #### 4.2.1 발생 건수 및 비율
-- **발생 건수**: `racecondition_analysis_IF_ELSE.csv`에서 `anomaly_type`에 '경합 발생 자체'가 포함된 레코드 수
+- **발생 건수**: `racecondition_analysis_IF_ELSE.csv`에서 `anomaly_type`에 '경합 발생 오류'가 포함된 레코드 수
 - **각 방 별 빈 단위로 집계**: `racecondition_event_preprocessor_result_IF_ELSE.csv`에서 각 bin 번호 내 포함되어 있는 각각의 bin별 스레드 총 개수  
 - **발생률**: 해당 방 내 각 bin별 개수 / 발생 건수
 
@@ -76,7 +76,7 @@
 | 방 번호 | Integer | 분석 대상 방 번호 | `roomNumber` |
 | Bin | Integer | 분석 구간 번호 | `bin` |
 | 전체 요청수 | Integer | 해당 방×bin의 총 스레드 요청 수 | `preprocessor_result에서 COUNT(roomNumber, bin)` |
-| 발생 건수 | Integer | 경합이 발생한 총 스레드 개수 | `COUNT(anomaly_type LIKE '%경합 발생%')` |
+| 발생 건수 | Integer | 경합이 발생한 총 스레드 개수 | `COUNT(anomaly_type LIKE '%경합 발생 오류%')` |
 | 발생률 (%) | Decimal(5,2) | 경합 발생 비율 | `(발생 건수 / 전체 요청수) × 100` |
 | 총 경합 스레드 수 | Decimal(10,2) | contention_group_size 총합 | `SUM(contention_group_size)` |
 | 평균 경합 스레드 수 | Decimal(8,2) | 평균 경합 그룹 크기 | `AVG(contention_group_size)` |
@@ -106,13 +106,13 @@
 | 방 번호 | Integer | 분석 대상 방 번호 | `roomNumber` |
 | Bin | Integer | 분석 구간 번호 | `bin` |
 | 전체 요청수 | Integer | 해당 방×bin의 총 스레드 요청 수 | `preprocessor_result에서 COUNT(roomNumber, bin)` |
-| 발생 건수 | Integer | 정원 초과가 발생한 총 스레드 개수 | `COUNT(anomaly_type LIKE '%정원 초과%')` |
+| 발생 건수 | Integer | 정원 초과가 발생한 총 스레드 개수 | `COUNT(anomaly_type LIKE '%정원 초과 오류%')` |
 | 발생률 (%) | Decimal(5,2) | 정원 초과 발생 비율 | `(발생 건수 / 전체 요청수) × 100` |
 | 총 초과 인원 | Decimal(10,2) | over_capacity_amount 총합 | `SUM(over_capacity_amount)` |
 | 평균 초과 인원 | Decimal(8,2) | 평균 초과 인원 수 | `AVG(over_capacity_amount)` |
 | 최소 초과 인원 | Decimal(8,2) | 최소 초과 인원 | `MIN(over_capacity_amount)` |
 | 최대 초과 인원 | Decimal(8,2) | 최대 초과 인원 수 | `MAX(over_capacity_amount)` |
-| 중간 초과 인원 | Decimal(8,2) | 중간값 초과 인원 | `MEDIAN(over_capacity_amount)` |
+| 중간값 초과 인원 | Decimal(8,2) | 중간값 초과 인원 | `MEDIAN(over_capacity_amount)` |
 | 초과 규모 표준편차 | Decimal(8,4) | 초과 인원의 표준편차 | `STDEV(over_capacity_amount)` |
 
 ### 4.4 규칙 4: 상태 전이 오류 (State Transition) 상세 분석
@@ -138,7 +138,7 @@
 | 방 번호 | Integer | 분석 대상 방 번호 | `roomNumber` |
 | Bin | Integer | 분석 구간 번호 | `bin` |
 | 전체 요청수 | Integer | 해당 방×bin의 총 스레드 요청 수 | `preprocessor_result에서 COUNT(roomNumber, bin)` |
-| 발생 건수 | Integer | 상태 전이 오류가 발생한 총 스레드 개수 | `COUNT(anomaly_type LIKE '%상태 전이%')` |
+| 발생 건수 | Integer | 상태 전이 오류가 발생한 총 스레드 개수 | `COUNT(anomaly_type LIKE '%상태 전이 오류%')` |
 | 발생률 (%) | Decimal(5,2) | 상태 전이 오류 발생 비율 | `(발생 건수 / 전체 요청수) × 100` |
 | 총 순서 차이 | Decimal(10,2) | curr_sequence_diff 총합 | `SUM(curr_sequence_diff)` |
 | 평균 순서 차이 | Decimal(8,2) | 평균 순서 차이값 | `AVG(curr_sequence_diff)` |
