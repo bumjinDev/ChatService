@@ -1,4 +1,4 @@
-# racecondition_anomaly_detector.py 요구사항 명세
+# RaceCondition 분석 결과 파일 요구사항 명세
 
 ## 1. 배경 및 목적
 

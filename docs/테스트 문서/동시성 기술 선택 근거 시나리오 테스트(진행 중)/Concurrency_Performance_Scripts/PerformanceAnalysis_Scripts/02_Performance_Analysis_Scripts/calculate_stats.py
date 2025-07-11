@@ -429,6 +429,127 @@ def create_per_bin_stats(df_total, df_success, df_capacity_failed, df_lock_faile
     return pd.DataFrame(bin_stats_list)
 
 
+def create_per_thread_critical_details(df_total, df_success, df_capacity_failed, df_lock_failed):
+    """
+    각 스레드별 임계구역 접근 상세 내역을 생성하는 함수 - 새로 추가
+    
+    매개변수:
+        df_total: 전체 데이터
+        df_success: 성공한 요청들
+        df_capacity_failed: 정원 초과 실패 요청들
+        df_lock_failed: 진입 실패 요청들
+    
+    반환값:
+        각 스레드별 임계구역 접근 상세 DataFrame
+    """
+    # 'bin' 컬럼이 없으면 빈 DataFrame 반환
+    if 'bin' not in df_total.columns:
+        return pd.DataFrame()
+    
+    thread_details_list = []
+    
+    # 전체 데이터를 순회하면서 각 스레드별 상세 정보 생성
+    for index, row in df_total.iterrows():
+        # 기본 정보
+        room_number = row['roomNumber']
+        bin_number = row['bin']
+        
+        # 사용자/스레드 ID 찾기
+        thread_id = None
+        possible_id_columns = ['userId', 'user_id', 'threadId', 'thread_id', 'clientId', 'client_id', 'requestId', 'request_id']
+        for col in possible_id_columns:
+            if col in row and pd.notna(row[col]):
+                thread_id = row[col]
+                break
+        
+        if thread_id is None:
+            thread_id = f"thread_{index}"  # 기본값
+        
+        # 임계구역 접근 결과 판단
+        join_result = row.get('join_result', 'UNKNOWN')
+        critical_leave_event = row.get('critical_leave_event_type', 'UNKNOWN')
+        
+        # 임계구역 진입 여부
+        entered_critical_section = pd.notna(row.get('critical_enter_nanoTime'))
+        exited_critical_section = pd.notna(row.get('critical_leave_nanoTime'))
+        
+        # 시간 계산
+        wait_time_ns = np.nan
+        dwell_time_ns = np.nan
+        fail_processing_time_ns = np.nan
+        
+        # 대기 시간 계산 (진입한 경우)
+        if entered_critical_section and pd.notna(row.get('waiting_start_nanoTime')):
+            wait_time_ns = calculate_time_diff_nano(
+                row['waiting_start_nanoTime'], 
+                row['critical_enter_nanoTime']
+            )
+        
+        # 작업 시간 또는 실패 처리 시간 계산
+        if entered_critical_section and exited_critical_section:
+            processing_time = calculate_time_diff_nano(
+                row['critical_enter_nanoTime'], 
+                row['critical_leave_nanoTime']
+            )
+            
+            if join_result == 'SUCCESS':
+                dwell_time_ns = processing_time
+            elif join_result == 'FAIL_OVER_CAPACITY':
+                fail_processing_time_ns = processing_time
+        
+        # 임계구역 작업 성공 여부
+        critical_section_success = (join_result == 'SUCCESS')
+        critical_section_failure_reason = None
+        
+        if not critical_section_success:
+            if join_result == 'FAIL_OVER_CAPACITY':
+                critical_section_failure_reason = 'CAPACITY_EXCEEDED'
+            elif join_result == 'FAIL_ENTRY':
+                critical_section_failure_reason = 'ENTRY_FAILED'
+            else:
+                critical_section_failure_reason = 'UNKNOWN_FAILURE'
+        
+        # 현재 인원수와 최대 인원수 정보 (가능한 경우)
+        current_people = row.get('currentPeople', np.nan)
+        max_people = row.get('maxPeople', np.nan)
+        
+        # 각 스레드별 상세 정보
+        thread_detail = {
+            'roomNumber': room_number,
+            'bin': bin_number,
+            'thread_id': thread_id,
+            'critical_section_entered': entered_critical_section,
+            'critical_section_exited': exited_critical_section,
+            'critical_section_success': critical_section_success,
+            'failure_reason': critical_section_failure_reason,
+            'join_result': join_result,
+            'critical_leave_event_type': critical_leave_event,
+            'wait_time_ns': wait_time_ns,
+            'dwell_time_ns': dwell_time_ns,
+            'fail_processing_time_ns': fail_processing_time_ns,
+            'current_people': current_people,
+            'max_people': max_people,
+            'waiting_start_nanoTime': row.get('waiting_start_nanoTime', np.nan),
+            'critical_enter_nanoTime': row.get('critical_enter_nanoTime', np.nan),
+            'critical_leave_nanoTime': row.get('critical_leave_nanoTime', np.nan),
+            'increment_before_nanoTime': row.get('increment_before_nanoTime', np.nan),
+            'increment_after_nanoTime': row.get('increment_after_nanoTime', np.nan)
+        }
+        
+        thread_details_list.append(thread_detail)
+    
+    # DataFrame 생성 및 정렬
+    result_df = pd.DataFrame(thread_details_list)
+    if not result_df.empty:
+        # 방 번호 → 구간 → 대기 시작 시간 순으로 정렬
+        sort_columns = ['roomNumber', 'bin']
+        if 'waiting_start_nanoTime' in result_df.columns:
+            sort_columns.append('waiting_start_nanoTime')
+        result_df = result_df.sort_values(sort_columns)
+    
+    return result_df
+
+
 def create_time_unit_comparison(df_success):
     """
     다양한 시간 단위로 비교 통계를 생성하는 함수
@@ -529,6 +650,44 @@ def format_excel_file(output_path):
                 cell = ws[f'{col}{row}']
                 if cell.value is not None:
                     cell.number_format = '#,##0'
+    
+    # Per_Thread_Critical_Details 시트의 포맷 (새로 추가)
+    if 'Per_Thread_Critical_Details' in wb.sheetnames:
+        ws = wb['Per_Thread_Critical_Details']
+        
+        if ws.max_row > 0:
+            header_row = [cell.value for cell in ws[1]]
+            
+            # 불리언 컬럼들 (TRUE/FALSE 표시)
+            boolean_columns = ['critical_section_entered', 'critical_section_exited', 'critical_section_success']
+            for col_name in boolean_columns:
+                try:
+                    col_index = header_row.index(col_name) + 1
+                    col_letter = chr(64 + col_index) if col_index <= 26 else f"A{chr(64 + col_index - 26)}"
+                    for row in range(2, ws.max_row + 1):
+                        cell = ws[f'{col_letter}{row}']
+                        if cell.value is not None:
+                            # 불리언 값을 문자열로 표시
+                            if isinstance(cell.value, bool):
+                                cell.value = "TRUE" if cell.value else "FALSE"
+                except ValueError:
+                    continue
+            
+            # 나노초 시간 컬럼들에 천 단위 구분자 적용
+            nano_time_columns = ['wait_time_ns', 'dwell_time_ns', 'fail_processing_time_ns',
+                               'waiting_start_nanoTime', 'critical_enter_nanoTime', 'critical_leave_nanoTime',
+                               'increment_before_nanoTime', 'increment_after_nanoTime']
+            
+            for col_name in nano_time_columns:
+                try:
+                    col_index = header_row.index(col_name) + 1
+                    col_letter = chr(64 + col_index) if col_index <= 26 else f"A{chr(64 + col_index - 26)}"
+                    for row in range(2, ws.max_row + 1):
+                        cell = ws[f'{col_letter}{row}']
+                        if cell.value is not None and isinstance(cell.value, (int, float)) and not pd.isna(cell.value):
+                            cell.number_format = '#,##0'
+                except ValueError:
+                    continue
     
     # Time_Unit_Comparison 시트의 포맷
     if 'Time_Unit_Comparison' in wb.sheetnames:
@@ -667,6 +826,7 @@ def process_performance_data(csv_path, label):
     df_capacity_failed_stats = create_capacity_failed_stats(df_capacity_failed)
     df_per_room_stats = create_per_room_stats(df_total, df_success, df_capacity_failed, df_lock_failed)
     df_per_bin_stats = create_per_bin_stats(df_total, df_success, df_capacity_failed, df_lock_failed)
+    df_per_thread_critical_details = create_per_thread_critical_details(df_total, df_success, df_capacity_failed, df_lock_failed)  # 새로 추가
     df_comparison_stats = create_time_unit_comparison(df_success)
     
     # 7. 데이터 검증 출력
@@ -699,6 +859,8 @@ def process_performance_data(csv_path, label):
             # 빈 DataFrame이 아닌 경우에만 저장
             if not df_per_bin_stats.empty:
                 df_per_bin_stats.to_excel(writer, sheet_name='Per_Bin_Stats', index=False)
+            if not df_per_thread_critical_details.empty:  # 새로 추가된 시트
+                df_per_thread_critical_details.to_excel(writer, sheet_name='Per_Thread_Critical_Details', index=False)
             if not df_comparison_stats.empty:
                 df_comparison_stats.to_excel(writer, sheet_name='Time_Unit_Comparison', index=False)
         

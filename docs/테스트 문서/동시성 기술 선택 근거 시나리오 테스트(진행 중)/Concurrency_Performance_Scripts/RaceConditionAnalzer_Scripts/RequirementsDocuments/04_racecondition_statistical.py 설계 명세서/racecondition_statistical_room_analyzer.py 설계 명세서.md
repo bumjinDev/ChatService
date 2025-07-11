@@ -1,4 +1,4 @@
-# racecondition_statistical_room_analyzer.py 요구사항 명세
+# RaceCondition 방별 통합 분석표 - 완전한 요구사항 명세
 
 ## 1. 배경 및 목적
 

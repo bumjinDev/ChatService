@@ -1,4 +1,4 @@
-# racecondition_statistical_bin_analyzer.py 요구사항 명세
+# racecondition_statistical_analyzerPy 요구사항 명세
 
 ## 1. 배경 및 목적
 
