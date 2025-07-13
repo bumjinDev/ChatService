@@ -55,9 +55,11 @@ class Rule2ContentionAnalyzer:
             print(f"✅ 결과 파일 로드 완료: {len(self.df_result)}건")
             
             # 나노초 정밀도 데이터 확인
-            if any('nanoTime' in col or 'epochNano' in col for col in self.df_result.columns):
+            if any('nanoTime' in col for col in self.df_result.columns):
                 self.has_high_precision = True
                 print("✅ 고정밀도 나노초 데이터 감지")
+            else:
+                print("⚠️ 나노초 데이터 없음")
                 
         except FileNotFoundError as e:
             print(f"❌ 파일을 찾을 수 없습니다: {e}")
@@ -65,17 +67,6 @@ class Rule2ContentionAnalyzer:
         except Exception as e:
             print(f"❌ 데이터 로딩 오류: {e}")
             return False
-        
-        # 날짜 컬럼 변환
-        time_columns = ['true_critical_section_start', 'true_critical_section_end', 
-                       'prev_entry_time', 'curr_entry_time']
-        for col in time_columns:
-            if col in self.df_result.columns:
-                try:
-                    self.df_result[col] = pd.to_datetime(self.df_result[col])
-                    print(f"✅ {col} 컬럼 datetime 변환 완료")
-                except Exception as e:
-                    print(f"⚠️ {col} 컬럼 datetime 변환 실패: {e}")
         
         # 방 번호 필터링 (Rule2는 반드시 필요)
         if self.room_number is None:
@@ -97,7 +88,7 @@ class Rule2ContentionAnalyzer:
             print(f"✅ 출력 디렉토리 확인: {self.output_dir}")
     
     def create_rule2_contention_gantt_chart(self):
-        """규칙 2: 경합 발생 상세 분석 - 간트 차트"""
+        """규칙 2: 경합 발생 상세 분석 - bin별 간트 차트"""
         print(f"🎯 Rule2 경합 발생 간트 차트 생성 시작 (방 {self.room_number})")
         
         # '경합 발생' 포함된 이상 현상만 필터링
@@ -111,16 +102,24 @@ class Rule2ContentionAnalyzer:
         
         print(f"   - 경합 발생 레코드: {len(contention_anomalies)}건")
         
-        # 시간 컬럼 확인 및 변환
-        if 'true_critical_section_start' not in contention_anomalies.columns or \
-           'true_critical_section_end' not in contention_anomalies.columns:
-            print("❌ 필수 시간 컬럼이 없습니다: true_critical_section_start, true_critical_section_end")
+        # 시간 컬럼 선택 (나노초만 사용)
+        if self.has_high_precision and 'true_critical_section_nanoTime_start' in contention_anomalies.columns:
+            start_col = 'true_critical_section_nanoTime_start'
+            end_col = 'true_critical_section_nanoTime_end'
+            print("   - 나노초 정밀도 시간 데이터 사용")
+        else:
+            print("❌ 나노초 데이터 없음 - 차트 생성 불가")
+            return
+        
+        # 시간 컬럼 확인
+        if start_col not in contention_anomalies.columns or end_col not in contention_anomalies.columns:
+            print(f"❌ 필수 시간 컬럼이 없습니다: {start_col}, {end_col}")
             return
         
         # 시간 데이터 유효성 확인
         valid_time_mask = (
-            contention_anomalies['true_critical_section_start'].notna() & 
-            contention_anomalies['true_critical_section_end'].notna()
+            contention_anomalies[start_col].notna() & 
+            contention_anomalies[end_col].notna()
         )
         contention_anomalies = contention_anomalies[valid_time_mask]
         
@@ -130,74 +129,145 @@ class Rule2ContentionAnalyzer:
         
         print(f"   - 유효한 시간 데이터: {len(contention_anomalies)}건")
         
-        # 차트 생성
-        fig, ax = plt.subplots(1, 1, figsize=(20, 12))
-        title = f'규칙 2: 경합 발생 간트 차트 - 방 {self.room_number}'
-        ax.set_title(title, fontsize=16, fontweight='bold', pad=20)
+        # bin별로 데이터 그룹화
+        if 'bin' not in contention_anomalies.columns:
+            print("❌ bin 컬럼이 없습니다.")
+            return
         
-        # user_id별 정렬 및 Y축 위치 설정
-        contention_anomalies_sorted = contention_anomalies.sort_values([
-            'true_critical_section_start', 'room_entry_sequence'
-        ])
+        bins = contention_anomalies['bin'].unique()
+        print(f"   - 분석할 bin 수: {len(bins)}개")
         
-        user_ids = contention_anomalies_sorted['user_id'].unique()
-        y_positions = {user_id: i for i, user_id in enumerate(user_ids)}
+        # 전체 데이터의 나노초 시간 범위 계산
+        global_start_nano = contention_anomalies[start_col].min()
+        global_end_nano = contention_anomalies[end_col].max()
+        total_duration_nanos = global_end_nano - global_start_nano
+        total_duration_seconds = total_duration_nanos / 1_000_000_000
         
-        print(f"   - 고유 사용자 수: {len(user_ids)}")
+        print(f"   - 전체 나노초 범위: {global_start_nano} ~ {global_end_nano}")
+        print(f"   - 전체 지속시간: {total_duration_seconds:.9f}초 ({total_duration_nanos:,} 나노초)")
         
-        # 각 사용자별 임계 구역 막대 그리기
-        for i, (_, row) in enumerate(contention_anomalies_sorted.iterrows()):
-            user_id = row['user_id']
-            start_time = row['true_critical_section_start']
-            end_time = row['true_critical_section_end']
-            contention_size = row.get('contention_group_size', 1)
+        # X축 설정: 고정 10개 구간 분할
+        if total_duration_seconds <= 1:
+            tick_label = "X축 10구간 분할 (1초 이하)"
+        elif total_duration_seconds <= 10:
+            tick_label = "X축 10구간 분할 (1-10초)"
+        else:
+            tick_label = "X축 10구간 분할 (10초 이상)"
+        
+        print(f"   - X축 설정: {tick_label}")
+        
+        # 각 bin별로 간트 차트 생성
+        for bin_value in bins:
+            print(f"   📊 bin {bin_value} 간트 차트 생성 중...")
             
-            y_pos = y_positions[user_id]
+            # 해당 bin 데이터 필터링
+            bin_data = contention_anomalies[contention_anomalies['bin'] == bin_value].copy()
             
-            if pd.notna(start_time) and pd.notna(end_time):
-                # 지속 시간 계산 (초 단위)
-                duration_seconds = (end_time - start_time).total_seconds()
+            if bin_data.empty:
+                print(f"   ❌ bin {bin_value} 데이터가 없어 건너뜀")
+                continue
+            
+            # 차트 생성
+            fig, ax = plt.subplots(1, 1, figsize=(20, 12))
+            title = f'규칙 2: 경합 발생 간트 차트 - 방 {self.room_number}, bin {bin_value}'
+            ax.set_title(title, fontsize=16, fontweight='bold', pad=20)
+            
+            # user_id별 정렬 및 Y축 위치 설정
+            bin_data_sorted = bin_data.sort_values([
+                start_col, 'room_entry_sequence'
+            ])
+            
+            user_ids = bin_data_sorted['user_id'].unique()
+            y_positions = {user_id: i for i, user_id in enumerate(user_ids)}
+            
+            print(f"     - bin {bin_value} 고유 사용자 수: {len(user_ids)}")
+            
+            # 각 사용자별 임계 구역 막대 그리기 (나노초 직접 사용)
+            for i, (_, row) in enumerate(bin_data_sorted.iterrows()):
+                user_id = row['user_id']
+                start_nano = row[start_col]
+                end_nano = row[end_col]
+                contention_size = row.get('contention_group_size', 1)
                 
-                # 0 이하의 지속시간은 0.001초로 보정
-                if duration_seconds <= 0:
-                    duration_seconds = 0.001
+                y_pos = y_positions[user_id]
                 
-                # 수평 막대 그리기 (임계 구역)
-                ax.barh(y_pos, duration_seconds, left=start_time, height=0.6, 
-                       alpha=0.7, color='red', edgecolor='black', linewidth=0.5)
+                if pd.notna(start_nano) and pd.notna(end_nano):
+                    # 나노초 지속시간 계산
+                    duration_nanos = end_nano - start_nano
+                    
+                    # 0 이하의 지속시간은 1000 나노초로 보정
+                    if duration_nanos <= 0:
+                        duration_nanos = 1000
+                    
+                    # 나노초를 상대적 위치로 변환 (0~1 범위)
+                    start_relative = (start_nano - global_start_nano) / total_duration_nanos
+                    duration_relative = duration_nanos / total_duration_nanos
+                    
+                    # 수평 막대 그리기 (나노초 기반)
+                    ax.barh(y_pos, duration_relative, left=start_relative, height=0.6, 
+                           alpha=0.7, color='red', edgecolor='red', linewidth=0.5)
+                    
+                    # 막대 끝에 경합 스레드 수 표기
+                    end_relative = start_relative + duration_relative
+                    ax.text(end_relative, y_pos, f' {int(contention_size)}', 
+                           va='center', ha='left', fontsize=9, fontweight='bold')
+            
+            # Y축 설정 (사용자 ID)
+            ax.set_yticks(range(len(user_ids)))
+            ax.set_yticklabels(user_ids, fontsize=10)
+            ax.set_ylabel('사용자 ID (user_id)', fontsize=12, fontweight='bold')
+            
+            # X축 설정 - 나노초 기반, 사용자 친화적 표시
+            ax.set_xlim(0, 1)
+            
+            # 고정 10개 tick 위치
+            tick_positions = np.linspace(0, 1, 11)
+            ax.set_xticks(tick_positions)
+            
+            # X축 레이블: 사용자 친화적 표시 (나노초 계산과 분리)
+            try:
+                tick_labels = []
+                for pos in tick_positions:
+                    nano_value = global_start_nano + pos * total_duration_nanos
+                    # 나노초를 datetime으로 변환하여 시각 표시
+                    dt = pd.to_datetime(nano_value, unit='ns')
+                    if total_duration_seconds <= 1:
+                        # 1초 이하: 밀리초까지 표시
+                        tick_labels.append(dt.strftime('%H시 %M분 %S초 ') + f"{int(dt.strftime('%f')[:3])}밀리초")
+                    else:
+                        # 1초 이상: 초까지 표시
+                        tick_labels.append(dt.strftime('%H시 %M분 %S초'))
                 
-                # 막대 끝에 경합 스레드 수 표기
-                actual_end_time = start_time + pd.Timedelta(seconds=duration_seconds)
-                ax.text(actual_end_time, y_pos, f' {int(contention_size)}', 
-                       va='center', ha='left', fontsize=9, fontweight='bold')
+                ax.set_xticklabels(tick_labels, rotation=45)
+            except Exception as e:
+                print(f"     ⚠️ X축 tick 설정 실패: {e}")
+                # 폴백: 상대적 시간 표시
+                tick_labels = [f'{pos*total_duration_seconds:.3f}s' for pos in tick_positions]
+                ax.set_xticklabels(tick_labels, rotation=45)
+            
+            ax.set_xlabel('시간 (나노초 정밀도)', fontsize=12, fontweight='bold')
+            ax.grid(True, alpha=0.3)
+            
+            # X축 레이블 회전
+            ax.tick_params(axis='x', rotation=45)
+            
+            # 범례 추가
+            ax.barh([], [], height=0.6, alpha=0.7, color='red', 
+                   edgecolor='red', linewidth=0.5, label='임계 구역 (Critical Section)')
+            ax.legend(fontsize=12, loc='upper right')
+            
+            # 레이아웃 조정
+            plt.tight_layout()
+            
+            # 파일 저장
+            chart_filename = f'contention_gantt_chart_room{self.room_number}_bin{bin_value}.png'
+            chart_path = os.path.join(self.output_dir, chart_filename)
+            plt.savefig(chart_path, dpi=300, bbox_inches='tight')
+            plt.close()
+            
+            print(f"     ✅ bin {bin_value} 간트 차트 저장 완료: {chart_path}")
         
-        # Y축 설정 (사용자 ID)
-        ax.set_yticks(range(len(user_ids)))
-        ax.set_yticklabels(user_ids, fontsize=10)
-        ax.set_ylabel('사용자 ID (user_id)', fontsize=12, fontweight='bold')
-        
-        # X축 설정 (시간)
-        ax.set_xlabel('시간 (Timestamp)', fontsize=12, fontweight='bold')
-        ax.grid(True, alpha=0.3)
-        
-        # X축 레이블 회전
-        ax.tick_params(axis='x', rotation=45)
-        
-        # 범례 추가
-        ax.barh([], [], height=0.6, alpha=0.7, color='red', 
-               edgecolor='black', linewidth=0.5, label='임계 구역 (Critical Section)')
-        ax.legend(fontsize=12, loc='upper right')
-        
-        # 레이아웃 조정
-        plt.tight_layout()
-        
-        # 파일 저장
-        chart_filename = f'contention_gantt_chart_room{self.room_number}.png'
-        chart_path = os.path.join(self.output_dir, chart_filename)
-        plt.savefig(chart_path, dpi=300, bbox_inches='tight')
-        plt.close()
-        
-        print(f"✅ 간트 차트 저장 완료: {chart_path}")
+        print(f"✅ 모든 bin 간트 차트 생성 완료 (총 {len(bins)}개)")
     
     def generate_rule2_csv_report(self):
         """규칙 2 경합 발생 CSV 보고서 생성"""
@@ -214,12 +284,19 @@ class Rule2ContentionAnalyzer:
         csv_filename = f'report_rule2_contention_details_room{self.room_number}.csv'
         csv_path = os.path.join(self.output_dir, csv_filename)
         
-        # 출력할 컬럼 정의
-        required_columns = [
-            'roomNumber', 'bin', 'user_id', 'contention_group_size',
-            'contention_user_ids', 'true_critical_section_start',
-            'true_critical_section_end', 'true_critical_section_duration'
-        ]
+        # 출력할 컬럼 정의 (나노초만 사용)
+        if self.has_high_precision and any('nanoTime' in col for col in contention_anomalies.columns):
+            required_columns = [
+                'roomNumber', 'bin', 'user_id', 'contention_group_size',
+                'contention_user_ids', 
+                'true_critical_section_nanoTime_start',
+                'true_critical_section_nanoTime_end',
+                'true_critical_section_duration_nanos'
+            ]
+            print("   - 나노초 정밀도 컬럼 사용")
+        else:
+            print("❌ 나노초 데이터 없음 - CSV 생성 불가")
+            return
         
         if contention_anomalies.empty:
             # 빈 데이터인 경우 빈 DataFrame 생성
@@ -227,24 +304,24 @@ class Rule2ContentionAnalyzer:
             empty_df.to_csv(csv_path, index=False, encoding='utf-8-sig')
             print(f"   - 빈 CSV 파일 생성: {csv_path}")
         else:
-            # 사용 가능한 컬럼만 선택 (duration 제외)
+            # 사용 가능한 나노초 컬럼만 선택
             available_columns = [col for col in required_columns[:-1] if col in contention_anomalies.columns]
             csv_df = contention_anomalies[available_columns].copy()
             
-            # true_critical_section_duration 계산
-            if ('true_critical_section_start' in csv_df.columns and 
-                'true_critical_section_end' in csv_df.columns):
+            # 나노초 지속시간 계산
+            if ('true_critical_section_nanoTime_start' in csv_df.columns and 
+                'true_critical_section_nanoTime_end' in csv_df.columns):
                 try:
-                    # 이미 datetime으로 변환된 상태라고 가정
-                    csv_df['true_critical_section_duration'] = (
-                        csv_df['true_critical_section_end'] - csv_df['true_critical_section_start']
-                    ).dt.total_seconds()
-                    print("   - 임계 구역 지속시간 계산 완료")
+                    csv_df['true_critical_section_duration_nanos'] = (
+                        csv_df['true_critical_section_nanoTime_end'] - 
+                        csv_df['true_critical_section_nanoTime_start']
+                    )
+                    print("   - 나노초 지속시간 계산 완료")
                 except Exception as e:
-                    print(f"   ⚠️ 지속시간 계산 실패: {e}")
-                    csv_df['true_critical_section_duration'] = ''
+                    print(f"   ⚠️ 나노초 지속시간 계산 실패: {e}")
+                    csv_df['true_critical_section_duration_nanos'] = ''
             else:
-                csv_df['true_critical_section_duration'] = ''
+                csv_df['true_critical_section_duration_nanos'] = ''
             
             # 누락된 컬럼은 빈 문자열로 추가
             for col in required_columns:

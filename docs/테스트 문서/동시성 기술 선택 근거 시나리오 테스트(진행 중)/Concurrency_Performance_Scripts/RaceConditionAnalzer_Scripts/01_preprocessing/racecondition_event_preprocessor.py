@@ -338,6 +338,7 @@ def main():
     parser.add_argument('--room', type=int, help='특정 방 번호만 처리 (옵션)')
     parser.add_argument('--csv', type=str, help='CSV 파일명 (필수)')
     parser.add_argument('--xlsx', type=str, help='Excel 파일명 (옵션)')
+    parser.add_argument('--output-dir', type=str, help='출력 파일 저장 디렉토리 (옵션)')
     
     args = parser.parse_args()
     
@@ -354,6 +355,16 @@ def main():
         print("📋 시간순 단순 매칭 및 방별 개별 bin 할당 적용")
         print("🕐 시간 형식 기존 형식으로 통일")
         print("🎯 3개 핵심 이벤트만 처리")
+        
+        # 출력 디렉토리 생성
+        if args.output_dir:
+            print(f"📁 출력 디렉토리 설정: {args.output_dir}")
+            try:
+                os.makedirs(args.output_dir, exist_ok=True)
+                print("   출력 디렉토리 생성 완료")
+            except OSError as e:
+                print(f"❌ 출력 디렉토리 생성 실패: {e}")
+                return
         
         # 1단계: 로그 파일 교체
         print("1. 로그 파일 교체 중...")
@@ -373,13 +384,15 @@ def main():
         print("4. 결과 저장 중...")
         
         if args.csv:
-            result.to_csv(args.csv, index=False, encoding='utf-8-sig')
-            print(f"   CSV 저장 완료: {args.csv}")
+            csv_path = os.path.join(args.output_dir, args.csv) if args.output_dir else args.csv
+            result.to_csv(csv_path, index=False, encoding='utf-8-sig')
+            print(f"   CSV 저장 완료: {csv_path}")
         
         if args.xlsx:
+            xlsx_path = os.path.join(args.output_dir, args.xlsx) if args.output_dir else args.xlsx
             desc_table = get_true_critical_section_desc_table()
-            save_with_side_table(result, args.xlsx, desc_table)
-            print(f"   Excel 저장 완료: {args.xlsx}")
+            save_with_side_table(result, xlsx_path, desc_table)
+            print(f"   Excel 저장 완료: {xlsx_path}")
         
         # 5단계: 결과 분석
         print("5. 결과 분석 중...")
@@ -389,6 +402,7 @@ def main():
         print("🎯 3개 핵심 이벤트 나노초 데이터 포함!")
         print("🕐 시간 형식 기존 형식으로 통일 완료!")
         print("🔧 시간순 단순 매칭 적용 완료!")
+        print("📁 출력 디렉토리 지정 기능 추가 완료!")
         
     except Exception as e:
         print(f"❌ 오류 발생: {e}")

@@ -245,7 +245,7 @@ class Rule3CapacityAnalyzer:
         
         # 차트 생성
         fig, ax = plt.subplots(figsize=(20, 12))
-        title = f"규칙 3: 정원 초과 오류 분석 - 전체 {len(rooms)}개 방 평균 및 신뢰구간"
+        title = f"규칙 3: 정원 초과 오류 분석 - 전체 {len(rooms)}개 방 평균 및 실제 값 표준편차 범위"
         ax.set_title(title, fontsize=16, fontweight='bold', pad=20)
         
         # numpy 배열로 변환
@@ -261,7 +261,7 @@ class Rule3CapacityAnalyzer:
         ax.fill_between(x_positions, 
                        mean_curr_array - std_curr_array, 
                        mean_curr_array + std_curr_array, 
-                       alpha=0.3, color='blue', label='실제값 신뢰구간 (±1σ)')
+                       alpha=0.3, color='blue', label='실제값 표준 편차 범위 (±1σ)')
         
         # 3. 평균 실제 인원수 (파란색 실선 + 작은 원점)
         ax.plot(x_positions, mean_curr_array, color='blue', linewidth=2,

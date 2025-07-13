@@ -1,6 +1,6 @@
 """
 Rule 4: State Transition 분석기 - 완전 독립 실행 가능 파일
-상태 전이 오류 분석 및 시각화
+상태 전이 오류 분석 및 시각화 (detected_anomalies.csv 기반)
 """
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -125,7 +125,7 @@ class Rule4StateTransitionAnalyzer:
             self._create_rule4_multi_room_chart()
     
     def _create_rule4_single_room_chart(self):
-        """규칙 4: 단일 방 상태 전이 분석 차트"""
+        """규칙 4: 단일 방 상태 전이 분석 차트 - detected_anomalies 기반"""
         room_data = self.df_preprocessor.copy()
         if room_data.empty:
             print("❌ 단일 방 데이터가 비어있어 차트 생성을 건너뜁니다.")
@@ -150,6 +150,21 @@ class Rule4StateTransitionAnalyzer:
         curr_people_values = room_data['curr_people'].tolist()
         print(f"   - 실제값 범위: {min(curr_people_values)} ~ {max(curr_people_values)}")
         
+        # detected_anomalies에서 해당 방의 상태 전이 오류 위치 확인
+        room_state_errors = self.df_result[
+            (self.df_result['roomNumber'] == self.room_number) &
+            (self.df_result['anomaly_type'].str.contains('상태 전이 오류', na=False))
+        ]
+        
+        # room_entry_sequence를 request_index로 변환 (1-based → 0-based)
+        error_positions = set()
+        for _, error_row in room_state_errors.iterrows():
+            sequence = error_row['room_entry_sequence']
+            if sequence >= 1 and sequence <= total_requests:
+                error_positions.add(sequence - 1)  # 0-based index로 변환
+        
+        print(f"   - detected_anomalies 기반 상태 전이 오류: {len(error_positions)}건")
+        
         # Y축 최댓값 동적 계산
         y_max = max(max(ideal_expected_values), max(curr_people_values)) * 1.2
         print(f"   - Y축 최댓값: {y_max:.1f}")
@@ -169,18 +184,14 @@ class Rule4StateTransitionAnalyzer:
                 marker='o', markersize=3, markerfacecolor='orange', markeredgecolor='orange',
                 label='실제 기록된 인원수 (curr_people)', alpha=0.8)
         
-        # 3. 불일치 발생 강조 표식 (빨간색 수직 음영)
-        discrepancy_count = 0
-        for i in range(total_requests):
-            ideal_val = ideal_expected_values[i]
-            actual_val = curr_people_values[i]
-            
-            if ideal_val != actual_val:
-                ax.axvspan(i-0.3, i+0.3, ymin=0, ymax=1, color='red', alpha=0.3,
-                        label='상태 전이 오류 발생' if discrepancy_count == 0 else '')
-                discrepancy_count += 1
+        # 3. detected_anomalies 기반 상태 전이 오류 표식 (빨간색 수직 음영)
+        error_marked = False
+        for i in error_positions:
+            ax.axvspan(i-0.3, i+0.3, ymin=0, ymax=1, color='red', alpha=0.3,
+                    label='상태 전이 오류 발생' if not error_marked else '')
+            error_marked = True
         
-        print(f"   - 상태 전이 오류 발생: {discrepancy_count}건")
+        print(f"   - 차트에 표시된 상태 전이 오류: {len(error_positions)}건")
         
         # X축 10개 동일 간격 눈금
         tick_positions = [int(i * total_requests / 10) for i in range(11) if int(i * total_requests / 10) < total_requests]
@@ -197,10 +208,10 @@ class Rule4StateTransitionAnalyzer:
         
         # 통계 정보 박스를 범례 우측에 배치
         stats_text = (f'총 요청: {total_requests:,}건\n'
-                    f'상태 전이 오류: {discrepancy_count:,}건')
+                    f'상태 전이 오류: {len(error_positions):,}건')
         
         if total_requests > 0:
-            error_rate = discrepancy_count / total_requests * 100
+            error_rate = len(error_positions) / total_requests * 100
             stats_text += f'\n오류 비율: {error_rate:.1f}%'
         
         ax.text(0.2, 0.98, stats_text, transform=ax.transAxes, fontsize=11,
@@ -221,7 +232,7 @@ class Rule4StateTransitionAnalyzer:
         print(f"✅ 단일 방 차트 저장 완료: {chart_path}")
     
     def _create_rule4_multi_room_chart(self):
-        """규칙 4: 전체 방 상태 전이 종합 분석 차트"""
+        """규칙 4: 전체 방 상태 전이 종합 분석 차트 - detected_anomalies 기반"""
         rooms = self.df_preprocessor['roomNumber'].unique()
         print(f"🎯 전체 {len(rooms)}개 방 Rule4 종합 차트 생성 시작")
         
@@ -265,9 +276,33 @@ class Rule4StateTransitionAnalyzer:
         
         print(f"   - 평균/표준편차 계산 완료")
         
+        # detected_anomalies에서 모든 방의 상태 전이 오류 위치 확인
+        all_state_errors = self.df_result[
+            self.df_result['anomaly_type'].str.contains('상태 전이 오류', na=False)
+        ]
+        
+        # 방별 오류 위치 매핑
+        room_error_positions = {}
+        total_error_count = 0
+        
+        for room in rooms:
+            room_errors = all_state_errors[all_state_errors['roomNumber'] == room]
+            error_positions = set()
+            
+            for _, error_row in room_errors.iterrows():
+                sequence = error_row['room_entry_sequence']
+                room_data_length = len(room_datasets[room])
+                if sequence >= 1 and sequence <= room_data_length:
+                    error_positions.add(sequence - 1)  # 0-based index로 변환
+            
+            room_error_positions[room] = error_positions
+            total_error_count += len(error_positions)
+        
+        print(f"   - detected_anomalies 기반 전체 상태 전이 오류: {total_error_count}건")
+        
         # 차트 생성
         fig, ax = plt.subplots(figsize=(20, 12))
-        title = f"규칙 4: 상태 전이 오류 분석 - 전체 {len(rooms)}개 방 평균 및 신뢰구간"
+        title = f"규칙 4: 상태 전이 오류 분석 - 전체 {len(rooms)}개 방 평균 및 표준편차"
         ax.set_title(title, fontsize=16, fontweight='bold', pad=20)
         
         # numpy 배열로 변환
@@ -291,19 +326,16 @@ class Rule4StateTransitionAnalyzer:
                 marker='o', markersize=3, markerfacecolor='orange', markeredgecolor='orange',
                 label='평균 실제 기록된 인원수 (curr_people)', alpha=0.8)
         
-        # 4. 상태 전이 오류 표식 (빨간색 수직 음영)
-        discrepancy_count = 0
-        for room, dataset in room_datasets.items():
-            room_max_people = dataset['max_people'].iloc[0] if not dataset.empty else 20
-            for i, row in dataset.iterrows():
-                ideal_val = min(i + 2, room_max_people)  # 각 방의 최대 정원 적용
-                actual_val = row['curr_people']
-                if ideal_val != actual_val and i < len(x_positions):
+        # 4. detected_anomalies 기반 상태 전이 오류 표식 (빨간색 수직 음영)
+        error_marked = False
+        for room, error_positions in room_error_positions.items():
+            for i in error_positions:
+                if i < len(x_positions):
                     ax.axvspan(i-0.2, i+0.2, ymin=0, ymax=1, color='red', alpha=0.2,
-                            label='상태 전이 오류 발생' if discrepancy_count == 0 else '')
-                    discrepancy_count += 1
+                            label='상태 전이 오류 발생' if not error_marked else '')
+                    error_marked = True
         
-        print(f"   - 전체 상태 전이 오류: {discrepancy_count}건")
+        print(f"   - 차트에 표시된 상태 전이 오류: {total_error_count}건")
         
         # X축 10개 동일 간격 눈금
         tick_positions = [int(i * max_requests / 10) for i in range(11) if int(i * max_requests / 10) < max_requests]
@@ -326,7 +358,7 @@ class Rule4StateTransitionAnalyzer:
         
         # 통계 정보를 범례 우측에 배치
         total_requests = len(self.df_preprocessor)
-        total_state_errors = len(self.df_result[self.df_result['anomaly_type'].str.contains('상태 전이 오류', na=False)])
+        total_state_errors = len(all_state_errors)
         
         stats_text = (f'분석 방 수: {len(rooms)}개\n'
                     f'총 요청: {total_requests:,}건\n'
@@ -354,15 +386,22 @@ class Rule4StateTransitionAnalyzer:
         print(f"✅ 전체 방 차트 저장 완료: {chart_path}")
     
     def generate_rule4_csv_report(self):
-        """규칙 4 상태 전이 오류 CSV 보고서 생성"""
+        """규칙 4 상태 전이 오류 CSV 보고서 생성 - 단순화된 버전"""
         print("📋 Rule4 CSV 보고서 생성 시작")
         
-        # anomaly_type에 '상태 전이 오류' 포함된 레코드 필터링
+        # 단순히 '상태 전이 오류' 포함된 레코드만 필터링
         state_transition_anomalies = self.df_result[
             self.df_result['anomaly_type'].str.contains('상태 전이 오류', na=False)
         ].copy()
         
         print(f"   - 상태 전이 오류: {len(state_transition_anomalies)}건")
+        
+        # 방 번호 필터링 (지정된 경우만)
+        if self.room_number is not None:
+            state_transition_anomalies = state_transition_anomalies[
+                state_transition_anomalies['roomNumber'] == self.room_number
+            ]
+            print(f"   - 방 {self.room_number} 필터링 후: {len(state_transition_anomalies)}건")
         
         # 파일명 생성
         if self.room_number:
@@ -397,10 +436,6 @@ class Rule4StateTransitionAnalyzer:
             
             # 컬럼 순서 맞춤
             csv_df = csv_df[required_columns]
-            
-            # 방 번호 필터링 (이중 확인)
-            if self.room_number is not None:
-                csv_df = csv_df[csv_df['roomNumber'] == self.room_number]
             
             # 정렬
             if not csv_df.empty:

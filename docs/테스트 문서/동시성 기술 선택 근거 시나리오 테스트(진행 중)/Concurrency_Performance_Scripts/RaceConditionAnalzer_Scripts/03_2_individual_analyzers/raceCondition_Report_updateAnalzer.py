@@ -256,7 +256,7 @@ class Rule1LostUpdateAnalyzer:
         
         # 차트 생성
         fig, ax = plt.subplots(figsize=(20, 12))
-        title = f"규칙 1: 값 불일치(Lost Update) 분석 - 전체 {len(rooms)}개 방 평균 및 신뢰구간"
+        title = f"규칙 1: 값 불일치(Lost Update) 분석 - 전체 {len(rooms)}개 방 평균 및 표준편차"
         ax.set_title(title, fontsize=16, fontweight='bold', pad=20)
         
         # numpy 배열로 변환
@@ -265,16 +265,16 @@ class Rule1LostUpdateAnalyzer:
         mean_curr_array = np.array(mean_curr)
         std_curr_array = np.array(std_curr)
         
-        # 신뢰구간 시각화 (평균 ± 표준편차)
+        # 표준편차 시각화 (평균 ± 표준편차)
         ax.fill_between(x_positions, 
                     mean_expected_array - std_expected_array, 
                     mean_expected_array + std_expected_array, 
-                    alpha=0.3, color='blue', label='기대값 신뢰구간 (±1σ)')
+                    alpha=0.3, color='blue', label='기대값 표준편차 (±1σ)')
         
         ax.fill_between(x_positions, 
                     mean_curr_array - std_curr_array, 
                     mean_curr_array + std_curr_array, 
-                    alpha=0.3, color='orange', label='실제값 신뢰구간 (±1σ)')
+                    alpha=0.3, color='orange', label='실제값 표준편차 (±1σ)')
         
         # 평균선 - 실선 + 작은 원점
         ax.plot(x_positions, mean_expected_array, 'b-', linewidth=2, 
@@ -304,7 +304,7 @@ class Rule1LostUpdateAnalyzer:
         ax.set_xticks(tick_positions)
         ax.set_xticklabels(tick_positions)
         
-        # Y축 신뢰구간 상단 경계의 최댓값 * 1.2
+        # Y축 표준편차 상단 경계의 최댓값 * 1.2
         max_upper_bound = max(
             np.max(mean_expected_array + std_expected_array) if len(mean_expected_array) > 0 else 0,
             np.max(mean_curr_array + std_curr_array) if len(mean_curr_array) > 0 else 0

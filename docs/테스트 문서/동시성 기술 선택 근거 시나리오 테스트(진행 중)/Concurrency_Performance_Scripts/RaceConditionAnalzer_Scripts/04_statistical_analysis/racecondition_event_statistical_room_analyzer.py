@@ -40,12 +40,12 @@ def load_and_validate_data(preprocessor_file, analysis_file):
     if missing_analysis:
         raise ValueError(f"이상현상 분석 데이터에서 필수 컬럼 누락: {missing_analysis}")
     
-    # 데이터 타입 정리
-    preprocessor_df['roomNumber'] = preprocessor_df['roomNumber'].astype(int)
-    preprocessor_df['bin'] = preprocessor_df['bin'].astype(int)
+    # 데이터 타입 정리 (NaN/무한대 값 처리)
+    preprocessor_df['roomNumber'] = pd.to_numeric(preprocessor_df['roomNumber'], errors='coerce').fillna(0).astype(int)
+    preprocessor_df['bin'] = pd.to_numeric(preprocessor_df['bin'], errors='coerce').fillna(0).astype(int)
     
-    analysis_df['roomNumber'] = analysis_df['roomNumber'].astype(int)
-    analysis_df['bin'] = analysis_df['bin'].astype(int)
+    analysis_df['roomNumber'] = pd.to_numeric(analysis_df['roomNumber'], errors='coerce').fillna(0).astype(int)
+    analysis_df['bin'] = pd.to_numeric(analysis_df['bin'], errors='coerce').fillna(0).astype(int)
     
     print("✅ 데이터 검증 및 타입 변환 완료")
     return preprocessor_df, analysis_df
@@ -59,7 +59,7 @@ def calculate_total_requests_per_room(preprocessor_df):
     print(f"✅ 집계 완료: {len(total_requests)}개 방")
     return total_requests
 
-def calculate_statistics(filtered_df, value_column, total_requests_df):
+def calculate_statistics(filtered_df, value_column, total_requests_df, use_absolute=False):
     """방별 통계 계산 함수 - 모든 방 포함"""
     # 전체 방 리스트를 기준으로 결과 생성
     result_stats = total_requests_df.copy()
@@ -100,11 +100,17 @@ def calculate_statistics(filtered_df, value_column, total_requests_df):
             occurrence_count = len(values)
             occurrence_rate = (occurrence_count / total_requests * 100) if total_requests > 0 else 0
             
-            # 결과 업데이트
+            # 결과 업데이트 (절댓값 옵션 적용)
             result_stats.loc[row_idx, 'occurrence_count'] = int(occurrence_count)
             result_stats.loc[row_idx, 'occurrence_rate'] = round(occurrence_rate, 2)
-            result_stats.loc[row_idx, 'sum_value'] = round(values.sum(), 2)
-            result_stats.loc[row_idx, 'avg_value'] = round(values.mean(), 2)
+            
+            if use_absolute:
+                result_stats.loc[row_idx, 'sum_value'] = round(values.abs().sum(), 2)
+                result_stats.loc[row_idx, 'avg_value'] = round(values.abs().mean(), 2)
+            else:
+                result_stats.loc[row_idx, 'sum_value'] = round(values.sum(), 2)
+                result_stats.loc[row_idx, 'avg_value'] = round(values.mean(), 2)
+            
             result_stats.loc[row_idx, 'min_value'] = round(values.min(), 2)
             result_stats.loc[row_idx, 'max_value'] = round(values.max(), 2)
             result_stats.loc[row_idx, 'median_value'] = round(values.median(), 2)
@@ -113,7 +119,7 @@ def calculate_statistics(filtered_df, value_column, total_requests_df):
     # 데이터 타입 정리
     result_stats['roomNumber'] = result_stats['roomNumber'].astype(int)
     result_stats['total_requests'] = result_stats['total_requests'].astype(int)
-    result_stats['occurrence_count'] = result_stats['occurrence_count'].astype(int)
+    result_stats['occurrence_count'] = result_stats['occurrence_count'].fillna(0).astype(int)
     
     return result_stats
 
@@ -227,17 +233,17 @@ def analyze_state_transition(analysis_df, total_requests_df):
     filtered_df = analysis_df[analysis_df['anomaly_type'].str.contains('상태 전이 오류', na=False)]
     print(f"  - 상태 전이 오류 발생 레코드: {len(filtered_df)}건")
     
-    # curr_sequence_diff 기준 통계 계산
-    stats_df = calculate_statistics(filtered_df, 'curr_sequence_diff', total_requests_df)
+    # curr_sequence_diff 기준 통계 계산 (절댓값 사용)
+    stats_df = calculate_statistics(filtered_df, 'curr_sequence_diff', total_requests_df, use_absolute=True)
     
-    # 컬럼명 변경
+    # 컬럼명 변경 (bin 단위와 동일하게 수정)
     column_mapping = {
-        'sum_value': '총 순서 차이',
-        'avg_value': '평균 순서 차이',
-        'min_value': '최소 순서 차이',
-        'max_value': '최대 순서 차이',
-        'median_value': '중간값 순서 차이',
-        'std_value': '순서 차이 표준편차'
+        'sum_value': '총합 값',
+        'avg_value': '평균 값',
+        'min_value': '최소 깂',
+        'max_value': '최대 깂',
+        'median_value': '중간 값',
+        'std_value': '표준편차 값'
     }
     
     final_columns = {
