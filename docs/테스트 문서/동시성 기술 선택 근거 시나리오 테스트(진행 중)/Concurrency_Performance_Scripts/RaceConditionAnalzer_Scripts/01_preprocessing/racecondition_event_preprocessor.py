@@ -50,9 +50,14 @@ def parse_logs(filepath, room_number=None):
     
     records = []  # 파싱된 레코드들을 저장할 리스트
     
+    print("🔍 디버깅: 로그 파싱 시작")
+    line_count = 0
+    
     # 로그 파일을 한 줄씩 읽으면서 파싱
     with open(filepath, encoding='utf-8') as f:
         for line in f:
+            line_count += 1
+            
             # 정규식으로 매칭 시도
             match = pattern.search(line)
             if match:
@@ -68,11 +73,17 @@ def parse_logs(filepath, room_number=None):
                 nano_match = re.search(r'nanoTime=(\d+)', line)
                 
                 if nano_match:
-                    data['nanoTime'] = int(nano_match.group(1))
+                    extracted_nano = int(nano_match.group(1))
+                    data['nanoTime'] = extracted_nano
+                    
+                    # 🔍 디버깅: 추출된 nanoTime 값 출력
+                    print(f"   라인 {line_count}: {data['event']} - {data['userId']} - nanoTime: {extracted_nano}")
                 
                 # 방 번호 필터링 적용
                 if room_number is None or data['roomNumber'] == room_number:
                     records.append(data)
+    
+    print(f"🔍 디버깅: 총 {len(records)}개 이벤트 파싱 완료")
     
     # 리스트를 DataFrame으로 변환해서 반환
     return pd.DataFrame(records)
@@ -82,6 +93,8 @@ def normalize_timestamp_format(df_result):
     시간 형식을 기존 형식으로 통일하는 함수
     2025-07-09T13:36:41.721432200Z → 2025-07-09 13:36:41.721432200+00:00
     """
+    print("🔍 디버깅: 시간 형식 정규화 시작")
+    
     if 'prev_entry_time' in df_result.columns:
         df_result['prev_entry_time'] = pd.to_datetime(df_result['prev_entry_time'])
         df_result['prev_entry_time'] = df_result['prev_entry_time'].dt.strftime('%Y-%m-%d %H:%M:%S.%f+00:00')
@@ -90,6 +103,7 @@ def normalize_timestamp_format(df_result):
         df_result['curr_entry_time'] = pd.to_datetime(df_result['curr_entry_time'])
         df_result['curr_entry_time'] = df_result['curr_entry_time'].dt.strftime('%Y-%m-%d %H:%M:%S.%f+00:00')
     
+    print("🔍 디버깅: 시간 형식 정규화 완료")
     return df_result
 
 def build_paired_data_true_critical_section(df):
@@ -102,14 +116,29 @@ def build_paired_data_true_critical_section(df):
     출력: DataFrame - 페어링된 입장 요청 데이터
     """
     
+    print("🔍 디버깅: 페어링 시작")
+    
     # 빈 데이터면 빈 DataFrame 반환
     if df.empty:
         return pd.DataFrame()
+    
+    # 입력 데이터 디버깅
+    print(f"🔍 디버깅: 입력 데이터 {len(df)}건")
+    if 'nanoTime' in df.columns:
+        nano_values = df['nanoTime'].dropna().values
+        print(f"🔍 디버깅: 입력 nanoTime 값 범위: {nano_values.min()} ~ {nano_values.max()}")
+        print(f"🔍 디버깅: 입력 nanoTime 샘플: {nano_values[:5]}")
     
     # === 전체 이벤트를 nanoTime 기준으로 시간순 정렬 ===
     if 'nanoTime' in df.columns:
         print("   nanoTime 기준으로 전체 이벤트 정렬 중...")
         df_sorted = df.sort_values(['roomNumber', 'nanoTime']).reset_index(drop=True)
+        
+        # 🔍 디버깅: 정렬 후 nanoTime 값 확인
+        sorted_nano_values = df_sorted['nanoTime'].dropna().values
+        print(f"🔍 디버깅: 정렬 후 nanoTime 값 범위: {sorted_nano_values.min()} ~ {sorted_nano_values.max()}")
+        print(f"🔍 디버깅: 정렬 후 nanoTime 샘플: {sorted_nano_values[:5]}")
+        
     else:
         print("   timestamp 기준으로 전체 이벤트 정렬 중...")
         df_sorted = df.sort_values(['roomNumber', 'timestamp']).reset_index(drop=True)
@@ -130,6 +159,10 @@ def build_paired_data_true_critical_section(df):
             if current_row['event'] == 'PRE_JOIN_CURRENT_STATE':
                 pre_event = current_row
                 
+                # 🔍 디버깅: PRE_JOIN 이벤트 nanoTime 확인
+                pre_nano = pre_event.get('nanoTime', 'None')
+                print(f"     PRE_JOIN - {pre_event['userId']} - nanoTime: {pre_nano}")
+                
                 # 다음 SUCCESS 또는 FAIL 이벤트 찾기
                 for j in range(i + 1, len(room_df)):
                     next_row = room_df.iloc[j]
@@ -138,8 +171,18 @@ def build_paired_data_true_critical_section(df):
                     if (next_row['userId'] == pre_event['userId'] and 
                         next_row['event'] in ['JOIN_SUCCESS_EXISTING', 'JOIN_FAIL_OVER_CAPACITY_EXISTING']):
                         
+                        # 🔍 디버깅: SUCCESS/FAIL 이벤트 nanoTime 확인
+                        end_nano = next_row.get('nanoTime', 'None')
+                        print(f"     {next_row['event']} - {next_row['userId']} - nanoTime: {end_nano}")
+                        
                         # 페어링 완성
                         paired_record = create_paired_record(pre_event, next_row)
+                        
+                        # 🔍 디버깅: 페어링 결과 nanoTime 확인
+                        paired_nano_pre = paired_record.get('nanoTime_pre', 'None')
+                        paired_nano_end = paired_record.get('nanoTime_end', 'None')
+                        print(f"     페어링 결과 - nanoTime_pre: {paired_nano_pre}, nanoTime_end: {paired_nano_end}")
+                        
                         result_list.append(paired_record)
                         break
             
@@ -151,10 +194,28 @@ def build_paired_data_true_critical_section(df):
     # === 결과 DataFrame 생성 ===
     result = pd.DataFrame(result_list)
     
+    # 🔍 디버깅: 결과 DataFrame nanoTime 값 확인
+    print(f"🔍 디버깅: 결과 DataFrame 생성 완료 - {len(result)}건")
+    if 'nanoTime_pre' in result.columns:
+        nano_pre_values = result['nanoTime_pre'].dropna().values
+        print(f"🔍 디버깅: nanoTime_pre 값 범위: {nano_pre_values.min()} ~ {nano_pre_values.max()}")
+        print(f"🔍 디버깅: nanoTime_pre 샘플: {nano_pre_values[:5]}")
+    
+    if 'nanoTime_end' in result.columns:
+        nano_end_values = result['nanoTime_end'].dropna().values
+        print(f"🔍 디버깅: nanoTime_end 값 범위: {nano_end_values.min()} ~ {nano_end_values.max()}")
+        print(f"🔍 디버깅: nanoTime_end 샘플: {nano_end_values[:5]}")
+    
     # === 🔧 나노초 정밀도 기반 재정렬 및 순번 부여 ===
     if 'nanoTime_pre' in result.columns:
         print("   나노초 정밀도 기준으로 최종 정렬 중...")
         result = result.sort_values(['roomNumber', 'nanoTime_pre']).reset_index(drop=True)
+        
+        # 🔍 디버깅: 최종 정렬 후 nanoTime 값 확인
+        sorted_nano_pre = result['nanoTime_pre'].dropna().values
+        print(f"🔍 디버깅: 최종 정렬 후 nanoTime_pre 값 범위: {sorted_nano_pre.min()} ~ {sorted_nano_pre.max()}")
+        print(f"🔍 디버깅: 최종 정렬 후 nanoTime_pre 샘플: {sorted_nano_pre[:5]}")
+        
     else:
         print("   타임스탬프 기준으로 최종 정렬 중...")
         result = result.sort_values(['roomNumber', 'timestamp_pre']).reset_index(drop=True)
@@ -166,6 +227,13 @@ def build_paired_data_true_critical_section(df):
     print("   방별 개별 bin 할당 중...")
     result['bin'] = result.groupby('roomNumber').cumcount() // 20 + 1
     result['bin'] = result['bin'].clip(upper=10)  # 최대 10으로 제한
+    
+    # 🔍 디버깅: bin 할당 후 nanoTime 값 확인
+    print(f"🔍 디버깅: bin 할당 후 nanoTime 값 확인")
+    if 'nanoTime_pre' in result.columns:
+        bin_nano_pre = result['nanoTime_pre'].dropna().values
+        print(f"🔍 디버깅: bin 할당 후 nanoTime_pre 값 범위: {bin_nano_pre.min()} ~ {bin_nano_pre.max()}")
+        print(f"🔍 디버깅: bin 할당 후 nanoTime_pre 샘플: {bin_nano_pre[:5]}")
     
     # === 🔧 최종 컬럼 정리 ===
     final_columns = {
@@ -185,11 +253,20 @@ def build_paired_data_true_critical_section(df):
     # === 🔧 나노초 정밀도 필드 추가 ===
     if 'nanoTime_pre' in result.columns:
         final_columns['nanoTime_pre'] = 'true_critical_section_nanoTime_start'
+        print("🔍 디버깅: nanoTime_pre → true_critical_section_nanoTime_start 매핑")
     if 'nanoTime_end' in result.columns:
         final_columns['nanoTime_end'] = 'true_critical_section_nanoTime_end'
+        print("🔍 디버깅: nanoTime_end → true_critical_section_nanoTime_end 매핑")
     
     # === 최종 컬럼 선택 및 이름 변경 ===
     existing_columns = {old: new for old, new in final_columns.items() if old in result.columns}
+    
+    # 🔍 디버깅: 컬럼 매핑 전 nanoTime 값 확인
+    print(f"🔍 디버깅: 컬럼 매핑 전 최종 확인")
+    if 'nanoTime_pre' in result.columns:
+        pre_mapping_values = result['nanoTime_pre'].dropna().values
+        print(f"🔍 디버깅: 매핑 전 nanoTime_pre 값 범위: {pre_mapping_values.min()} ~ {pre_mapping_values.max()}")
+        print(f"🔍 디버깅: 매핑 전 nanoTime_pre 샘플: {pre_mapping_values[:5]}")
     
     # 원하는 순서대로 컬럼 정렬
     desired_order = ['roomNumber', 'bin', 'user_id', 'prev_people', 'curr_people', 'expected_people', 'max_people', 
@@ -199,12 +276,26 @@ def build_paired_data_true_critical_section(df):
     # DataFrame 재구성
     result = result[list(existing_columns.keys())].rename(columns=existing_columns)
     
+    # 🔍 디버깅: 컬럼 매핑 후 nanoTime 값 확인
+    print(f"🔍 디버깅: 컬럼 매핑 후 최종 확인")
+    if 'true_critical_section_nanoTime_start' in result.columns:
+        post_mapping_values = result['true_critical_section_nanoTime_start'].dropna().values
+        print(f"🔍 디버깅: 매핑 후 true_critical_section_nanoTime_start 값 범위: {post_mapping_values.min()} ~ {post_mapping_values.max()}")
+        print(f"🔍 디버깅: 매핑 후 true_critical_section_nanoTime_start 샘플: {post_mapping_values[:5]}")
+    
     # 존재하는 컬럼들만 원하는 순서로 재배열
     final_order = [col for col in desired_order if col in result.columns]
     result = result[final_order]
     
     # === 🔧 시간 형식 기존 형식으로 통일 ===
     result = normalize_timestamp_format(result)
+    
+    # 🔍 디버깅: 최종 결과 확인
+    print(f"🔍 디버깅: 최종 결과 - {len(result)}건")
+    if 'true_critical_section_nanoTime_start' in result.columns:
+        final_values = result['true_critical_section_nanoTime_start'].dropna().values
+        print(f"🔍 디버깅: 최종 true_critical_section_nanoTime_start 값 범위: {final_values.min()} ~ {final_values.max()}")
+        print(f"🔍 디버깅: 최종 true_critical_section_nanoTime_start 샘플: {final_values[:5]}")
     
     return result
 
@@ -236,10 +327,12 @@ def create_paired_record(pre_event, end_event):
     record['timestamp_end'] = end_event['timestamp']
     
     # 나노초 정보
-    if 'nanoTime' in pre_event:
+    if 'nanoTime' in pre_event and pd.notna(pre_event['nanoTime']):
         record['nanoTime_pre'] = pre_event['nanoTime']
-    if 'nanoTime' in end_event:
+        print(f"     create_paired_record - nanoTime_pre 설정: {pre_event['nanoTime']}")
+    if 'nanoTime' in end_event and pd.notna(end_event['nanoTime']):
         record['nanoTime_end'] = end_event['nanoTime']
+        print(f"     create_paired_record - nanoTime_end 설정: {end_event['nanoTime']}")
     
     return record
 
@@ -332,9 +425,9 @@ def analyze_results(df):
 
 def main():
     """
-    🔧 완전 수정된 나노초 정밀도 기반 메인 함수
+    🔧 디버깅 출력 추가된 메인 함수
     """
-    parser = argparse.ArgumentParser(description="Race Condition 이벤트 전처리기 (완전 수정 버전)")
+    parser = argparse.ArgumentParser(description="Race Condition 이벤트 전처리기 (디버깅 버전)")
     parser.add_argument('--room', type=int, help='특정 방 번호만 처리 (옵션)')
     parser.add_argument('--csv', type=str, help='CSV 파일명 (필수)')
     parser.add_argument('--xlsx', type=str, help='Excel 파일명 (옵션)')
@@ -351,10 +444,11 @@ def main():
         return
     
     try:
-        print("🔧 완전 수정된 Race Condition 이벤트 전처리기 시작...")
+        print("🔧 디버깅 버전 Race Condition 이벤트 전처리기 시작...")
         print("📋 시간순 단순 매칭 및 방별 개별 bin 할당 적용")
         print("🕐 시간 형식 기존 형식으로 통일")
         print("🎯 3개 핵심 이벤트만 처리")
+        print("🔍 디버깅 출력 활성화")
         
         # 출력 디렉토리 생성
         if args.output_dir:
@@ -398,11 +492,12 @@ def main():
         print("5. 결과 분석 중...")
         analyze_results(result)
         
-        print("\n✅ 완전 수정된 전처리 완료!")
+        print("\n✅ 디버깅 버전 전처리 완료!")
         print("🎯 3개 핵심 이벤트 나노초 데이터 포함!")
         print("🕐 시간 형식 기존 형식으로 통일 완료!")
         print("🔧 시간순 단순 매칭 적용 완료!")
         print("📁 출력 디렉토리 지정 기능 추가 완료!")
+        print("🔍 디버깅 출력으로 nanoTime 값 추적 완료!")
         
     except Exception as e:
         print(f"❌ 오류 발생: {e}")

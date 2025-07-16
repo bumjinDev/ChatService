@@ -198,7 +198,7 @@ class Rule3CapacityAnalyzer:
                 ax.axvspan(idx-0.3, idx+0.3, ymin=0, ymax=1, color='magenta', alpha=0.3,
                           label='정원 초과 오류 발생 시점 (anomaly_type 기반)' if exceeded_count == 0 else '')
                 # 초과 지점에 빨간색 강조점 추가 (detected_anomalies.csv의 실제 curr_people 값 사용)
-                ax.scatter(idx, error_row['curr_people'], color='red', s=30, alpha=1.0, zorder=5)
+                ax.scatter(idx, error_row['curr_people'], color='red', s=35, alpha=1.0, zorder=5)
                 exceeded_count += 1
                 exceeded_positions.append(idx)
         
@@ -237,7 +237,7 @@ class Rule3CapacityAnalyzer:
             if max_exceeded > 0:
                 stats_text += f'\n최대 초과: +{max_exceeded}명'
         
-        ax.text(0.2, 0.98, stats_text, transform=ax.transAxes, fontsize=11,
+        ax.text(0.23, 0.98, stats_text, transform=ax.transAxes, fontsize=11,
                 verticalalignment='top', bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.9))
         
         # 차트 마무리
@@ -428,7 +428,6 @@ class Rule3CapacityAnalyzer:
             'prev_people', 'curr_people', 'expected_people', 'max_people', 
             'anomaly_type', 'over_capacity_amount', 'over_capacity_curr', 'over_capacity_max',
             'true_critical_section_start', 'true_critical_section_end', 'true_critical_section_duration',
-            'true_critical_section_nanoTime_start', 'true_critical_section_nanoTime_end', 'true_critical_section_duration_nanos',
             'contention_group_size', 'contention_user_ids', 'intervening_users_in_critical_section', 'intervening_user_count_critical'
         ]
         

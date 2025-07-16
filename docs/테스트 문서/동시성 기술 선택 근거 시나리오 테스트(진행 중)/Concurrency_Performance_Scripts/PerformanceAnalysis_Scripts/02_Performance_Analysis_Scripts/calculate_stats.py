@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
-성능 분석 지표 계산 스크립트 (v6.0) - 나노초 단위 분석
+성능 분석 지표 계산 스크립트 (v7.0) - 나노초 단위 분석 + 중앙값 통계 추가
 - 모든 시간 계산을 나노초 단위로 유지
 - 통계 출력도 나노초 단위로 표시
+- 정원 초과 실패의 중앙값 통계 추가
 
 [스크립트 목적]
 이 스크립트는 성능 테스트 결과 CSV 파일을 읽어서 다양한 통계를 계산하고,
@@ -361,8 +362,10 @@ def create_per_room_stats(df_total, df_success, df_capacity_failed, df_lock_fail
             'success_median_dwell_time(ns)': room_success['dwell_time_ns'].median() if len(room_success) > 0 else 0,
             'success_max_dwell_time(ns)': room_success['dwell_time_ns'].max() if len(room_success) > 0 else 0,
             'capacity_failed_avg_wait_time(ns)': room_capacity_failed['wait_time_ns'].mean() if len(room_capacity_failed) > 0 else 0,
+            'capacity_failed_median_wait_time(ns)': room_capacity_failed['wait_time_ns'].median() if len(room_capacity_failed) > 0 else 0,  # 추가!
             'capacity_failed_max_wait_time(ns)': room_capacity_failed['wait_time_ns'].max() if len(room_capacity_failed) > 0 else 0,
             'capacity_failed_avg_fail_processing_time(ns)': room_capacity_failed['fail_processing_time_ns'].mean() if len(room_capacity_failed) > 0 else 0,
+            'capacity_failed_median_fail_processing_time(ns)': room_capacity_failed['fail_processing_time_ns'].median() if len(room_capacity_failed) > 0 else 0,  # 추가!
             'capacity_failed_max_fail_processing_time(ns)': room_capacity_failed['fail_processing_time_ns'].max() if len(room_capacity_failed) > 0 else 0
         }
         
@@ -419,8 +422,10 @@ def create_per_bin_stats(df_total, df_success, df_capacity_failed, df_lock_faile
             'success_median_dwell_time(ns)': combo_success['dwell_time_ns'].median() if len(combo_success) > 0 else 0,
             'success_max_dwell_time(ns)': combo_success['dwell_time_ns'].max() if len(combo_success) > 0 else 0,
             'capacity_failed_avg_wait_time(ns)': combo_capacity_failed['wait_time_ns'].mean() if len(combo_capacity_failed) > 0 else 0,
+            'capacity_failed_median_wait_time(ns)': combo_capacity_failed['wait_time_ns'].median() if len(combo_capacity_failed) > 0 else 0,  # 추가!
             'capacity_failed_max_wait_time(ns)': combo_capacity_failed['wait_time_ns'].max() if len(combo_capacity_failed) > 0 else 0,
             'capacity_failed_avg_fail_processing_time(ns)': combo_capacity_failed['fail_processing_time_ns'].mean() if len(combo_capacity_failed) > 0 else 0,
+            'capacity_failed_median_fail_processing_time(ns)': combo_capacity_failed['fail_processing_time_ns'].median() if len(combo_capacity_failed) > 0 else 0,  # 추가!
             'capacity_failed_max_fail_processing_time(ns)': combo_capacity_failed['fail_processing_time_ns'].max() if len(combo_capacity_failed) > 0 else 0
         }
         
@@ -617,7 +622,7 @@ def format_excel_file(output_path):
                 if cell.value is not None:
                     cell.number_format = '#,##0'  # 천 단위 구분자
     
-    # Per_Room_Stats 시트의 포맷
+    # Per_Room_Stats 시트의 포맷 - 중앙값 컬럼 추가!
     if 'Per_Room_Stats' in wb.sheetnames:
         ws = wb['Per_Room_Stats']
         # 비율 컬럼들 (F, G, H)
@@ -627,14 +632,14 @@ def format_excel_file(output_path):
                 if cell.value is not None:
                     cell.number_format = '0.00"%"'
         
-        # 시간 컬럼들 (I~S) - 정원초과 실패 최대값 컬럼 추가로 범위 확장
-        for col in ['I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S']:
+        # 시간 컬럼들 (I~U) - 중앙값 컬럼 추가로 범위 확장!
+        for col in ['I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U']:
             for row in range(2, ws.max_row + 1):
                 cell = ws[f'{col}{row}']
                 if cell.value is not None:
                     cell.number_format = '#,##0'
     
-    # Per_Bin_Stats 시트의 포맷
+    # Per_Bin_Stats 시트의 포맷 - 중앙값 컬럼 추가!
     if 'Per_Bin_Stats' in wb.sheetnames:
         ws = wb['Per_Bin_Stats']
         # 비율 컬럼들 (G, H, I)
@@ -644,14 +649,14 @@ def format_excel_file(output_path):
                 if cell.value is not None:
                     cell.number_format = '0.00"%"'
         
-        # 시간 컬럼들 (J~T) - 정원초과 실패 최대값 컬럼 추가로 범위 확장
-        for col in ['J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T']:
+        # 시간 컬럼들 (J~V) - 중앙값 컬럼 추가로 범위 확장!
+        for col in ['J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V']:
             for row in range(2, ws.max_row + 1):
                 cell = ws[f'{col}{row}']
                 if cell.value is not None:
                     cell.number_format = '#,##0'
     
-    # Per_Thread_Critical_Details 시트의 포맷 (새로 추가)
+    # Per_Thread_Critical_Details 시트의 포맷
     if 'Per_Thread_Critical_Details' in wb.sheetnames:
         ws = wb['Per_Thread_Critical_Details']
         
@@ -826,7 +831,7 @@ def process_performance_data(csv_path, label):
     df_capacity_failed_stats = create_capacity_failed_stats(df_capacity_failed)
     df_per_room_stats = create_per_room_stats(df_total, df_success, df_capacity_failed, df_lock_failed)
     df_per_bin_stats = create_per_bin_stats(df_total, df_success, df_capacity_failed, df_lock_failed)
-    df_per_thread_critical_details = create_per_thread_critical_details(df_total, df_success, df_capacity_failed, df_lock_failed)  # 새로 추가
+    df_per_thread_critical_details = create_per_thread_critical_details(df_total, df_success, df_capacity_failed, df_lock_failed)
     df_comparison_stats = create_time_unit_comparison(df_success)
     
     # 7. 데이터 검증 출력
@@ -859,7 +864,7 @@ def process_performance_data(csv_path, label):
             # 빈 DataFrame이 아닌 경우에만 저장
             if not df_per_bin_stats.empty:
                 df_per_bin_stats.to_excel(writer, sheet_name='Per_Bin_Stats', index=False)
-            if not df_per_thread_critical_details.empty:  # 새로 추가된 시트
+            if not df_per_thread_critical_details.empty:
                 df_per_thread_critical_details.to_excel(writer, sheet_name='Per_Thread_Critical_Details', index=False)
             if not df_comparison_stats.empty:
                 df_comparison_stats.to_excel(writer, sheet_name='Time_Unit_Comparison', index=False)
@@ -882,7 +887,7 @@ def main():
     명령줄에서 인자를 받아서 처리를 시작합니다.
     
     사용 예시:
-        python calculate_performance_stats.py \
+        python calculate_stats.py \
             --inputs "test1.csv,test2.csv" \
             --labels "Test1,Test2"
     """
@@ -929,7 +934,7 @@ def main():
     # 시작 시간 기록
     start_time = datetime.now()
     print(f"성능 분석 시작: {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
-    print(f"버전: v6.0 - 나노초 단위 분석")
+    print(f"버전: v7.0 - 나노초 단위 분석 + 중앙값 통계 추가")
     
     # 각 파일 처리
     success_count = 0

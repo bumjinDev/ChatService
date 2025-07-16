@@ -96,10 +96,10 @@ class Rule1LostUpdateAnalyzer:
             print(f"   - 전처리 데이터: {before_filter_preprocessor} → {len(self.df_preprocessor)}건")
             print(f"   - 결과 데이터: {before_filter_result} → {len(self.df_result)}건")
         
-        # 인덱스 부여 (정렬 제거 - preprocessor.csv 순서 그대로 사용)
-        self.df_preprocessor = self.df_preprocessor.reset_index(drop=True)
+        # 시간순 정렬 및 인덱스 부여
+        self.df_preprocessor = self.df_preprocessor.sort_values('curr_entry_time').reset_index(drop=True)
         self.df_preprocessor['request_index'] = range(len(self.df_preprocessor))
-        print(f"✅ 인덱스 부여 완료 (정렬 없이 원본 순서 유지)")
+        print(f"✅ 시간순 정렬 및 request_index 컬럼 추가 완료")
         
         return True
     
@@ -213,14 +213,14 @@ class Rule1LostUpdateAnalyzer:
         rooms = self.df_preprocessor['roomNumber'].unique()
         print(f"🎯 전체 {len(rooms)}개 방 Rule1 종합 차트 생성 시작")
         
-        # 각 방별 데이터 정리 (정렬 제거 - 원본 순서 유지)
+        # 각 방별 데이터 정리
         room_datasets = {}
         max_requests = 0
         
         for room in rooms:
             room_subset = self.df_preprocessor[
                 self.df_preprocessor['roomNumber'] == room
-            ].reset_index(drop=True)  # 정렬 제거, 원본 순서 유지
+            ].sort_values('curr_entry_time').reset_index(drop=True)
             room_datasets[room] = room_subset
             max_requests = max(max_requests, len(room_subset))
         
@@ -393,7 +393,7 @@ class Rule1LostUpdateAnalyzer:
             if self.room_number is not None:
                 csv_df = csv_df[csv_df['roomNumber'] == self.room_number]
             
-            # 정렬 (CSV 출력용 - 보고서 가독성을 위해 유지)
+            # 정렬
             if not csv_df.empty:
                 sort_columns = ['roomNumber', 'bin', 'room_entry_sequence']
                 available_sort_cols = [col for col in sort_columns if col in csv_df.columns]

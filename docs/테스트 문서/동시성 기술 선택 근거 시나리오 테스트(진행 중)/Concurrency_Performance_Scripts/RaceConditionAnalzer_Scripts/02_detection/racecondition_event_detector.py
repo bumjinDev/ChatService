@@ -59,21 +59,22 @@ def detect_race_condition_anomalies(df):
                 anomaly_details['contention_group_size'] = contention_info['group_size']
                 anomaly_details['contention_user_ids'] = ', '.join(contention_info['user_ids'])
             
-            # 규칙 3: 정원 초과 오류
-            if row['curr_people'] > row['max_people']:
+            # 규칙 3: 정원 초과 오류 (진입 당시 최대값을 넘지 않았던 경우만)
+            if (row['prev_people'] <= row['max_people'] and row['curr_people'] > row['max_people']):
                 anomaly_types.append('정원 초과 오류')
                 anomaly_details['over_capacity_amount'] = row['curr_people'] - row['max_people']
                 anomaly_details['over_capacity_curr'] = row['curr_people']
                 anomaly_details['over_capacity_max'] = row['max_people']
             
             # 규칙 4: 상태 전이 오류 (원본 room_entry_sequence 그대로 사용)
-            expected_curr_people = 1 + row['room_entry_sequence']
-            if row['curr_people'] != expected_curr_people:
-                anomaly_types.append('상태 전이 오류')
-                anomaly_details['expected_curr_by_sequence'] = expected_curr_people
-                anomaly_details['actual_curr_people'] = row['curr_people']
-                anomaly_details['curr_sequence_diff'] = row['curr_people'] - expected_curr_people
-                anomaly_details['sorted_sequence_position'] = row['room_entry_sequence']
+            if row['join_result'] == 'SUCCESS':
+                expected_curr_people = 1 + row['room_entry_sequence']
+                if row['curr_people'] != expected_curr_people:
+                    anomaly_types.append('상태 전이 오류')
+                    anomaly_details['expected_curr_by_sequence'] = expected_curr_people
+                    anomaly_details['actual_curr_people'] = row['curr_people']
+                    anomaly_details['curr_sequence_diff'] = row['curr_people'] - expected_curr_people
+                    anomaly_details['sorted_sequence_position'] = row['room_entry_sequence']
             
             # 임계구역 분석
             critical_analysis = analyze_critical_section(row, room_df, idx)
@@ -97,15 +98,16 @@ def detect_race_condition_anomalies(df):
     return anomalies, detailed_analysis
 
 def find_contention_groups(room_df):
-    """진짜 임계구역 기준 경합 그룹 찾기"""
+    """나노초 정밀도 기반 경합 그룹 찾기"""
     contention_groups = {}
     
     for i, row1 in room_df.iterrows():
-        start1 = row1['prev_entry_time']
-        end1 = row1['curr_entry_time']
+        # 나노초 데이터 사용으로 변경
+        start1_nano = row1['true_critical_section_nanoTime_start']
+        end1_nano = row1['true_critical_section_nanoTime_end']
         user1 = row1['user_id']
         
-        if pd.isna(start1) or pd.isna(end1):
+        if pd.isna(start1_nano) or pd.isna(end1_nano):
             continue
             
         overlapping_users = [user1]
@@ -114,15 +116,16 @@ def find_contention_groups(room_df):
             if i == j:
                 continue
                 
-            start2 = row2['prev_entry_time']
-            end2 = row2['curr_entry_time']
+            # 나노초 데이터 사용으로 변경
+            start2_nano = row2['true_critical_section_nanoTime_start']
+            end2_nano = row2['true_critical_section_nanoTime_end']
             user2 = row2['user_id']
             
-            if pd.isna(start2) or pd.isna(end2):
+            if pd.isna(start2_nano) or pd.isna(end2_nano):
                 continue
             
-            # 시간 겹침 확인
-            if not (end1 < start2 or end2 < start1):
+            # 나노초 기준 겹침 확인으로 변경
+            if not (end1_nano < start2_nano or end2_nano < start1_nano):
                 overlapping_users.append(user2)
         
         # 2명 이상 겹치면 경합
@@ -136,42 +139,34 @@ def find_contention_groups(room_df):
     return contention_groups
 
 def analyze_critical_section(base_row, room_df, base_idx):
-    """임계구역 상세 분석"""
-    critical_start = base_row['prev_entry_time']
-    critical_end = base_row['curr_entry_time']
+    # 나노초 데이터 확인
+    start_nano = base_row.get('true_critical_section_nanoTime_start')
+    end_nano = base_row.get('true_critical_section_nanoTime_end')
     
-    if pd.isna(critical_start) or pd.isna(critical_end):
+    if pd.isna(start_nano) or pd.isna(end_nano):
         return {}
     
-    # 개입 사용자 찾기
+    # 나노초 기준 개입 사용자 찾기
     intervening_users = []
     for idx, other_row in room_df.iterrows():
         if idx == base_idx:
             continue
             
-        other_start = other_row['prev_entry_time']
-        other_end = other_row['curr_entry_time']
+        other_start_nano = other_row.get('true_critical_section_nanoTime_start')
+        other_end_nano = other_row.get('true_critical_section_nanoTime_end')
         
-        if pd.isna(other_start) or pd.isna(other_end):
+        if pd.isna(other_start_nano) or pd.isna(other_end_nano):
             continue
         
-        if not (critical_end < other_start or other_end < critical_start):
+        # 나노초 기준 겹침 확인
+        if not (end_nano < other_start_nano or other_end_nano < start_nano):
             intervening_users.append(other_row['user_id'])
     
     result = {
-        'true_critical_section_start': critical_start,
-        'true_critical_section_end': critical_end,
-        'true_critical_section_duration': (critical_end - critical_start).total_seconds(),
         'intervening_users_in_critical_section': ', '.join(intervening_users) if intervening_users else '',
-        'intervening_user_count_critical': len(intervening_users)
+        'intervening_user_count_critical': len(intervening_users),
+        'true_critical_section_duration_nanos': end_nano - start_nano
     }
-    
-    # 나노초 정밀도 분석
-    start_nano = base_row.get('true_critical_section_nanoTime_start')
-    end_nano = base_row.get('true_critical_section_nanoTime_end')
-    
-    if not pd.isna(start_nano) and not pd.isna(end_nano):
-        result['true_critical_section_duration_nanos'] = end_nano - start_nano
     
     return result
 
@@ -210,7 +205,7 @@ Bin: {row['bin']}
   - 차이: {anomaly_details.get('lost_update_diff', 'N/A')}명
   → 다른 사용자의 작업으로 인해 의도한 갱신이 누락되거나 덮어쓰여짐"""
         
-        elif anomaly_type == '경합 발생 자체':
+        elif anomaly_type == '경합 발생 오류':
             text += f"""
  [규칙 2: 경합 발생 자체 (Contention Detected)]
   - 경합 그룹 크기: {anomaly_details.get('contention_group_size', 'N/A')}개 사용자
@@ -223,7 +218,7 @@ Bin: {row['bin']}
   - 최대 정원: {anomaly_details.get('over_capacity_max', 'N/A')}명
   - 실제 인원: {anomaly_details.get('over_capacity_curr', 'N/A')}명
   - 초과 인원: {anomaly_details.get('over_capacity_amount', 'N/A')}명
-  → 비즈니스 규칙을 명백히 위반한 심각한 오류"""
+  → 진입 당시 정원 내였지만 작업 후 정원 초과한 심각한 오류"""
         
         elif anomaly_type == '상태 전이 오류':
             pos = anomaly_details.get('sorted_sequence_position', 'N/A')
@@ -268,7 +263,7 @@ def print_statistics(df, anomaly_df):
         
         error_counts = {
             '값 불일치': 0,
-            '경합 발생 자체': 0,
+            '경합 발생 오류': 0,
             '정원 초과 오류': 0,
             '상태 전이 오류': 0
         }
@@ -353,7 +348,7 @@ def main():
                     ["규칙", "조건", "의미"],
                     ["규칙 1: 값 불일치", "curr_people ≠ expected_people", "다른 사용자 작업으로 의도한 갱신이 누락/덮어쓰여짐"],
                     ["규칙 2: 경합 발생 자체", "진짜 임계구역이 1나노초라도 겹침", "동시성 제어 부재로 잠재적 위험 노출"],
-                    ["규칙 3: 정원 초과 오류", "curr_people > max_people", "비즈니스 규칙을 명백히 위반한 심각한 오류"],
+                    ["규칙 3: 정원 초과 오류", "prev_people ≤ max_people & curr_people > max_people", "진입 당시 정원 내였지만 작업 후 정원 초과한 심각한 오류"],
                     ["규칙 4: 상태 전이 오류", "curr_people ≠ 1+room_entry_sequence", "올바른 상태를 읽지 못하고 오염된 상태로 작업"]
                 ]
                 

@@ -11,6 +11,7 @@
 2. 사용자별, 방별로 이벤트 그룹화
 3. 시간순 정렬 및 구간(bin) 분할
 4. CSV 및 Excel 형식으로 결과 저장
+5. 사용자 지정 출력 디렉토리 지원
 
 [이벤트 의미]
 - WAITING_START: 임계 영역 진입 대기 시작
@@ -25,6 +26,7 @@ import re
 import os
 import shutil
 import argparse
+import sys
 from typing import Dict, List, Optional, Tuple, Any
 from openpyxl import load_workbook
 
@@ -32,7 +34,6 @@ from openpyxl import load_workbook
 # 파일 경로 상수
 LOG_FILE = 'ChatService.log'
 NEW_LOG_PATH = r'E:\devSpace\ChatServiceTest\log\ChatService.log'
-RESULTS_DIR = 'results'
 
 # 이벤트 타입 상수
 EVENT_WAITING_START = 'WAITING_START'
@@ -456,28 +457,32 @@ def save_to_csv(df: pd.DataFrame, filepath: str) -> None:
         if col in df_copy.columns:
             df_copy[col] = df_copy[col].apply(convert_nano_value)
     
+    # 출력 디렉토리 생성
+    output_dir = os.path.dirname(filepath)
+    if output_dir and not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    
     # UTF-8 with BOM으로 저장 (Excel에서 한글 깨짐 방지)
     df_copy.to_csv(filepath, index=False, encoding='utf-8-sig')
     print(f"CSV 파일 저장 완료: {filepath}")
 
 
-def save_with_side_table(df: pd.DataFrame, filename: str, desc_table: List[List[str]]) -> str:
+def save_with_side_table(df: pd.DataFrame, filepath: str, desc_table: List[List[str]]) -> str:
     """
     DataFrame을 Excel로 저장하고 설명 테이블 추가
     
     Args:
         df: 저장할 DataFrame
-        filename: 파일명
+        filepath: 파일 전체 경로
         desc_table: 설명 테이블
     
     Returns:
         저장된 파일 경로
     """
-    # 결과 디렉토리 생성
-    if not os.path.exists(RESULTS_DIR):
-        os.makedirs(RESULTS_DIR)
-    
-    full_path = os.path.join(RESULTS_DIR, filename)
+    # 출력 디렉토리 생성
+    output_dir = os.path.dirname(filepath)
+    if output_dir and not os.path.exists(output_dir):
+        os.makedirs(output_dir)
     
     # timezone 제거한 복사본 생성
     df_excel = df.copy()
@@ -486,7 +491,7 @@ def save_with_side_table(df: pd.DataFrame, filename: str, desc_table: List[List[
             df_excel[col] = df_excel[col].dt.tz_localize(None)
     
     # Excel 파일 생성
-    with pd.ExcelWriter(full_path, engine='openpyxl') as writer:
+    with pd.ExcelWriter(filepath, engine='openpyxl') as writer:
         df_excel.to_excel(writer, index=False)
         
         # 나노초 컬럼들을 텍스트 형식으로 설정
@@ -501,7 +506,7 @@ def save_with_side_table(df: pd.DataFrame, filename: str, desc_table: List[List[
                 cell.number_format = '@'  # 텍스트 형식
     
     # 설명 테이블 추가
-    wb = load_workbook(full_path)
+    wb = load_workbook(filepath)
     ws = wb.active
     
     start_col = len(df.columns) + 2
@@ -510,10 +515,10 @@ def save_with_side_table(df: pd.DataFrame, filename: str, desc_table: List[List[
         for j, val in enumerate(row):
             ws.cell(row=i + 1, column=start_col + j, value=val)
     
-    wb.save(full_path)
-    print(f"Excel 파일 저장 완료: {full_path}")
+    wb.save(filepath)
+    print(f"Excel 파일 저장 완료: {filepath}")
     
-    return full_path
+    return filepath
 
 
 def analyze_clean_results(df: pd.DataFrame) -> None:
@@ -610,6 +615,7 @@ def main():
     메인 실행 함수
     
     명령줄 인자:
+        --output_dir: 출력 디렉토리 경로
         --room: 특정 방 번호만 처리
         --csv: 추가 CSV 파일명
         --xlsx: Excel 파일명
@@ -617,8 +623,10 @@ def main():
     # 명령줄 인자 파서 설정
     parser = argparse.ArgumentParser(
         description="레이스 컨디션 지표 제거된 5개 이벤트 성능 측정 전처리기",
-        epilog="예시: python script.py --room 1 --xlsx output.xlsx"
+        epilog="예시: py -3 preprocess_logs.py --output_dir C:\\my_analysis\\ --room 1 --xlsx output.xlsx"
     )
+    parser.add_argument('--output_dir', type=str, default='results', 
+                        help='출력 디렉토리 경로 (기본값: results)')
     parser.add_argument('--room', type=int, help='특정 방 번호만 처리 (옵션)')
     parser.add_argument('--csv', type=str, help='추가 CSV 파일명 (옵션)')
     parser.add_argument('--xlsx', type=str, help='Excel 파일명 (옵션)')
@@ -639,34 +647,38 @@ def main():
         result = build_clean_performance_data(df)
         print(f"구축 완료: {len(result)}개 세션")
         
-        # 4. 결과 디렉토리 생성
-        if not os.path.exists(RESULTS_DIR):
-            os.makedirs(RESULTS_DIR)
+        # 4. 출력 디렉토리 설정 및 생성
+        output_dir = args.output_dir
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+            print(f"출력 디렉토리 생성: {output_dir}")
         
-        # 5. CSV 파일 저장
+        # 5. 기본 CSV 파일 저장
         if args.room:
             base_filename = f'clean_five_events_performance_room{args.room}.csv'
         else:
             base_filename = 'clean_five_events_performance_all_rooms.csv'
         
-        csv_path = os.path.join(RESULTS_DIR, base_filename)
+        csv_path = os.path.join(output_dir, base_filename)
         save_to_csv(result, csv_path)
         
-        # 추가 CSV 파일 저장 (옵션)
+        # 6. 추가 CSV 파일 저장 (옵션)
         if args.csv:
-            additional_csv_path = os.path.join(RESULTS_DIR, args.csv)
+            additional_csv_path = os.path.join(output_dir, args.csv)
             save_to_csv(result, additional_csv_path)
         
-        # 6. Excel 파일 저장 (옵션)
+        # 7. Excel 파일 저장 (옵션)
         if args.xlsx:
+            xlsx_path = os.path.join(output_dir, args.xlsx)
             desc_table = get_clean_event_desc_table()
-            save_with_side_table(result, args.xlsx, desc_table)
+            save_with_side_table(result, xlsx_path, desc_table)
         
-        # 7. 결과 분석 출력
+        # 8. 결과 분석 출력
         analyze_clean_results(result)
         
         print(f"\n{'='*60}")
         print(f"처리 완료!")
+        print(f"출력 디렉토리: {os.path.abspath(output_dir)}")
         print(f"{'='*60}")
         
     except FileNotFoundError as e:
