@@ -12,6 +12,7 @@
 3. 시간순 정렬 및 구간(bin) 분할
 4. CSV 및 Excel 형식으로 결과 저장
 5. 사용자 지정 출력 디렉토리 지원
+6. PRE_CHECK_FAIL_OVER_CAPACITY 독립 이벤트 처리 추가
 
 [이벤트 의미]
 - WAITING_START: 임계 영역 진입 대기 시작
@@ -19,6 +20,7 @@
 - CRITICAL_LEAVE: 임계 영역 퇴장
 - INCREMENT_BEFORE: 카운터 증가 작업 시작
 - INCREMENT_AFTER: 카운터 증가 작업 완료
+- PRE_CHECK_FAIL_OVER_CAPACITY: 락 외부 사전 차단 (독립 이벤트)
 """
 
 import pandas as pd
@@ -45,6 +47,7 @@ EVENT_INCREMENT_AFTER = 'INCREMENT_AFTER'
 # 결과 타입 상수
 RESULT_SUCCESS = 'SUCCESS'
 RESULT_FAIL_CAPACITY = 'FAIL_OVER_CAPACITY'
+RESULT_PRE_CHECK_FAIL = 'PRE_CHECK_FAIL'  # 새로 추가
 RESULT_UNKNOWN = 'UNKNOWN'
 
 # 분석 구간 수
@@ -64,6 +67,16 @@ CRITICAL_PATTERN = re.compile(
 INCREMENT_PATTERN = re.compile(
     r'timestampIso=(?P<timestamp>[\w\-\:\.TZ]+)'
     r' event=(?P<tag>INCREMENT_BEFORE|INCREMENT_AFTER)'
+    r' roomNumber=(?P<roomNumber>\d+)'
+    r' userId=(?P<userId>[\w\-\_]+)'
+    r'.* epochNano=(?P<epochNano>\d+)'
+    r'.* nanoTime=(?P<nanoTime>\d+)'
+)
+
+# PRE_CHECK_FAIL_OVER_CAPACITY 이벤트 패턴 추가
+PRE_CHECK_FAIL_PATTERN = re.compile(
+    r'timestampIso=(?P<timestamp>[\w\-\:\.TZ]+)'
+    r' event=(?P<tag>PRE_CHECK_FAIL_OVER_CAPACITY)'
     r' roomNumber=(?P<roomNumber>\d+)'
     r' userId=(?P<userId>[\w\-\_]+)'
     r'.* epochNano=(?P<epochNano>\d+)'
@@ -109,12 +122,19 @@ def parse_log_line(line: str) -> Optional[Dict[str, Any]]:
         data['event_type'] = None  # INCREMENT 이벤트는 event_type이 없음
         return data
     
+    # PRE_CHECK_FAIL_OVER_CAPACITY 이벤트 패턴 매칭 (새로 추가)
+    match = PRE_CHECK_FAIL_PATTERN.search(line)
+    if match:
+        data = match.groupdict()
+        data['event_type'] = 'PRE_CHECK_FAIL_OVER_CAPACITY'  # 독립 이벤트 타입
+        return data
+    
     return None
 
 
 def parse_five_events_clean(filepath: str, room_number: Optional[int] = None) -> pd.DataFrame:
     """
-    로그 파일에서 5가지 이벤트를 파싱하여 DataFrame으로 변환
+    로그 파일에서 5가지 이벤트 + PRE_CHECK_FAIL 이벤트를 파싱하여 DataFrame으로 변환
     
     Args:
         filepath: 로그 파일 경로
@@ -126,6 +146,7 @@ def parse_five_events_clean(filepath: str, room_number: Optional[int] = None) ->
     특징:
         - 나노초 값을 문자열로 유지하여 정밀도 보존
         - 방 번호로 필터링 가능
+        - PRE_CHECK_FAIL_OVER_CAPACITY 독립 이벤트 포함
     """
     records = []
     
@@ -156,6 +177,52 @@ def parse_five_events_clean(filepath: str, room_number: Optional[int] = None) ->
         return pd.DataFrame()
     
     return pd.DataFrame(records)
+
+
+def create_pre_check_fail_record(event_data: pd.Series, room_sequence: int) -> Dict[str, Any]:
+    """
+    PRE_CHECK_FAIL_OVER_CAPACITY 이벤트로부터 독립 레코드 생성
+    
+    Args:
+        event_data: PRE_CHECK_FAIL_OVER_CAPACITY 이벤트 데이터
+        room_sequence: 방별 진입 순번
+    
+    Returns:
+        PRE_CHECK_FAIL 독립 레코드
+    """
+    record = {
+        # 기본 정보
+        'user_id': event_data['userId'],
+        'roomNumber': event_data['roomNumber'],
+        'room_entry_sequence': room_sequence,
+        'join_result': RESULT_PRE_CHECK_FAIL,
+        
+        # 정렬용 시간 정보 (실제 PRE_CHECK_FAIL_OVER_CAPACITY 로그 시간)
+        'waiting_start_time': event_data['timestamp'],
+        'waiting_start_nanoTime': str(int(float(event_data['nanoTime']))),
+        'waiting_start_epochNano': str(int(float(event_data['epochNano']))),
+        
+        # 나머지 모든 이벤트 컬럼들 - 빈 값 처리
+        'waiting_start_event_type': '',
+        'critical_enter_time': '',
+        'critical_enter_nanoTime': '0',
+        'critical_enter_epochNano': '0',
+        'critical_enter_event_type': '',
+        'critical_leave_time': '',
+        'critical_leave_nanoTime': '0',
+        'critical_leave_epochNano': '0',
+        'critical_leave_event_type': '',
+        'increment_before_time': '',
+        'increment_before_nanoTime': '0',
+        'increment_before_epochNano': '0',
+        'increment_before_event_type': '',
+        'increment_after_time': '',
+        'increment_after_nanoTime': '0',
+        'increment_after_epochNano': '0',
+        'increment_after_event_type': ''
+    }
+    
+    return record
 
 
 def process_user_events(user_id: str, user_data: pd.DataFrame) -> Dict[str, Any]:
@@ -266,13 +333,15 @@ def build_clean_performance_data(df: pd.DataFrame) -> pd.DataFrame:
         df: 파싱된 이벤트 DataFrame
     
     Returns:
-        성능 분석용 DataFrame
+        성능 분석용 DataFrame (기존 페어링 + PRE_CHECK_FAIL 독립 이벤트 포함)
     
     처리 과정:
         1. 타임스탬프 변환 및 정렬
-        2. 사용자별 이벤트 그룹화
-        3. 방별 진입 순서 계산
-        4. 10개 구간으로 분할
+        2. PRE_CHECK_FAIL_OVER_CAPACITY 독립 이벤트 분리 처리
+        3. 나머지 5개 이벤트 사용자별 그룹화 및 페어링
+        4. 방별 진입 순서 계산
+        5. 독립 이벤트와 페어링 결과 병합
+        6. 10개 구간으로 분할
     """
     if df.empty:
         return pd.DataFrame()
@@ -287,36 +356,50 @@ def build_clean_performance_data(df: pd.DataFrame) -> pd.DataFrame:
     # 전체 데이터를 시간순 정렬
     df = df.sort_values(['timestamp', 'nanoTime_num', 'epochNano_num']).reset_index(drop=True)
     
+    # PRE_CHECK_FAIL_OVER_CAPACITY 독립 이벤트와 나머지 이벤트 분리
+    pre_check_fail_events = df[df['event_type'] == 'PRE_CHECK_FAIL_OVER_CAPACITY'].copy()
+    other_events = df[df['event_type'] != 'PRE_CHECK_FAIL_OVER_CAPACITY'].copy()
+    
     performance_results = []
     
     # 각 방별로 처리
     for room_num in df['roomNumber'].unique():
-        room_df = df[df['roomNumber'] == room_num].copy()
         room_sequence = 0
         
-        # 사용자별로 그룹화하고 첫 이벤트 시간으로 정렬
-        user_groups = []
-        for user_id, user_data in room_df.groupby('userId'):
-            first_event = user_data.iloc[0]
-            user_groups.append((
-                first_event['timestamp'],
-                first_event['nanoTime_num'],
-                first_event['epochNano_num'],
-                user_id,
-                user_data
-            ))
-        
-        # 첫 이벤트 시간순으로 정렬
-        user_groups.sort(key=lambda x: (x[0], x[1], x[2]))
-        
-        # 각 사용자의 이벤트 처리
-        for _, _, _, user_id, user_data in user_groups:
+        # === 1. PRE_CHECK_FAIL 독립 이벤트 처리 ===
+        room_pre_check_fail = pre_check_fail_events[pre_check_fail_events['roomNumber'] == room_num].copy()
+        for _, pre_check_event in room_pre_check_fail.iterrows():
             room_sequence += 1
+            pre_check_record = create_pre_check_fail_record(pre_check_event, room_sequence)
+            performance_results.append(pre_check_record)
+        
+        # === 2. 기존 5개 이벤트 페어링 처리 ===
+        room_other_events = other_events[other_events['roomNumber'] == room_num].copy()
+        
+        if not room_other_events.empty:
+            # 사용자별로 그룹화하고 첫 이벤트 시간으로 정렬
+            user_groups = []
+            for user_id, user_data in room_other_events.groupby('userId'):
+                first_event = user_data.iloc[0]
+                user_groups.append((
+                    first_event['timestamp'],
+                    first_event['nanoTime_num'],
+                    first_event['epochNano_num'],
+                    user_id,
+                    user_data
+                ))
             
-            profile = process_user_events(user_id, user_data)
-            profile['room_entry_sequence'] = room_sequence
+            # 첫 이벤트 시간순으로 정렬
+            user_groups.sort(key=lambda x: (x[0], x[1], x[2]))
             
-            performance_results.append(profile)
+            # 각 사용자의 이벤트 처리
+            for _, _, _, user_id, user_data in user_groups:
+                room_sequence += 1
+                
+                profile = process_user_events(user_id, user_data)
+                profile['room_entry_sequence'] = room_sequence
+                
+                performance_results.append(profile)
     
     if not performance_results:
         return pd.DataFrame()
@@ -410,8 +493,8 @@ def get_clean_event_desc_table() -> List[List[str]]:
         ["bin", "방별 분석 구간", "각 방의 요청을 10개 구간으로 균등 분할"],
         ["user_id", "사용자 식별", "로그 필드: userId"],
         ["room_entry_sequence", "방별 처리 순번", "방별 타임스탬프 기준 순번"],
-        ["join_result", "입장 결과 구분", "SUCCESS/FAIL_OVER_CAPACITY/UNKNOWN"],
-        ["waiting_start_*", "대기 시작 시점", "WAITING_START 이벤트 속성들"],
+        ["join_result", "입장 결과 구분", "SUCCESS/FAIL_OVER_CAPACITY/PRE_CHECK_FAIL/UNKNOWN"],
+        ["waiting_start_*", "대기 시작 시점", "WAITING_START 이벤트 속성들 (PRE_CHECK_FAIL은 정렬용만)"],
         ["critical_enter_*", "임계구역 진입 시점", "CRITICAL_ENTER 이벤트 속성들"],
         ["critical_leave_*", "임계구역 진출 시점", "CRITICAL_LEAVE 이벤트 속성들"],
         ["increment_before_*", "증가 작업 시작 시점", "INCREMENT_BEFORE 이벤트 속성들"],
@@ -419,7 +502,8 @@ def get_clean_event_desc_table() -> List[List[str]]:
         ["*_time", "이벤트 발생 시간", "timestampIso (스레드 요청 순서)"],
         ["*_nanoTime", "나노초 정밀도 시간", "System.nanoTime()"],
         ["*_epochNano", "Epoch 나노초 시간", "Epoch 기준 나노초"],
-        ["*_event_type", "이벤트 상세 타입", "SUCCESS/FAIL_OVER_CAPACITY 등"]
+        ["*_event_type", "이벤트 상세 타입", "SUCCESS/FAIL_OVER_CAPACITY 등"],
+        ["PRE_CHECK_FAIL", "락 외부 사전 차단", "이중 확인 구조로 락 진입 전 차단된 요청"]
     ]
 
 
@@ -564,23 +648,35 @@ def analyze_clean_results(df: pd.DataFrame) -> None:
             if pd.notna(event_type):
                 print(f"  {event_type}: {count}건")
     
+    # PRE_CHECK_FAIL 분석 (새로 추가)
+    pre_check_fail_count = len(df[df['join_result'] == RESULT_PRE_CHECK_FAIL])
+    if pre_check_fail_count > 0:
+        print(f"\n[PRE_CHECK_FAIL 분석]")
+        print(f"  락 외부 사전 차단: {pre_check_fail_count}건 ({pre_check_fail_count/total_operations*100:.1f}%)")
+        print(f"  이중 확인 구조 효과: 락 진입 전 {pre_check_fail_count}건의 불필요한 대기 방지")
+    
     # 완전한 5개 이벤트 세션 분석
     complete_sessions = 0
     success_complete = 0
     fail_complete = 0
     
     for _, row in df.iterrows():
-        if all(pd.notna(row.get(event)) for event in events):
-            complete_sessions += 1
-            if row.get('join_result') == RESULT_SUCCESS:
-                success_complete += 1
-            elif row.get('join_result') == RESULT_FAIL_CAPACITY:
-                fail_complete += 1
+        # PRE_CHECK_FAIL은 독립 이벤트이므로 완전한 세션 분석에서 제외
+        if row['join_result'] != RESULT_PRE_CHECK_FAIL:
+            if all(pd.notna(row.get(event)) and row.get(event) != '' for event in events):
+                complete_sessions += 1
+                if row.get('join_result') == RESULT_SUCCESS:
+                    success_complete += 1
+                elif row.get('join_result') == RESULT_FAIL_CAPACITY:
+                    fail_complete += 1
     
-    print(f"\n[완전한 5개 이벤트 세션 분석]")
-    print(f"  완전한 세션: {complete_sessions}건 ({complete_sessions/total_operations*100:.1f}%)")
-    print(f"    - 성공: {success_complete}건")
-    print(f"    - 실패: {fail_complete}건")
+    paired_operations = total_operations - pre_check_fail_count
+    if paired_operations > 0:
+        print(f"\n[완전한 5개 이벤트 세션 분석] (PRE_CHECK_FAIL 제외)")
+        print(f"  페어링 대상 세션: {paired_operations}건")
+        print(f"  완전한 세션: {complete_sessions}건 ({complete_sessions/paired_operations*100:.1f}%)")
+        print(f"    - 성공: {success_complete}건")
+        print(f"    - 실패: {fail_complete}건")
     
     # 방별 성능 통계
     print(f"\n[방별 성능 통계]")
@@ -622,7 +718,7 @@ def main():
     """
     # 명령줄 인자 파서 설정
     parser = argparse.ArgumentParser(
-        description="레이스 컨디션 지표 제거된 5개 이벤트 성능 측정 전처리기",
+        description="레이스 컨디션 지표 제거된 5개 이벤트 성능 측정 전처리기 + PRE_CHECK_FAIL 독립 이벤트",
         epilog="예시: py -3 preprocess_logs.py --output_dir C:\\my_analysis\\ --room 1 --xlsx output.xlsx"
     )
     parser.add_argument('--output_dir', type=str, default='results', 
@@ -696,4 +792,4 @@ def main():
 
 # 스크립트가 직접 실행될 때만 main() 호출
 if __name__ == '__main__':
-    main()
+    main(

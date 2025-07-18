@@ -102,10 +102,10 @@ class Rule4StateTransitionAnalyzer:
             print(f"   - 전처리 데이터: {before_filter_preprocessor} → {len(self.df_preprocessor)}건")
             print(f"   - 결과 데이터: {before_filter_result} → {len(self.df_result)}건")
         
-        # 시간순 정렬 및 인덱스 부여
-        self.df_preprocessor = self.df_preprocessor.sort_values('curr_entry_time').reset_index(drop=True)
+        # 원천 데이터 순서 유지 - 인덱스만 부여 (정렬 제거)
+        self.df_preprocessor = self.df_preprocessor.reset_index(drop=True)
         self.df_preprocessor['request_index'] = range(len(self.df_preprocessor))
-        print(f"✅ 시간순 정렬 및 request_index 컬럼 추가 완료")
+        print(f"✅ 원천 데이터 순서 유지 및 request_index 컬럼 추가 완료")
         
         return True
     
@@ -236,14 +236,14 @@ class Rule4StateTransitionAnalyzer:
         rooms = self.df_preprocessor['roomNumber'].unique()
         print(f"🎯 전체 {len(rooms)}개 방 Rule4 종합 차트 생성 시작")
         
-        # 각 방별 데이터 정리
+        # 각 방별 데이터 정리 (정렬 제거 - 원천 데이터 순서 유지)
         room_datasets = {}
         max_requests = 0
         
         for room in rooms:
             room_subset = self.df_preprocessor[
                 self.df_preprocessor['roomNumber'] == room
-            ].sort_values('curr_entry_time').reset_index(drop=True)
+            ].reset_index(drop=True)
             room_datasets[room] = room_subset
             max_requests = max(max_requests, len(room_subset))
         
@@ -319,7 +319,7 @@ class Rule4StateTransitionAnalyzer:
         ax.fill_between(x_positions, 
                     mean_curr_array - std_curr_array, 
                     mean_curr_array + std_curr_array, 
-                    alpha=0.3, color='orange', label='실제값 신뢰구간 (±1σ)')
+                    alpha=0.3, color='orange', label='실제값 변동 범위 (±1 표준편차)')
         
         # 3. 평균 실제 인원수 (주황색 실선 + 작은 원점)
         ax.plot(x_positions, mean_curr_array, color='orange', linewidth=2,
@@ -437,12 +437,8 @@ class Rule4StateTransitionAnalyzer:
             # 컬럼 순서 맞춤
             csv_df = csv_df[required_columns]
             
-            # 정렬
-            if not csv_df.empty:
-                sort_columns = ['roomNumber', 'bin', 'room_entry_sequence']
-                available_sort_cols = [col for col in sort_columns if col in csv_df.columns]
-                if available_sort_cols:
-                    csv_df = csv_df.sort_values(available_sort_cols)
+            # 정렬 제거 - 원천 데이터 순서 유지
+            # 기존 정렬 로직 완전 제거
             
             # CSV 저장
             csv_df.to_csv(csv_path, index=False, encoding='utf-8-sig')

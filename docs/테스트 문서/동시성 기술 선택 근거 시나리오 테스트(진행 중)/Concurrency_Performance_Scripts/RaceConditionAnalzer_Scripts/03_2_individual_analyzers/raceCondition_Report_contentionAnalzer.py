@@ -149,7 +149,7 @@ class Rule2ContentionAnalyzer:
         
         # '경합 발생 오류' 포함된 이상 현상만 필터링 (다른 파일과 동일하게)
         contention_anomalies = self.df_result[
-            self.df_result['anomaly_type'].str.contains('경합 발생 오류', na=False)
+            self.df_result['anomaly_type'].fillna('').str.contains('경합 발생 오류', na=False)
         ].copy()
         
         if contention_anomalies.empty:
@@ -304,7 +304,7 @@ class Rule2ContentionAnalyzer:
         
         # '경합 발생 오류' 포함된 이상 현상만 필터링 (다른 파일과 동일하게)
         contention_anomalies = self.df_result[
-            self.df_result['anomaly_type'].str.contains('경합 발생 오류', na=False)
+            self.df_result['anomaly_type'].fillna('').str.contains('경합 발생 오류', na=False)
         ].copy()
         
         print(f"   - 경합 발생 이상 현상: {len(contention_anomalies)}건")

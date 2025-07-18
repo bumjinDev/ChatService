@@ -161,7 +161,7 @@ def analyze_lost_update(analysis_df, total_info):
     print("🔍 규칙 1: 값 불일치 (Lost Update) 전체 분석 중...")
     
     # '값 불일치' 포함된 레코드 필터링
-    filtered_df = analysis_df[analysis_df['anomaly_type'].str.contains('값 불일치', na=False)]
+    filtered_df = analysis_df[analysis_df['anomaly_type'].fillna('').str.contains('값 불일치', na=False)]
     print(f"  - 값 불일치 발생 레코드: {len(filtered_df)}건")
     
     # lost_update_diff 기준 통계 계산
@@ -189,7 +189,7 @@ def analyze_contention(analysis_df, total_info):
     print("🔍 규칙 2: 경합 발생 (Contention) 전체 분석 중...")
     
     # '경합 발생 오류' 포함된 레코드 필터링
-    filtered_df = analysis_df[analysis_df['anomaly_type'].str.contains('경합 발생 오류', na=False)]
+    filtered_df = analysis_df[analysis_df['anomaly_type'].fillna('').str.contains('경합 발생 오류', na=False)]
     print(f"  - 경합 발생 레코드: {len(filtered_df)}건")
     
     # contention_group_size 기준 통계 계산
@@ -217,7 +217,7 @@ def analyze_capacity_exceeded(analysis_df, total_info):
     print("🔍 규칙 3: 정원 초과 (Capacity Exceeded) 전체 분석 중...")
     
     # '정원 초과 오류' 포함된 레코드 필터링
-    filtered_df = analysis_df[analysis_df['anomaly_type'].str.contains('정원 초과 오류', na=False)]
+    filtered_df = analysis_df[analysis_df['anomaly_type'].fillna('').str.contains('정원 초과 오류', na=False)]
     print(f"  - 정원 초과 발생 레코드: {len(filtered_df)}건")
     
     # over_capacity_amount 기준 통계 계산
@@ -245,7 +245,7 @@ def analyze_state_transition(analysis_df, total_info):
     print("🔍 규칙 4: 상태 전이 오류 (State Transition) 전체 분석 중...")
     
     # '상태 전이 오류' 포함된 레코드 필터링
-    filtered_df = analysis_df[analysis_df['anomaly_type'].str.contains('상태 전이 오류', na=False)]
+    filtered_df = analysis_df[analysis_df['anomaly_type'].fillna('').str.contains('상태 전이 오류', na=False)]
     print(f"  - 상태 전이 오류 발생 레코드: {len(filtered_df)}건")
     
     # curr_sequence_diff 기준 통계 계산 (절댓값 사용)
@@ -303,7 +303,7 @@ def add_dataframe_to_sheet(ws, df, sheet_title):
         if len(df) > 0:
             col_values = [str(val) for val in df.iloc[:, col_idx-1] if pd.notna(val)]
             if col_values:
-                max_length = max(max_length, max(len(val) for val in col_values))
+                max_length = max(max_length, max(len(val) for val in col_values) if col_values else 0)
         ws.column_dimensions[get_column_letter(col_idx)].width = min(max_length + 3, 35)
 
 def create_excel_output(lost_update_df, contention_df, capacity_df, state_transition_df, output_file):

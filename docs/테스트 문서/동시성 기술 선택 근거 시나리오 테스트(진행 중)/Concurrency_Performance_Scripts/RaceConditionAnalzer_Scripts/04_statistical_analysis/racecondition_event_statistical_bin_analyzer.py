@@ -129,7 +129,7 @@ def analyze_lost_update(analysis_df, total_requests_df):
     print("🔍 규칙 1: 값 불일치 (Lost Update) 분석 중...")
     
     # '값 불일치' 포함된 레코드 필터링
-    filtered_df = analysis_df[analysis_df['anomaly_type'].str.contains('값 불일치', na=False)]
+    filtered_df = analysis_df[analysis_df['anomaly_type'].fillna('').str.contains('값 불일치', na=False)]
     print(f"  - 값 불일치 발생 레코드: {len(filtered_df)}건")
     
     # lost_update_diff 기준 통계 계산
@@ -164,7 +164,7 @@ def analyze_contention(analysis_df, total_requests_df):
     print("🔍 규칙 2: 경합 발생 (Contention) 분석 중...")
     
     # '경합 발생' 포함된 레코드 필터링
-    filtered_df = analysis_df[analysis_df['anomaly_type'].str.contains('경합 발생 오류', na=False)]
+    filtered_df = analysis_df[analysis_df['anomaly_type'].fillna('').str.contains('경합 발생 오류', na=False)]
     print(f"  - 경합 발생 레코드: {len(filtered_df)}건")
     
     # contention_group_size 기준 통계 계산
@@ -199,7 +199,7 @@ def analyze_capacity_exceeded(analysis_df, total_requests_df):
     print("🔍 규칙 3: 정원 초과 (Capacity Exceeded) 분석 중...")
     
     # '정원 초과' 포함된 레코드 필터링
-    filtered_df = analysis_df[analysis_df['anomaly_type'].str.contains('정원 초과 오류', na=False)]
+    filtered_df = analysis_df[analysis_df['anomaly_type'].fillna('').str.contains('정원 초과 오류', na=False)]
     print(f"  - 정원 초과 발생 레코드: {len(filtered_df)}건")
     
     # over_capacity_amount 기준 통계 계산
@@ -234,7 +234,7 @@ def analyze_state_transition(analysis_df, total_requests_df):
     print("🔍 규칙 4: 상태 전이 오류 (State Transition) 분석 중...")
     
     # '상태 전이' 포함된 레코드 필터링
-    filtered_df = analysis_df[analysis_df['anomaly_type'].str.contains('상태 전이 오류', na=False)]
+    filtered_df = analysis_df[analysis_df['anomaly_type'].fillna('').str.contains('상태 전이 오류', na=False)]
     print(f"  - 상태 전이 오류 발생 레코드: {len(filtered_df)}건")
     
     # curr_sequence_diff 기준 통계 계산 (절댓값 사용)
@@ -291,7 +291,9 @@ def add_dataframe_to_sheet(ws, df, sheet_title):
     for col_idx, column in enumerate(df.columns, 1):
         max_length = max(len(str(column)), 15)
         if len(df) > 0:
-            max_length = max(max_length, max(len(str(val)) for val in df.iloc[:, col_idx-1] if pd.notna(val)))
+            values = [len(str(val)) for val in df.iloc[:, col_idx-1] if pd.notna(val)]
+            if values:
+                max_length = max(max_length, max(values))
         ws.column_dimensions[get_column_letter(col_idx)].width = min(max_length + 2, 30)
 
 

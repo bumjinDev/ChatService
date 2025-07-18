@@ -111,7 +111,7 @@ class Rule3CapacityAnalyzer:
             self.df_result = self.df_result[self.df_result['roomNumber'] == self.room_number]
             print(f"✅ 결과 데이터 방 {self.room_number} 필터링 완료: {before_filter_result} → {len(self.df_result)}건")
         
-        # 시간순 정렬 및 인덱스 부여 (정렬 제거 - preprocessor.csv 순서 그대로 사용)
+        # 인덱스 부여 (정렬 없이 원본 순서 그대로 사용)
         # self.df_preprocessor = self.df_preprocessor.sort_values('curr_entry_time').reset_index(drop=True)
         self.df_preprocessor = self.df_preprocessor.reset_index(drop=True)
         self.df_preprocessor['request_index'] = range(len(self.df_preprocessor))
@@ -259,14 +259,14 @@ class Rule3CapacityAnalyzer:
         rooms = self.df_preprocessor['roomNumber'].unique()
         print(f"🎯 전체 {len(rooms)}개 방 Rule3 종합 차트 생성 시작")
         
-        # 각 방별 데이터 정리
+        # 각 방별 데이터 정리 (정렬 없이 원본 순서 유지)
         room_datasets = {}
         max_requests = 0
         
         for room in rooms:
             room_subset = self.df_preprocessor[
                 self.df_preprocessor['roomNumber'] == room
-            ].sort_values('curr_entry_time').reset_index(drop=True)
+            ].reset_index(drop=True)  # 정렬 제거: .sort_values('curr_entry_time') 삭제
             room_datasets[room] = room_subset
             max_requests = max(max_requests, len(room_subset))
         
@@ -450,13 +450,13 @@ class Rule3CapacityAnalyzer:
             # 컬럼 순서 맞춤
             csv_df = csv_df[required_columns]
             
-            # 스레드 순차 처리 순서로 정렬 (curr_entry_time 순)
-            if 'curr_entry_time' in csv_df.columns:
-                csv_df = csv_df.sort_values('curr_entry_time')
+            # 정렬 제거: 원본 순서 그대로 유지
+            # if 'curr_entry_time' in csv_df.columns:
+            #     csv_df = csv_df.sort_values('curr_entry_time')  # 이 부분 제거
             
             # CSV 저장
             csv_df.to_csv(csv_path, index=False, encoding='utf-8-sig')
-            print(f"   - CSV 보고서 생성 완료: {len(csv_df)}건 → {csv_path}")
+            print(f"   - CSV 보고서 생성 완료: {len(csv_df)}건 → {csv_path} (원본 순서 유지)")
         
         return csv_path
     
@@ -485,7 +485,7 @@ class Rule3CapacityAnalyzer:
             traceback.print_exc()
             return False
         
-        print("✅ Rule 3 분석 완료!")
+        print("✅ Rule 3 분석 완료! (원본 순서 유지)")
         return True
 
 def main():

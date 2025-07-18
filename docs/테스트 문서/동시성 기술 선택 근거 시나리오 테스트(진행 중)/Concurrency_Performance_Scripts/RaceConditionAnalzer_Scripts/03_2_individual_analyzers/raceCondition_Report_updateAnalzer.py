@@ -279,10 +279,10 @@ class Rule1LostUpdateAnalyzer:
         # 평균선 - 실선 + 작은 원점
         ax.plot(x_positions, mean_expected_array, 'b-', linewidth=2, 
                 marker='o', markersize=3, markerfacecolor='blue', markeredgecolor='blue',
-                label='연산 시점의 기대값 (expected_people)', alpha=0.8)
+                label='연산 시점의 기대값 (expected_people)', alpha=0.4)
         ax.plot(x_positions, mean_curr_array, color='orange', linewidth=2, 
                 marker='o', markersize=3, markerfacecolor='orange', markeredgecolor='orange',
-                label='실제 기록된 최종값 (curr_people)', alpha=0.8)
+                label='실제 기록된 최종값 (curr_people)', alpha=0.4)
         
         # 값 불일치 표식 - 수직 음영
         mismatch_count = 0
@@ -317,7 +317,7 @@ class Rule1LostUpdateAnalyzer:
         ax.legend(fontsize=12, loc='upper left', framealpha=0.9)
         
         # 통계 정보를 범례 우측에 배치 (약 2cm 간격)
-        total_lost_updates = len(self.df_result[self.df_result['anomaly_type'].str.contains('값 불일치', na=False)])
+        total_lost_updates = len(self.df_result[self.df_result['anomaly_type'].fillna('').str.contains('값 불일치', na=False)])
         total_requests = len(self.df_preprocessor)
         
         stats_text = (f'분석 방 수: {len(rooms)}개\n'
@@ -351,7 +351,7 @@ class Rule1LostUpdateAnalyzer:
         
         # anomaly_type에 '값 불일치' 포함된 레코드 필터링
         lost_update_anomalies = self.df_result[
-            self.df_result['anomaly_type'].str.contains('값 불일치', na=False)
+            self.df_result['anomaly_type'].fillna('').str.contains('값 불일치', na=False)
         ].copy()
         
         print(f"   - 값 불일치 이상 현상: {len(lost_update_anomalies)}건")
