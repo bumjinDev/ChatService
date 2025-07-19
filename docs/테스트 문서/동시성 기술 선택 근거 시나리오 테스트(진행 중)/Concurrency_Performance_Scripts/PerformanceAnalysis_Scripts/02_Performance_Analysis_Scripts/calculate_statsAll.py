@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-성능 분석 지표 계산 스크립트 (v7.0) - 나노초 단위 분석 + 중앙값 통계 추가
-- 모든 시간 계산을 나노초 단위로 유지
-- 통계 출력도 나노초 단위로 표시
-- 정원 초과 실패의 중앙값 통계 추가
+성능 분석 지표 계산 스크립트 (v8.0) - PRE_CHECK_FAIL 지원 추가
+- PRE_CHECK_FAIL_OVER_CAPACITY 이벤트 분석 추가
+- Overall_Summary에 PRE_CHECK_FAIL 카테고리 추가
+- 나노초 단위 분석 + 중앙값 통계 포함
 
 [스크립트 목적]
 이 스크립트는 성능 테스트 결과 CSV 파일을 읽어서 다양한 통계를 계산하고,
@@ -11,7 +11,7 @@
 
 [주요 기능]
 1. CSV 파일에서 성능 데이터 읽기
-2. 성공/실패 케이스별 분류
+2. 성공/실패 케이스별 분류 (PRE_CHECK_FAIL 포함)
 3. 대기 시간, 처리 시간 등의 통계 계산
 4. 방(room)별, 구간(bin)별 상세 통계 생성
 5. 결과를 Excel 파일로 저장
@@ -158,7 +158,7 @@ def calculate_time_diff_nano(start_nano, end_nano):
 
 def set_join_result_from_events(df):
     """
-    이벤트 타입을 기반으로 join_result 컬럼을 설정하는 함수
+    이벤트 타입을 기반으로 join_result 컬럼을 설정하는 함수 (PRE_CHECK_FAIL 지원 추가)
     
     매개변수:
         df: 성능 데이터가 담긴 DataFrame
@@ -171,13 +171,15 @@ def set_join_result_from_events(df):
         - SUCCESS: 성공적으로 처리됨
         - FAIL_OVER_CAPACITY: 정원 초과로 실패
         - FAIL_ENTRY: 진입 자체를 실패 (락 획득 실패 등)
+        - PRE_CHECK_FAIL: 락 외부 사전 차단 (이중 확인 구조)
     """
     def determine_join_result(row):
         """개별 행(row)의 join_result를 결정하는 내부 함수"""
         # 이미 join_result가 설정되어 있고 유효한 값이면 그대로 사용
         if pd.notna(row.get('join_result')) and row.get('join_result') != '':
             existing_result = str(row['join_result']).strip()
-            if existing_result in ['SUCCESS', 'FAIL_OVER_CAPACITY', 'FAIL_ENTRY']:
+            # PRE_CHECK_FAIL 포함하여 유효한 값들 확인
+            if existing_result in ['SUCCESS', 'FAIL_OVER_CAPACITY', 'FAIL_ENTRY', 'PRE_CHECK_FAIL']:
                 return existing_result
         
         # critical_leave_event_type을 기반으로 결과 판단
@@ -199,15 +201,16 @@ def set_join_result_from_events(df):
     return df_result
 
 
-def create_summary_stats(df_total, df_success, df_lock_failed, df_capacity_failed):
+def create_summary_stats(df_total, df_success, df_lock_failed, df_capacity_failed, df_pre_check_failed):
     """
-    전체 요약 통계를 생성하는 함수
+    전체 요약 통계를 생성하는 함수 (PRE_CHECK_FAIL 추가)
     
     매개변수:
         df_total: 전체 데이터
         df_success: 성공한 요청들
         df_lock_failed: 진입 실패한 요청들
         df_capacity_failed: 정원 초과로 실패한 요청들
+        df_pre_check_failed: 락 외부 사전 차단된 요청들 (새로 추가)
     
     반환값:
         요약 통계 DataFrame
@@ -216,25 +219,29 @@ def create_summary_stats(df_total, df_success, df_lock_failed, df_capacity_faile
     success_count = len(df_success)
     lock_failed_count = len(df_lock_failed)
     capacity_failed_count = len(df_capacity_failed)
+    pre_check_failed_count = len(df_pre_check_failed)  # 새로 추가
     
     summary_data = {
         'Category': [
             'Total Requests',
             'Success',
             'Entry Failed (Lock, etc)',
-            'Capacity Failed'
+            'Capacity Failed',
+            'PRE_CHECK_FAIL'  # 새로 추가
         ],
         'Count': [
             total_requests,
             success_count,
             lock_failed_count,
-            capacity_failed_count
+            capacity_failed_count,
+            pre_check_failed_count  # 새로 추가
         ],
         'Percentage (%)': [
             100.0,
             calculate_rate(success_count, total_requests),
             calculate_rate(lock_failed_count, total_requests),
-            calculate_rate(capacity_failed_count, total_requests)
+            calculate_rate(capacity_failed_count, total_requests),
+            calculate_rate(pre_check_failed_count, total_requests)  # 새로 추가
         ]
     }
     
@@ -319,15 +326,83 @@ def create_capacity_failed_stats(df_capacity_failed):
     return pd.DataFrame(capacity_failed_stats_data)
 
 
-def create_per_room_stats(df_total, df_success, df_capacity_failed, df_lock_failed):
+def create_pre_check_failed_stats(df_pre_check_failed, total_count, capacity_failed_count):
     """
-    방(room)별 통계를 생성하는 함수
+    PRE_CHECK_FAIL로 차단된 요청들의 통계를 생성하는 함수 (재구성)
+    
+    매개변수:
+        df_pre_check_failed: PRE_CHECK_FAIL로 차단된 요청들의 DataFrame
+        total_count: 전체 요청 수
+        capacity_failed_count: FAIL_OVER_CAPACITY 요청 수
+    
+    반환값:
+        PRE_CHECK_FAIL 통계 DataFrame
+    
+    설명:
+        1. PRE_CHECK_FAIL vs 전체 요청 비율
+        2. PRE_CHECK_FAIL vs 실패 요청(PRE_CHECK_FAIL + FAIL_OVER_CAPACITY) 비율
+    """
+    if len(df_pre_check_failed) == 0:
+        return pd.DataFrame({'Metric': [], 'Statistic': [], 'Value': [], 'Unit': []})
+    
+    # PRE_CHECK_FAIL 발생 횟수
+    pre_check_count = len(df_pre_check_failed)
+    # 실패한 요청 총합 (PRE_CHECK_FAIL + FAIL_OVER_CAPACITY)
+    total_failed = pre_check_count + capacity_failed_count
+    
+    # 퍼센티지 계산 (소수점 1자리까지)
+    pre_check_vs_total_percentage = round((pre_check_count / total_count) * 100, 1) if total_count > 0 else 0.0
+    pre_check_vs_failed_percentage = round((pre_check_count / total_failed) * 100, 1) if total_failed > 0 else 0.0
+    
+    # 재구성된 통계 데이터
+    pre_check_stats_data = {
+        'Metric': [
+            'PRE_CHECK_FAIL vs Total Requests',
+            'PRE_CHECK_FAIL vs Total Requests',
+            'PRE_CHECK_FAIL vs Total Requests',
+            'PRE_CHECK_FAIL vs Failed Requests',
+            'PRE_CHECK_FAIL vs Failed Requests',
+            'PRE_CHECK_FAIL vs Failed Requests'
+        ],
+        'Statistic': [
+            'Total Requests Count',
+            'PRE_CHECK_FAIL Count',
+            'PRE_CHECK_FAIL Percentage',
+            'Total Failed Count',
+            'PRE_CHECK_FAIL Count',
+            'PRE_CHECK_FAIL Percentage'
+        ],
+        'Value': [
+            total_count,
+            pre_check_count,
+            pre_check_vs_total_percentage,
+            total_failed,
+            pre_check_count,
+            pre_check_vs_failed_percentage
+        ],
+        'Unit': [
+            'requests',
+            'events',
+            '%',
+            'requests',
+            'events',
+            '%'
+        ]
+    }
+    
+    return pd.DataFrame(pre_check_stats_data)
+
+
+def create_per_room_stats(df_total, df_success, df_capacity_failed, df_lock_failed, df_pre_check_failed):
+    """
+    방(room)별 통계를 생성하는 함수 (PRE_CHECK_FAIL 추가)
     
     매개변수:
         df_total: 전체 데이터
         df_success: 성공한 요청들
         df_capacity_failed: 정원 초과 실패 요청들
         df_lock_failed: 진입 실패 요청들
+        df_pre_check_failed: PRE_CHECK_FAIL 요청들 (새로 추가)
     
     반환값:
         방별 통계 DataFrame
@@ -344,7 +419,8 @@ def create_per_room_stats(df_total, df_success, df_capacity_failed, df_lock_fail
         room_success = df_success[df_success['roomNumber'] == room] if len(df_success) > 0 else pd.DataFrame()
         room_capacity_failed = df_capacity_failed[df_capacity_failed['roomNumber'] == room] if len(df_capacity_failed) > 0 else pd.DataFrame()
         room_lock_failed = df_lock_failed[df_lock_failed['roomNumber'] == room] if len(df_lock_failed) > 0 else pd.DataFrame()
-        
+        room_pre_check_failed = df_pre_check_failed[df_pre_check_failed['roomNumber'] == room] if len(df_pre_check_failed) > 0 else pd.DataFrame()  # 새로 추가
+
         # 통계 계산
         stats = {
             'roomNumber': room,
@@ -352,8 +428,10 @@ def create_per_room_stats(df_total, df_success, df_capacity_failed, df_lock_fail
             'success_count': len(room_success),
             'capacity_failed_count': len(room_capacity_failed),
             'entry_failed_count': len(room_lock_failed),
+            'pre_check_failed_count': len(room_pre_check_failed),  # 실제 count 개수
             'success_rate(%)': calculate_rate(len(room_success), len(room_total)),
             'capacity_failed_rate(%)': calculate_rate(len(room_capacity_failed), len(room_total)),
+            'pre_check_failed_rate(%)': calculate_rate(len(room_pre_check_failed), len(room_total)),  # 기존 컬럼명을 퍼센트로 변경
             'entry_failed_rate(%)': calculate_rate(len(room_lock_failed), len(room_total)),
             'success_avg_wait_time(ns)': room_success['wait_time_ns'].mean() if len(room_success) > 0 else 0,
             'success_median_wait_time(ns)': room_success['wait_time_ns'].median() if len(room_success) > 0 else 0,
@@ -362,27 +440,28 @@ def create_per_room_stats(df_total, df_success, df_capacity_failed, df_lock_fail
             'success_median_dwell_time(ns)': room_success['dwell_time_ns'].median() if len(room_success) > 0 else 0,
             'success_max_dwell_time(ns)': room_success['dwell_time_ns'].max() if len(room_success) > 0 else 0,
             'capacity_failed_avg_wait_time(ns)': room_capacity_failed['wait_time_ns'].mean() if len(room_capacity_failed) > 0 else 0,
-            'capacity_failed_median_wait_time(ns)': room_capacity_failed['wait_time_ns'].median() if len(room_capacity_failed) > 0 else 0,  # 추가!
+            'capacity_failed_median_wait_time(ns)': room_capacity_failed['wait_time_ns'].median() if len(room_capacity_failed) > 0 else 0,
             'capacity_failed_max_wait_time(ns)': room_capacity_failed['wait_time_ns'].max() if len(room_capacity_failed) > 0 else 0,
             'capacity_failed_avg_fail_processing_time(ns)': room_capacity_failed['fail_processing_time_ns'].mean() if len(room_capacity_failed) > 0 else 0,
-            'capacity_failed_median_fail_processing_time(ns)': room_capacity_failed['fail_processing_time_ns'].median() if len(room_capacity_failed) > 0 else 0,  # 추가!
+            'capacity_failed_median_fail_processing_time(ns)': room_capacity_failed['fail_processing_time_ns'].median() if len(room_capacity_failed) > 0 else 0,
             'capacity_failed_max_fail_processing_time(ns)': room_capacity_failed['fail_processing_time_ns'].max() if len(room_capacity_failed) > 0 else 0
         }
-        
+                
         room_stats_list.append(stats)
     
     return pd.DataFrame(room_stats_list)
 
 
-def create_per_bin_stats(df_total, df_success, df_capacity_failed, df_lock_failed):
+def create_per_bin_stats(df_total, df_success, df_capacity_failed, df_lock_failed, df_pre_check_failed):
     """
-    방(room)과 구간(bin)별 상세 통계를 생성하는 함수
+    방(room)과 구간(bin)별 상세 통계를 생성하는 함수 (PRE_CHECK_FAIL 추가)
     
     매개변수:
         df_total: 전체 데이터
         df_success: 성공한 요청들
         df_capacity_failed: 정원 초과 실패 요청들
         df_lock_failed: 진입 실패 요청들
+        df_pre_check_failed: PRE_CHECK_FAIL 요청들 (새로 추가)
     
     반환값:
         방-구간별 통계 DataFrame
@@ -403,6 +482,7 @@ def create_per_bin_stats(df_total, df_success, df_capacity_failed, df_lock_faile
         combo_success = df_success[(df_success['roomNumber'] == room) & (df_success['bin'] == bin_num)] if len(df_success) > 0 else pd.DataFrame()
         combo_capacity_failed = df_capacity_failed[(df_capacity_failed['roomNumber'] == room) & (df_capacity_failed['bin'] == bin_num)] if len(df_capacity_failed) > 0 else pd.DataFrame()
         combo_lock_failed = df_lock_failed[(df_lock_failed['roomNumber'] == room) & (df_lock_failed['bin'] == bin_num)] if len(df_lock_failed) > 0 else pd.DataFrame()
+        combo_pre_check_failed = df_pre_check_failed[(df_pre_check_failed['roomNumber'] == room) & (df_pre_check_failed['bin'] == bin_num)] if len(df_pre_check_failed) > 0 else pd.DataFrame()  # 새로 추가
         
         # 통계 계산
         stats = {
@@ -411,9 +491,11 @@ def create_per_bin_stats(df_total, df_success, df_capacity_failed, df_lock_faile
             'total_requests': len(combo_total),
             'success_count': len(combo_success),
             'capacity_failed_count': len(combo_capacity_failed),
-            'entry_failed_count': len(combo_lock_failed),
+            'pre_check_failed_count': len(combo_pre_check_failed),  # F컬럼으로 이동
+            'entry_failed_count': len(combo_lock_failed),           # G컬럼으로 이동
             'success_rate(%)': calculate_rate(len(combo_success), len(combo_total)),
             'capacity_failed_rate(%)': calculate_rate(len(combo_capacity_failed), len(combo_total)),
+            'pre_check_failed_rate(%)': calculate_rate(len(combo_pre_check_failed), len(combo_total)),
             'entry_failed_rate(%)': calculate_rate(len(combo_lock_failed), len(combo_total)),
             'success_avg_wait_time(ns)': combo_success['wait_time_ns'].mean() if len(combo_success) > 0 else 0,
             'success_median_wait_time(ns)': combo_success['wait_time_ns'].median() if len(combo_success) > 0 else 0,
@@ -422,10 +504,10 @@ def create_per_bin_stats(df_total, df_success, df_capacity_failed, df_lock_faile
             'success_median_dwell_time(ns)': combo_success['dwell_time_ns'].median() if len(combo_success) > 0 else 0,
             'success_max_dwell_time(ns)': combo_success['dwell_time_ns'].max() if len(combo_success) > 0 else 0,
             'capacity_failed_avg_wait_time(ns)': combo_capacity_failed['wait_time_ns'].mean() if len(combo_capacity_failed) > 0 else 0,
-            'capacity_failed_median_wait_time(ns)': combo_capacity_failed['wait_time_ns'].median() if len(combo_capacity_failed) > 0 else 0,  # 추가!
+            'capacity_failed_median_wait_time(ns)': combo_capacity_failed['wait_time_ns'].median() if len(combo_capacity_failed) > 0 else 0,
             'capacity_failed_max_wait_time(ns)': combo_capacity_failed['wait_time_ns'].max() if len(combo_capacity_failed) > 0 else 0,
             'capacity_failed_avg_fail_processing_time(ns)': combo_capacity_failed['fail_processing_time_ns'].mean() if len(combo_capacity_failed) > 0 else 0,
-            'capacity_failed_median_fail_processing_time(ns)': combo_capacity_failed['fail_processing_time_ns'].median() if len(combo_capacity_failed) > 0 else 0,  # 추가!
+            'capacity_failed_median_fail_processing_time(ns)': combo_capacity_failed['fail_processing_time_ns'].median() if len(combo_capacity_failed) > 0 else 0,
             'capacity_failed_max_fail_processing_time(ns)': combo_capacity_failed['fail_processing_time_ns'].max() if len(combo_capacity_failed) > 0 else 0
         }
         
@@ -434,15 +516,16 @@ def create_per_bin_stats(df_total, df_success, df_capacity_failed, df_lock_faile
     return pd.DataFrame(bin_stats_list)
 
 
-def create_per_thread_critical_details(df_total, df_success, df_capacity_failed, df_lock_failed):
+def create_per_thread_critical_details(df_total, df_success, df_capacity_failed, df_lock_failed, df_pre_check_failed):
     """
-    각 스레드별 임계구역 접근 상세 내역을 생성하는 함수 - 새로 추가
+    각 스레드별 임계구역 접근 상세 내역을 생성하는 함수 (PRE_CHECK_FAIL 추가)
     
     매개변수:
         df_total: 전체 데이터
         df_success: 성공한 요청들
         df_capacity_failed: 정원 초과 실패 요청들
         df_lock_failed: 진입 실패 요청들
+        df_pre_check_failed: PRE_CHECK_FAIL 요청들 (새로 추가)
     
     반환값:
         각 스레드별 임계구역 접근 상세 DataFrame
@@ -474,45 +557,56 @@ def create_per_thread_critical_details(df_total, df_success, df_capacity_failed,
         join_result = row.get('join_result', 'UNKNOWN')
         critical_leave_event = row.get('critical_leave_event_type', 'UNKNOWN')
         
-        # 임계구역 진입 여부
-        entered_critical_section = pd.notna(row.get('critical_enter_nanoTime'))
-        exited_critical_section = pd.notna(row.get('critical_leave_nanoTime'))
-        
-        # 시간 계산
-        wait_time_ns = np.nan
-        dwell_time_ns = np.nan
-        fail_processing_time_ns = np.nan
-        
-        # 대기 시간 계산 (진입한 경우)
-        if entered_critical_section and pd.notna(row.get('waiting_start_nanoTime')):
-            wait_time_ns = calculate_time_diff_nano(
-                row['waiting_start_nanoTime'], 
-                row['critical_enter_nanoTime']
-            )
-        
-        # 작업 시간 또는 실패 처리 시간 계산
-        if entered_critical_section and exited_critical_section:
-            processing_time = calculate_time_diff_nano(
-                row['critical_enter_nanoTime'], 
-                row['critical_leave_nanoTime']
-            )
+        # PRE_CHECK_FAIL의 경우 특별 처리
+        if join_result == 'PRE_CHECK_FAIL':
+            # PRE_CHECK_FAIL은 락 진입 전 차단이므로 임계구역 미진입
+            entered_critical_section = False
+            exited_critical_section = False
+            critical_section_success = False
+            critical_section_failure_reason = 'PRE_CHECK_BLOCKED'
+            wait_time_ns = np.nan  # 대기 시간 없음
+            dwell_time_ns = np.nan  # 체류 시간 없음
+            fail_processing_time_ns = np.nan  # 실패 처리 시간 없음
+        else:
+            # 기존 로직 (SUCCESS, FAIL_OVER_CAPACITY, FAIL_ENTRY)
+            entered_critical_section = pd.notna(row.get('critical_enter_nanoTime'))
+            exited_critical_section = pd.notna(row.get('critical_leave_nanoTime'))
             
-            if join_result == 'SUCCESS':
-                dwell_time_ns = processing_time
-            elif join_result == 'FAIL_OVER_CAPACITY':
-                fail_processing_time_ns = processing_time
-        
-        # 임계구역 작업 성공 여부
-        critical_section_success = (join_result == 'SUCCESS')
-        critical_section_failure_reason = None
-        
-        if not critical_section_success:
-            if join_result == 'FAIL_OVER_CAPACITY':
-                critical_section_failure_reason = 'CAPACITY_EXCEEDED'
-            elif join_result == 'FAIL_ENTRY':
-                critical_section_failure_reason = 'ENTRY_FAILED'
-            else:
-                critical_section_failure_reason = 'UNKNOWN_FAILURE'
+            # 시간 계산
+            wait_time_ns = np.nan
+            dwell_time_ns = np.nan
+            fail_processing_time_ns = np.nan
+            
+            # 대기 시간 계산 (진입한 경우)
+            if entered_critical_section and pd.notna(row.get('waiting_start_nanoTime')):
+                wait_time_ns = calculate_time_diff_nano(
+                    row['waiting_start_nanoTime'], 
+                    row['critical_enter_nanoTime']
+                )
+            
+            # 작업 시간 또는 실패 처리 시간 계산
+            if entered_critical_section and exited_critical_section:
+                processing_time = calculate_time_diff_nano(
+                    row['critical_enter_nanoTime'], 
+                    row['critical_leave_nanoTime']
+                )
+                
+                if join_result == 'SUCCESS':
+                    dwell_time_ns = processing_time
+                elif join_result == 'FAIL_OVER_CAPACITY':
+                    fail_processing_time_ns = processing_time
+            
+            # 임계구역 작업 성공 여부
+            critical_section_success = (join_result == 'SUCCESS')
+            critical_section_failure_reason = None
+            
+            if not critical_section_success:
+                if join_result == 'FAIL_OVER_CAPACITY':
+                    critical_section_failure_reason = 'CAPACITY_EXCEEDED'
+                elif join_result == 'FAIL_ENTRY':
+                    critical_section_failure_reason = 'ENTRY_FAILED'
+                else:
+                    critical_section_failure_reason = 'UNKNOWN_FAILURE'
         
         # 현재 인원수와 최대 인원수 정보 (가능한 경우)
         current_people = row.get('currentPeople', np.nan)
@@ -592,7 +686,7 @@ def create_time_unit_comparison(df_success):
 
 def format_excel_file(output_path):
     """
-    Excel 파일의 포맷을 설정하는 함수
+    Excel 파일의 포맷을 설정하는 함수 (PRE_CHECK_FAIL 추가)
     
     매개변수:
         output_path: Excel 파일 경로
@@ -605,16 +699,33 @@ def format_excel_file(output_path):
     """
     wb = load_workbook(output_path)
     
-    # Overall_Summary 시트의 백분율 포맷
-    if 'Overall_Summary' in wb.sheetnames:
-        ws = wb['Overall_Summary']
-        for row in range(2, ws.max_row + 1):
-            cell = ws[f'C{row}']  # Percentage 컬럼
-            if cell.value is not None:
-                cell.number_format = '0.00"%"'
+    # Per_Bin_Stats 시트의 포맷 (PRE_CHECK_FAIL 컬럼 추가로 범위 확장)
+    if 'Per_Bin_Stats' in wb.sheetnames:
+        ws = wb['Per_Bin_Stats']
+        
+        # F, G컬럼 (pre_check_failed_count, entry_failed_count) - 정수 포맷 적용
+        for col in ['F', 'G']:
+            for row in range(2, ws.max_row + 1):
+                cell = ws[f'{col}{row}']
+                if cell.value is not None:
+                    cell.number_format = '#,##0'
+        
+        # 비율 컬럼들 (H, I, J, K) - 퍼센트 포맷 적용
+        for col in ['H', 'I', 'J', 'K']:
+            for row in range(2, ws.max_row + 1):
+                cell = ws[f'{col}{row}']
+                if cell.value is not None:
+                    cell.number_format = '0.00"%"'
+        
+        # 시간 컬럼들 (L~X) - 범위 조정
+        for col in ['L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X']:
+            for row in range(2, ws.max_row + 1):
+                cell = ws[f'{col}{row}']
+                if cell.value is not None:
+                    cell.number_format = '#,##0'
     
-    # 통계 시트들의 값 포맷
-    for sheet_name in ['Overall_Success_Stats', 'Overall_Capacity_Failed_Stats']:
+    # 통계 시트들의 값 포맷 (PRE_CHECK_FAIL 시트 추가)
+    for sheet_name in ['Overall_Success_Stats', 'Overall_Capacity_Failed_Stats', 'Overall_PRE_CHECK_FAIL_Stats']:
         if sheet_name in wb.sheetnames:
             ws = wb[sheet_name]
             for row in range(2, ws.max_row + 1):
@@ -622,35 +733,43 @@ def format_excel_file(output_path):
                 if cell.value is not None:
                     cell.number_format = '#,##0'  # 천 단위 구분자
     
-    # Per_Room_Stats 시트의 포맷 - 중앙값 컬럼 추가!
+    # Per_Room_Stats 시트의 포맷 (PRE_CHECK_FAIL 컬럼 추가로 범위 확장)
+    # Per_Room_Stats 시트의 포맷 (PRE_CHECK_FAIL 컬럼 추가로 범위 확장)
     if 'Per_Room_Stats' in wb.sheetnames:
         ws = wb['Per_Room_Stats']
-        # 비율 컬럼들 (F, G, H)
-        for col in ['F', 'G', 'H']:
+        
+        # F컬럼 (pre_check_failed_count) - 정수 포맷 적용
+        for row in range(2, ws.max_row + 1):
+            cell = ws[f'F{row}']
+            if cell.value is not None:
+                cell.number_format = '#,##0'
+        
+        # 비율 컬럼들 (G, H, I, J) - 퍼센트 포맷 적용
+        for col in ['G', 'H', 'I', 'J']:
             for row in range(2, ws.max_row + 1):
                 cell = ws[f'{col}{row}']
                 if cell.value is not None:
                     cell.number_format = '0.00"%"'
         
-        # 시간 컬럼들 (I~U) - 중앙값 컬럼 추가로 범위 확장!
-        for col in ['I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U']:
+        # 시간 컬럼들 (J~V) - 기존 범위 유지
+        for col in ['J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V']:
             for row in range(2, ws.max_row + 1):
                 cell = ws[f'{col}{row}']
                 if cell.value is not None:
                     cell.number_format = '#,##0'
     
-    # Per_Bin_Stats 시트의 포맷 - 중앙값 컬럼 추가!
+    # Per_Bin_Stats 시트의 포맷 (PRE_CHECK_FAIL 컬럼 추가로 범위 확장)
     if 'Per_Bin_Stats' in wb.sheetnames:
         ws = wb['Per_Bin_Stats']
-        # 비율 컬럼들 (G, H, I)
-        for col in ['G', 'H', 'I']:
+        # 비율 컬럼들 (G, H, I, J) - PRE_CHECK_FAIL 비율 추가
+        for col in ['G', 'H', 'I', 'J']:
             for row in range(2, ws.max_row + 1):
                 cell = ws[f'{col}{row}']
                 if cell.value is not None:
                     cell.number_format = '0.00"%"'
         
-        # 시간 컬럼들 (J~V) - 중앙값 컬럼 추가로 범위 확장!
-        for col in ['J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V']:
+        # 시간 컬럼들 (K~W) - PRE_CHECK_FAIL 추가로 범위 조정
+        for col in ['K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W']:
             for row in range(2, ws.max_row + 1):
                 cell = ws[f'{col}{row}']
                 if cell.value is not None:
@@ -716,7 +835,7 @@ def format_excel_file(output_path):
 
 def process_performance_data(csv_path, label):
     """
-    단일 CSV 파일을 처리하여 성능 통계를 계산하고 Excel로 저장하는 메인 처리 함수
+    단일 CSV 파일을 처리하여 성능 통계를 계산하고 Excel로 저장하는 메인 처리 함수 (PRE_CHECK_FAIL 지원)
     
     매개변수:
         csv_path: 분석할 CSV 파일 경로
@@ -753,15 +872,16 @@ def process_performance_data(csv_path, label):
         print(f"오류: CSV 파일 로드 실패 - {e}")
         return False
     
-    # 2. join_result 컬럼 설정
+    # 2. join_result 컬럼 설정 (PRE_CHECK_FAIL 보존)
     df_total = set_join_result_from_events(df_total)
     
-    # 3. 데이터를 결과별로 분류
+    # 3. 데이터를 결과별로 분류 (PRE_CHECK_FAIL 추가)
     df_success = df_total[df_total['join_result'] == 'SUCCESS'].copy()
     df_lock_failed = df_total[df_total['join_result'] == 'FAIL_ENTRY'].copy()
     df_capacity_failed = df_total[df_total['join_result'] == 'FAIL_OVER_CAPACITY'].copy()
+    df_pre_check_failed = df_total[df_total['join_result'] == 'PRE_CHECK_FAIL'].copy()  # 새로 추가
     
-    print(f"  - 성공: {len(df_success)}, 진입실패: {len(df_lock_failed)}, 정원초과실패: {len(df_capacity_failed)}")
+    print(f"  - 성공: {len(df_success)}, 진입실패: {len(df_lock_failed)}, 정원초과실패: {len(df_capacity_failed)}, PRE_CHECK_FAIL: {len(df_pre_check_failed)}")
     
     # 4. 성공 그룹의 시간 계산
     if len(df_success) > 0:
@@ -825,28 +945,35 @@ def process_performance_data(csv_path, label):
         print(f"  - 정원초과 실패 그룹 시간 계산 완료 (유효 데이터: {len(valid_capacity_failed)}개/{len(df_capacity_failed)}개)")
         df_capacity_failed = valid_capacity_failed
     
-    # 6. 각종 통계 DataFrame 생성
-    df_summary = create_summary_stats(df_total, df_success, df_lock_failed, df_capacity_failed)
+    # 6. 각종 통계 DataFrame 생성 (PRE_CHECK_FAIL 추가)
+    df_summary = create_summary_stats(df_total, df_success, df_lock_failed, df_capacity_failed, df_pre_check_failed)
     df_success_stats = create_success_stats(df_success)
     df_capacity_failed_stats = create_capacity_failed_stats(df_capacity_failed)
-    df_per_room_stats = create_per_room_stats(df_total, df_success, df_capacity_failed, df_lock_failed)
-    df_per_bin_stats = create_per_bin_stats(df_total, df_success, df_capacity_failed, df_lock_failed)
-    df_per_thread_critical_details = create_per_thread_critical_details(df_total, df_success, df_capacity_failed, df_lock_failed)
+    df_pre_check_failed_stats = create_pre_check_failed_stats(
+        df_pre_check_failed, 
+        len(df_total),           # 전체 요청 수
+        len(df_capacity_failed)  # FAIL_OVER_CAPACITY 요청 수
+    )
+    df_per_room_stats = create_per_room_stats(df_total, df_success, df_capacity_failed, df_lock_failed, df_pre_check_failed)
+    df_per_bin_stats = create_per_bin_stats(df_total, df_success, df_capacity_failed, df_lock_failed, df_pre_check_failed)
+    df_per_thread_critical_details = create_per_thread_critical_details(df_total, df_success, df_capacity_failed, df_lock_failed, df_pre_check_failed)
     df_comparison_stats = create_time_unit_comparison(df_success)
     
-    # 7. 데이터 검증 출력
+    # 7. 데이터 검증 출력 (PRE_CHECK_FAIL 추가)
     total_requests = len(df_total)
     success_count = len(df_success)
     lock_failed_count = len(df_lock_failed)
     capacity_failed_count = len(df_capacity_failed)
+    pre_check_failed_count = len(df_pre_check_failed)  # 새로 추가
     
     print("\n  - 데이터 검증:")
     print(f"    전체 요청 수: {total_requests}")
     print(f"    성공: {success_count} ({calculate_rate(success_count, total_requests):.2f}%)")
     print(f"    정원초과 실패: {capacity_failed_count} ({calculate_rate(capacity_failed_count, total_requests):.2f}%)")
     print(f"    진입 실패: {lock_failed_count} ({calculate_rate(lock_failed_count, total_requests):.2f}%)")
+    print(f"    PRE_CHECK_FAIL: {pre_check_failed_count} ({calculate_rate(pre_check_failed_count, total_requests):.2f}%)")
     
-    # 8. Excel 파일로 저장
+    # 8. Excel 파일로 저장 (PRE_CHECK_FAIL 시트 추가)
     output_dir = 'performance_reports'
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -859,6 +986,11 @@ def process_performance_data(csv_path, label):
             df_summary.to_excel(writer, sheet_name='Overall_Summary', index=False)
             df_success_stats.to_excel(writer, sheet_name='Overall_Success_Stats', index=False)
             df_capacity_failed_stats.to_excel(writer, sheet_name='Overall_Capacity_Failed_Stats', index=False)
+            
+            # PRE_CHECK_FAIL 시트 추가
+            if not df_pre_check_failed_stats.empty:
+                df_pre_check_failed_stats.to_excel(writer, sheet_name='Overall_PRE_CHECK_FAIL_Stats', index=False)
+            
             df_per_room_stats.to_excel(writer, sheet_name='Per_Room_Stats', index=False)
             
             # 빈 DataFrame이 아닌 경우에만 저장
@@ -893,7 +1025,7 @@ def main():
     """
     # 명령줄 인자 파서 설정
     parser = argparse.ArgumentParser(
-        description='성능 테스트 결과 CSV 파일을 분석하여 나노초 단위 통계 지표를 계산하고 Excel로 저장합니다.'
+        description='성능 테스트 결과 CSV 파일을 분석하여 나노초 단위 통계 지표를 계산하고 Excel로 저장합니다. (PRE_CHECK_FAIL 지원)'
     )
     
     # --inputs 인자: 분석할 CSV 파일들 (콤마로 구분)
@@ -934,7 +1066,7 @@ def main():
     # 시작 시간 기록
     start_time = datetime.now()
     print(f"성능 분석 시작: {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
-    print(f"버전: v7.0 - 나노초 단위 분석 + 중앙값 통계 추가")
+    print(f"버전: v8.0 - PRE_CHECK_FAIL 지원 + 나노초 단위 분석 + 중앙값 통계")
     
     # 각 파일 처리
     success_count = 0
