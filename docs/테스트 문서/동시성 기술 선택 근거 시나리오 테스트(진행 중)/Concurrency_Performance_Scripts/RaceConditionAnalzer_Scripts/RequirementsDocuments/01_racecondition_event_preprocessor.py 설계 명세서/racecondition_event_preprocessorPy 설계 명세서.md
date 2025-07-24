@@ -22,17 +22,17 @@ ChatService 로그에서 발생하는 Race Condition 현상을 체계적으로 �
 ### 3.1 추출 대상 이벤트
 
 #### 3.1.1 PRE_JOIN_CURRENT_STATE
-- **의미**: 진짜 임계구역 시작점
+- **의미**: 임계구역 시작점
 - **역할**: 입장 시도 시점의 현재 상태 확인
 - **필수 필드**: timestampIso, roomNumber, userId, currentPeople, maxPeople, nanoTime, epochNano
 
 #### 3.1.2 JOIN_SUCCESS_EXISTING
-- **의미**: 진짜 임계구역 종료점 (성공)
+- **의미**: 임계구역 종료점 (성공)
 - **역할**: 입장 성공 후 최종 상태 기록
 - **필수 필드**: timestampIso, roomNumber, userId, currentPeople, maxPeople, nanoTime
 
 #### 3.1.3 JOIN_FAIL_OVER_CAPACITY_EXISTING
-- **의미**: 진짜 임계구역 종료점 (실패)
+- **의미**: 임계구역 종료점 (실패)
 - **역할**: 정원 초과로 인한 입장 실패 기록
 - **필수 필드**: timestampIso, roomNumber, userId, currentPeople, maxPeople, nanoTime
 

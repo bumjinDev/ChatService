@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
-성능 분석 지표 계산 스크립트 (v8.0) - PRE_CHECK_FAIL 지원 추가
+성능 분석 지표 계산 스크립트 (v8.1) - 총합 통계 추가
 - PRE_CHECK_FAIL_OVER_CAPACITY 이벤트 분석 추가
 - Overall_Summary에 PRE_CHECK_FAIL 카테고리 추가
 - 나노초 단위 분석 + 중앙값 통계 포함
+- 총합 통계 추가: 대기시간, 작업시간, 실패처리시간
 
 [스크립트 목적]
 이 스크립트는 성능 테스트 결과 CSV 파일을 읽어서 다양한 통계를 계산하고,
@@ -12,7 +13,7 @@
 [주요 기능]
 1. CSV 파일에서 성능 데이터 읽기
 2. 성공/실패 케이스별 분류 (PRE_CHECK_FAIL 포함)
-3. 대기 시간, 처리 시간 등의 통계 계산
+3. 대기 시간, 처리 시간 등의 통계 계산 (평균, 중앙값, 최댓값, 총합)
 4. 방(room)별, 구간(bin)별 상세 통계 생성
 5. 결과를 Excel 파일로 저장
 """
@@ -395,7 +396,7 @@ def create_pre_check_failed_stats(df_pre_check_failed, total_count, capacity_fai
 
 def create_per_room_stats(df_total, df_success, df_capacity_failed, df_lock_failed, df_pre_check_failed):
     """
-    방(room)별 통계를 생성하는 함수 (PRE_CHECK_FAIL 추가)
+    방(room)별 통계를 생성하는 함수 (PRE_CHECK_FAIL 추가 + 총합 통계 추가)
     
     매개변수:
         df_total: 전체 데이터
@@ -433,18 +434,30 @@ def create_per_room_stats(df_total, df_success, df_capacity_failed, df_lock_fail
             'capacity_failed_rate(%)': calculate_rate(len(room_capacity_failed), len(room_total)),
             'pre_check_failed_rate(%)': calculate_rate(len(room_pre_check_failed), len(room_total)),  # 기존 컬럼명을 퍼센트로 변경
             'entry_failed_rate(%)': calculate_rate(len(room_lock_failed), len(room_total)),
+            
+            # 성공 대기시간 통계 (기존 + 새로 추가)
             'success_avg_wait_time(ns)': room_success['wait_time_ns'].mean() if len(room_success) > 0 else 0,
             'success_median_wait_time(ns)': room_success['wait_time_ns'].median() if len(room_success) > 0 else 0,
             'success_max_wait_time(ns)': room_success['wait_time_ns'].max() if len(room_success) > 0 else 0,
+            'success_total_wait_time(ns)': room_success['wait_time_ns'].sum() if len(room_success) > 0 else 0,  # NEW
+            
+            # 성공 작업시간 통계 (기존 + 새로 추가)
             'success_avg_dwell_time(ns)': room_success['dwell_time_ns'].mean() if len(room_success) > 0 else 0,
             'success_median_dwell_time(ns)': room_success['dwell_time_ns'].median() if len(room_success) > 0 else 0,
             'success_max_dwell_time(ns)': room_success['dwell_time_ns'].max() if len(room_success) > 0 else 0,
+            'success_total_dwell_time(ns)': room_success['dwell_time_ns'].sum() if len(room_success) > 0 else 0,  # NEW
+            
+            # 용량 초과 실패 대기시간 통계 (기존 + 새로 추가)
             'capacity_failed_avg_wait_time(ns)': room_capacity_failed['wait_time_ns'].mean() if len(room_capacity_failed) > 0 else 0,
             'capacity_failed_median_wait_time(ns)': room_capacity_failed['wait_time_ns'].median() if len(room_capacity_failed) > 0 else 0,
             'capacity_failed_max_wait_time(ns)': room_capacity_failed['wait_time_ns'].max() if len(room_capacity_failed) > 0 else 0,
+            'capacity_failed_total_wait_time(ns)': room_capacity_failed['wait_time_ns'].sum() if len(room_capacity_failed) > 0 else 0,  # NEW
+            
+            # 용량 초과 실패 처리시간 통계 (기존 + 새로 추가)
             'capacity_failed_avg_fail_processing_time(ns)': room_capacity_failed['fail_processing_time_ns'].mean() if len(room_capacity_failed) > 0 else 0,
             'capacity_failed_median_fail_processing_time(ns)': room_capacity_failed['fail_processing_time_ns'].median() if len(room_capacity_failed) > 0 else 0,
-            'capacity_failed_max_fail_processing_time(ns)': room_capacity_failed['fail_processing_time_ns'].max() if len(room_capacity_failed) > 0 else 0
+            'capacity_failed_max_fail_processing_time(ns)': room_capacity_failed['fail_processing_time_ns'].max() if len(room_capacity_failed) > 0 else 0,
+            'capacity_failed_total_fail_processing_time(ns)': room_capacity_failed['fail_processing_time_ns'].sum() if len(room_capacity_failed) > 0 else 0  # NEW
         }
                 
         room_stats_list.append(stats)
@@ -454,7 +467,7 @@ def create_per_room_stats(df_total, df_success, df_capacity_failed, df_lock_fail
 
 def create_per_bin_stats(df_total, df_success, df_capacity_failed, df_lock_failed, df_pre_check_failed):
     """
-    방(room)과 구간(bin)별 상세 통계를 생성하는 함수 (PRE_CHECK_FAIL 추가)
+    방(room)과 구간(bin)별 상세 통계를 생성하는 함수 (PRE_CHECK_FAIL 추가 + 총합 통계 추가)
     
     매개변수:
         df_total: 전체 데이터
@@ -497,18 +510,30 @@ def create_per_bin_stats(df_total, df_success, df_capacity_failed, df_lock_faile
             'capacity_failed_rate(%)': calculate_rate(len(combo_capacity_failed), len(combo_total)),
             'pre_check_failed_rate(%)': calculate_rate(len(combo_pre_check_failed), len(combo_total)),
             'entry_failed_rate(%)': calculate_rate(len(combo_lock_failed), len(combo_total)),
+            
+            # 성공 대기시간 통계 (기존 + 새로 추가)
             'success_avg_wait_time(ns)': combo_success['wait_time_ns'].mean() if len(combo_success) > 0 else 0,
             'success_median_wait_time(ns)': combo_success['wait_time_ns'].median() if len(combo_success) > 0 else 0,
             'success_max_wait_time(ns)': combo_success['wait_time_ns'].max() if len(combo_success) > 0 else 0,
+            'success_total_wait_time(ns)': combo_success['wait_time_ns'].sum() if len(combo_success) > 0 else 0,  # NEW
+            
+            # 성공 작업시간 통계 (기존 + 새로 추가)
             'success_avg_dwell_time(ns)': combo_success['dwell_time_ns'].mean() if len(combo_success) > 0 else 0,
             'success_median_dwell_time(ns)': combo_success['dwell_time_ns'].median() if len(combo_success) > 0 else 0,
             'success_max_dwell_time(ns)': combo_success['dwell_time_ns'].max() if len(combo_success) > 0 else 0,
+            'success_total_dwell_time(ns)': combo_success['dwell_time_ns'].sum() if len(combo_success) > 0 else 0,  # NEW
+            
+            # 용량 초과 실패 대기시간 통계 (기존 + 새로 추가)
             'capacity_failed_avg_wait_time(ns)': combo_capacity_failed['wait_time_ns'].mean() if len(combo_capacity_failed) > 0 else 0,
             'capacity_failed_median_wait_time(ns)': combo_capacity_failed['wait_time_ns'].median() if len(combo_capacity_failed) > 0 else 0,
             'capacity_failed_max_wait_time(ns)': combo_capacity_failed['wait_time_ns'].max() if len(combo_capacity_failed) > 0 else 0,
+            'capacity_failed_total_wait_time(ns)': combo_capacity_failed['wait_time_ns'].sum() if len(combo_capacity_failed) > 0 else 0,  # NEW
+            
+            # 용량 초과 실패 처리시간 통계 (기존 + 새로 추가)
             'capacity_failed_avg_fail_processing_time(ns)': combo_capacity_failed['fail_processing_time_ns'].mean() if len(combo_capacity_failed) > 0 else 0,
             'capacity_failed_median_fail_processing_time(ns)': combo_capacity_failed['fail_processing_time_ns'].median() if len(combo_capacity_failed) > 0 else 0,
-            'capacity_failed_max_fail_processing_time(ns)': combo_capacity_failed['fail_processing_time_ns'].max() if len(combo_capacity_failed) > 0 else 0
+            'capacity_failed_max_fail_processing_time(ns)': combo_capacity_failed['fail_processing_time_ns'].max() if len(combo_capacity_failed) > 0 else 0,
+            'capacity_failed_total_fail_processing_time(ns)': combo_capacity_failed['fail_processing_time_ns'].sum() if len(combo_capacity_failed) > 0 else 0  # NEW
         }
         
         bin_stats_list.append(stats)
@@ -686,7 +711,7 @@ def create_time_unit_comparison(df_success):
 
 def format_excel_file(output_path):
     """
-    Excel 파일의 포맷을 설정하는 함수 (PRE_CHECK_FAIL 추가)
+    Excel 파일의 포맷을 설정하는 함수 (PRE_CHECK_FAIL 추가 + 총합 통계 추가)
     
     매개변수:
         output_path: Excel 파일 경로
@@ -717,8 +742,8 @@ def format_excel_file(output_path):
                 if cell.value is not None:
                     cell.number_format = '0.00"%"'
         
-        # 시간 컬럼들 (L~X) - 범위 조정
-        for col in ['L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X']:
+        # 시간 컬럼들 (L~AA) - 총합 통계 추가로 범위 확장
+        for col in ['L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'AA']:
             for row in range(2, ws.max_row + 1):
                 cell = ws[f'{col}{row}']
                 if cell.value is not None:
@@ -733,7 +758,6 @@ def format_excel_file(output_path):
                 if cell.value is not None:
                     cell.number_format = '#,##0'  # 천 단위 구분자
     
-    # Per_Room_Stats 시트의 포맷 (PRE_CHECK_FAIL 컬럼 추가로 범위 확장)
     # Per_Room_Stats 시트의 포맷 (PRE_CHECK_FAIL 컬럼 추가로 범위 확장)
     if 'Per_Room_Stats' in wb.sheetnames:
         ws = wb['Per_Room_Stats']
@@ -751,25 +775,8 @@ def format_excel_file(output_path):
                 if cell.value is not None:
                     cell.number_format = '0.00"%"'
         
-        # 시간 컬럼들 (J~V) - 기존 범위 유지
-        for col in ['J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V']:
-            for row in range(2, ws.max_row + 1):
-                cell = ws[f'{col}{row}']
-                if cell.value is not None:
-                    cell.number_format = '#,##0'
-    
-    # Per_Bin_Stats 시트의 포맷 (PRE_CHECK_FAIL 컬럼 추가로 범위 확장)
-    if 'Per_Bin_Stats' in wb.sheetnames:
-        ws = wb['Per_Bin_Stats']
-        # 비율 컬럼들 (G, H, I, J) - PRE_CHECK_FAIL 비율 추가
-        for col in ['G', 'H', 'I', 'J']:
-            for row in range(2, ws.max_row + 1):
-                cell = ws[f'{col}{row}']
-                if cell.value is not None:
-                    cell.number_format = '0.00"%"'
-        
-        # 시간 컬럼들 (K~W) - PRE_CHECK_FAIL 추가로 범위 조정
-        for col in ['K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W']:
+        # 시간 컬럼들 (K~Z) - 총합 통계 추가로 범위 대폭 확장
+        for col in ['K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']:
             for row in range(2, ws.max_row + 1):
                 cell = ws[f'{col}{row}']
                 if cell.value is not None:
@@ -1025,7 +1032,7 @@ def main():
     """
     # 명령줄 인자 파서 설정
     parser = argparse.ArgumentParser(
-        description='성능 테스트 결과 CSV 파일을 분석하여 나노초 단위 통계 지표를 계산하고 Excel로 저장합니다. (PRE_CHECK_FAIL 지원)'
+        description='성능 테스트 결과 CSV 파일을 분석하여 나노초 단위 통계 지표를 계산하고 Excel로 저장합니다. (PRE_CHECK_FAIL 지원 + 총합 통계 추가)'
     )
     
     # --inputs 인자: 분석할 CSV 파일들 (콤마로 구분)
@@ -1066,7 +1073,7 @@ def main():
     # 시작 시간 기록
     start_time = datetime.now()
     print(f"성능 분석 시작: {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
-    print(f"버전: v8.0 - PRE_CHECK_FAIL 지원 + 나노초 단위 분석 + 중앙값 통계")
+    print(f"버전: v8.1 - PRE_CHECK_FAIL 지원 + 나노초 단위 분석 + 중앙값 통계 + 총합 통계")
     
     # 각 파일 처리
     success_count = 0
