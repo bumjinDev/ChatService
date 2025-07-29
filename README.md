@@ -168,7 +168,9 @@ src
 
 ## 8. 기술 검증 결과
 
-- [동시성 테스트 결과서]([./test/입장_동시성_제어_테스트_설계.md](https://github.com/bumjinDev/ChatService/blob/main/docs/%ED%85%8C%EC%8A%A4%ED%8A%B8%20%EB%AC%B8%EC%84%9C/%EB%8F%99%EC%8B%9C%EC%84%B1%20%EA%B8%B0%EC%88%A0%20%EC%84%A0%ED%83%9D%20%EA%B7%BC%EA%B1%B0%20%EC%8B%9C%EB%82%98%EB%A6%AC%EC%98%A4%20%ED%85%8C%EC%8A%A4%ED%8A%B8/Concurrency_Performance_Scripts/%EB%B6%84%EC%84%9D%20%EC%B5%9C%EC%A2%85%20%EB%AC%B8%EC%84%9C/%EB%8F%99%EC%8B%9C%EC%84%B1%20%EC%A0%9C%EC%96%B4%20%EB%A9%94%EC%BB%A4%EB%8B%88%EC%A6%98%20%EC%8B%A4%EC%A6%9D%20%EB%B6%84%EC%84%9D%20%EB%B0%8F%20%EA%B8%B0%EC%88%A0%EC%A0%81%20%EA%B0%9C%EC%84%A0_%EC%B5%9C%EC%A2%85%EB%B3%B8.md))
+- [실시간 채팅 프로젝트](https://github.com/bumjinDev/ChatService/blob/main/docs/%ED%8F%AC%ED%8A%B8%ED%8F%B4%EB%A6%AC%EC%98%A4/%EC%8B%A4%EC%8B%9C%EA%B0%84%20%EC%B1%84%ED%8C%85%20%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8_%ED%8F%AC%ED%8A%B8%ED%8F%B4%EB%A6%AC%EC%98%A4_%EC%A0%95%EB%B2%94%EC%A7%84.pdf)
+
+- [동시성 테스트 결과서](https://github.com/bumjinDev/ChatService/blob/main/docs/%ED%8F%AC%ED%8A%B8%ED%8F%B4%EB%A6%AC%EC%98%A4/Java%20Spring%20%ED%99%98%EA%B2%BD%EC%9D%98%20%EB%8F%99%EC%8B%9C%EC%84%B1%20%EC%A0%9C%EC%96%B4%20%EA%B8%B0%EB%B2%95%20%EB%B3%84%20%EC%A0%81%ED%95%A9%EC%84%B1%20%ED%85%8C%EC%8A%A4%ED%8A%B8_%ED%8F%AC%ED%8A%B8%ED%8F%B4%EB%A6%AC%EC%98%A4_%EC%A0%95%EB%B2%94%EC%A7%84.pdf)
 
 > 모든 테스트는 구조적 흐름 검증을 목적으로 수동/자동 병행 테스트로 수행되었습니다.
 
