@@ -143,15 +143,15 @@ src
 아래 GIF들은 실사용자 기준에서 시스템이 실제 어떻게 작동하는지를 시각적으로 보여줍니다:
 
 #### 🎯 1. 채팅방 입장 성공 흐름
-![입장 성공](./assets/join-room-success.gif)
+![대화](https://github.com/user-attachments/assets/3367989b-18d4-4cc7-bc5b-7a9fa4d642af)
 > 사용자가 REST로 입장 요청을 보낸 뒤, WebSocket이 연결되고 메시지를 주고받는 정상 흐름 시연
 
 #### 🚫 2. 중복 로그인 감지 및 기존 세션 강제 종료
-![중복 로그인 차단](./assets/kick-duplicate-session.gif)
+![중복 로그인 차단](https://github.com/user-attachments/assets/212964ea-aa60-45d7-bd6c-3ff49d7b9e28)
 > 동일 userId가 다른 브라우저에서 재접속할 경우, 기존 세션이 자동 종료되며 사용자에게 알림 발생
 
 #### ⛔ 3. 입장 실패 (permit 부족)
-![입장 거절](./assets/permit-denied.gif)
+![입장거절](https://github.com/user-attachments/assets/8d806516-5cf7-498f-907b-140d794f2848)
 > 정원이 가득 찬 방에 입장 요청 시 서버가 거절하고 입장 불가 메시지를 반환하는 장면
 
 ---
