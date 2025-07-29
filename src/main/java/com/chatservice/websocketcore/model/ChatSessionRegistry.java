@@ -572,14 +572,14 @@ public class ChatSessionRegistry {
 
     /**
      * @param roomNumber       방 번호
-     * @param newCurrentPeople 갱신 인원수
-     * @method updateRoomCurrentPeople
-     * @brief permit/세마포어 기반 인원수 동기화. ChatRoom 내 인원수 직접 갱신.
+     *      * @param newCurrentPeople 갱신 인원수
+     *      * @method updateRoomCurrentPeople
+     *      * @brief permit/세마포어 기반 인원수 동기화. ChatRoom 내 인원수 직접 갱신.
      */
     public void updateRoomCurrentPeople(int roomNumber, int newCurrentPeople) {
         roomMap.computeIfPresent(roomNumber, (num, room) -> {
             room.setCurrentPeople(newCurrentPeople);
-            logger.debug("[updateRoomCurrentPeople] roomNumber={}, newCurrentPeople={}, chatRoom.CurrentPeople()={}", roomNumber, newCurrentPeople, room.getCurrentPeople());
+            logger.info("[updateRoomCurrentPeople] roomNumber={}, newCurrentPeople={}, chatRoom.CurrentPeople()={}", roomNumber, newCurrentPeople, room.getCurrentPeople());
             return room;
         });
     }

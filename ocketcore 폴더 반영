@@ -1,0 +1,245 @@
+[1mdiff --git a/src/main/java/com/chatservice/websocketcore/core/ChatHandShakeIntercepter.java b/src/main/java/com/chatservice/websocketcore/core/ChatHandShakeIntercepter.java[m
+[1mindex ebc02b4..a7f6262 100644[m
+[1m--- a/src/main/java/com/chatservice/websocketcore/core/ChatHandShakeIntercepter.java[m
+[1m+++ b/src/main/java/com/chatservice/websocketcore/core/ChatHandShakeIntercepter.java[m
+[36m@@ -66,6 +66,7 @@[m [mpublic class ChatHandShakeIntercepter implements HandshakeInterceptor {[m
+         // @step3: 사용자 이름, 아이디 추출(세션/필터 등에서 미리 설정되었다고 가정)[m
+         String userName = (String) servletRequest.getAttribute("userName");[m
+         String userId = (String) servletRequest.getAttribute("userId");[m
+[32m+[m
+         logger.info("[beforeHandshake] roomNumber 파라미터 추출: roomNumber={}", roomNumber);[m
+         logger.info("[beforeHandshake] userName={}, userId={}", userName, userId);[m
+ [m
+[36m@@ -77,28 +78,20 @@[m [mpublic class ChatHandShakeIntercepter implements HandshakeInterceptor {[m
+         }[m
+         logger.info("[beforeHandshake] 필수 파라미터 존재 - 핸드셰이크 진행");[m
+ [m
+[31m-        // @step5: 세션 단위 랜덤 sessionKey 생성(UUID)[m
+[31m-        String sessionKey = java.util.UUID.randomUUID().toString();[m
+[31m-        logger.info("[beforeHandshake] sessionKey 생성: sessionKey={}", sessionKey);[m
+[32m+[m[32m        // @step5: 클라이언트가 전달한 sessionKey 파라미터 추출[m
+[32m+[m[32m        String sessionKey = servletRequest.getParameter("sessionKey");[m
+[32m+[m[32m        logger.info("[beforeHandshake] sessionKey 파라미터 추출: sessionKey={}", sessionKey);[m
+ [m
+         // @step6: 모든 필수 속성/파라미터를 attributes에 등록(WebSocketSession.getAttributes()로 복사됨)[m
+         attributes.put("roomNumber", roomNumber);      // @ 세션용 방번호[m
+         attributes.put("userName", userName);          // @ 세션용 사용자이름[m
+         attributes.put("userId", userId);              // @ 세션용 사용자ID[m
+[31m-        attributes.put("sessionKey", sessionKey);      // @ 세션 식별 고유키[m
+[31m-        logger.info("[beforeHandshake] attributes 등록 완료: roomNumber={}, userName={}, userId={}, sessionKey={}",[m
+[31m-                roomNumber, userName, userId, sessionKey);[m
+ [m
+[31m-        // @step7: ChatSessionRegistry의 (roomId, userId) 별 sessionKey 등록(상태 일치화)[m
+[31m-        chatSessionRegistry.saveSessionKey(roomNumber, userId, sessionKey);[m
+[31m-        logger.info("[beforeHandshake] sessionKey ChatSessionRegistry 저장 완료: roomNumber={}, userId={}, sessionKey={}",[m
+[31m-                roomNumber, userId, sessionKey);[m
+[32m+[m[32m        attributes.put("sessionKey", sessionKey);      // @ 세션 식별 고유키[m
+ [m
+[31m-        logger.debug("[beforeHandshake] sessionKey 생성/저장: roomNumber={}, userId={}, sessionKey={}",[m
+[31m-                roomNumber, userId, sessionKey[m
+[31m-        );[m
+[32m+[m[32m        logger.info("[beforeHandshake] attributes 등록 완료: roomNumber={}, userName={}, userId={}, clientSessionKey={}",[m
+[32m+[m[32m                roomNumber, userName, userId, sessionKey);[m
+ [m
+[31m-        // @return true: 정상 진행(핸드셰이크 허용)[m
+         logger.info("[beforeHandshake] 핸드셰이크 정상 종료 - true 반환");[m
+         return true;[m
+     }[m
+[1mdiff --git a/src/main/java/com/chatservice/websocketcore/core/WebSocketConfig.java b/src/main/java/com/chatservice/websocketcore/core/WebSocketConfig.java[m
+[1mindex 5bb7924..2e9fa6d 100644[m
+[1m--- a/src/main/java/com/chatservice/websocketcore/core/WebSocketConfig.java[m
+[1m+++ b/src/main/java/com/chatservice/websocketcore/core/WebSocketConfig.java[m
+[36m@@ -9,8 +9,6 @@[m [mimport org.springframework.web.socket.config.annotation.WebSocketConfigurer;[m
+ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;[m
+ import org.springframework.web.socket.server.HandshakeInterceptor;[m
+ [m
+[31m-import com.chatservice.exportroom.service.ExportRoomService;[m
+[31m-import com.chatservice.exportroom.service.IExportRoomService;[m
+ import com.chatservice.joinroom.service.IRoomJoinService;[m
+ import com.chatservice.websocketcore.model.ChatSessionRegistry;[m
+ [m
+[36m@@ -19,20 +17,15 @@[m [mimport com.chatservice.websocketcore.model.ChatSessionRegistry;[m
+ public class WebSocketConfig implements WebSocketConfigurer {[m
+ 	[m
+ 	IRoomJoinService roomJoinService;[m
+[31m-	IExportRoomService exportRoomService;[m
+[31m-	[m
+ 	ChatSessionRegistry chatSessionRegistry;[m
+[31m-[m
+ 	SemaphoreRegistry semaphoreRegistry;[m
+ [m
+ 	public WebSocketConfig([m
+ 			IRoomJoinService roomJoinService,[m
+[31m-			ExportRoomService exportRoomService,[m
+ 			ChatSessionRegistry chatSessionRegistry,[m
+ 			SemaphoreRegistry semaphoreRegistry) {[m
+ 		[m
+ 		this.roomJoinService = roomJoinService;[m
+[31m-		this.exportRoomService = exportRoomService;[m
+ 		this.chatSessionRegistry = chatSessionRegistry;[m
+ 		this.semaphoreRegistry = semaphoreRegistry;[m
+ 	}[m
+[1mdiff --git a/src/main/java/com/chatservice/websocketcore/model/ChatSessionRegistry.java b/src/main/java/com/chatservice/websocketcore/model/ChatSessionRegistry.java[m
+[1mindex 932e248..ebe6875 100644[m
+[1m--- a/src/main/java/com/chatservice/websocketcore/model/ChatSessionRegistry.java[m
+[1m+++ b/src/main/java/com/chatservice/websocketcore/model/ChatSessionRegistry.java[m
+[36m@@ -148,14 +148,13 @@[m [mpublic class ChatSessionRegistry {[m
+     public void handleUserSessionOnConnect(String roomId, String userId, WebSocketSession session) throws Exception {[m
+         // 서버 저장 sessionKey 조회(최초 입장 or 기존 세션 판별 기준)[m
+         String serverSessionKey = getSessionKey(roomId, userId);[m
+[31m-        logger.info("[세션키 조회] 서버 세션키 로드 완료: roomId={}, userId={}, serverSessionKey={}", roomId, userId, serverSessionKey);[m
+[32m+[m[32m        logger.info("[서버 측 세션키 조회] 서버 세션키 로드 완료: roomId={}, userId={}, serverSessionKey={}", roomId, userId, serverSessionKey);[m
+ [m
+         Object rawKey = session.getAttributes().get("sessionKey"); // 핸드셰이크 중 설정된 클라이언트 세션키[m
+[31m-        logger.info("[세션키 조회] 클라이언트 rawKey 추출: rawKey={}", rawKey);[m
+[32m+[m[32m        logger.info("[클라이언트 세션키 조회] 클라이언트 rawKey 추출: rawKey={}", rawKey);[m
+ [m
+         String clientSessionKey = (rawKey == null) ? "null" : rawKey.toString(); // null 방어 및 명시적 문자열화[m
+[31m-        logger.info("[세션키 확정] 클라이언트 세션키 처리 완료: clientSessionKey={}", clientSessionKey);[m
+[31m-[m
+[32m+[m[32m        logger.info("[클라이언트 세션키 확정] 클라이언트 세션키 처리 완료: clientSessionKey={}", clientSessionKey);[m
+ [m
+         /* [서버 측 유효성 검사][m
+          *[m
+[36m@@ -271,7 +270,7 @@[m [mpublic class ChatSessionRegistry {[m
+          *   - roomUserVOMap, roomUserSessions, roomList의 NPE 가능성 대비[m
+          */[m
+         if (clientSessionKey.equals(serverSessionKey)) {[m
+[31m-            logger.info("[정상 복귀 진입] 동일 sessionKey 감지: roomId={}, userId={}", roomId, userId);[m
+[32m+[m[32m            logger.info("[새로 고침 복귀] 동일 sessionKey 감지: roomId={}, userId={}", roomId, userId);[m
+ [m
+             int roomNum = Integer.parseInt(roomId);[m
+             int maxWaitMs = 100, waited = 0;[m
+[36m@@ -344,37 +343,28 @@[m [mpublic class ChatSessionRegistry {[m
+         if (clientSessionKey.equals("null")) {[m
+             logger.info("[중복탭 진입] clientSessionKey=null, serverSessionKey 존재 → 기존 세션 제거 시작: roomId={}, userId={}", roomId, userId);[m
+ [m
+[31m-            // 이전 세션 강제 종료 수행.[m
+[32m+[m[32m            /* 이전 세션 강제 종료 수행 */[m
+             WebSocketSession prevSession = roomUserSessions.get(roomId).get(userId);[m
+             if (prevSession != null) {[m
+                 prevSession.close(new CloseStatus(3000, "중복 세션 강제 종료"));[m
+                 logger.info("[세션 종료] 기존 prevSession 강제 close 완료");[m
+             }[m
+ [m
+[31m-            // 새로운 탭 갱신 따라 세션 스토리지 갱신.[m
+[31m-            String newSessionKey = UUID.randomUUID().toString();[m
+[31m-            saveSessionKey(roomId, userId, newSessionKey);[m
+[32m+[m[32m            /* 새로운 탭 접속 했으므로, 세션 스토리지 내 값 또한 새로운 값으로 갱신 */[m
+[32m+[m[32m            String newSessionKey = UUID.randomUUID().toString();        // 새로운 세션 스토리지 값[m
+[32m+[m[32m            saveSessionKey(roomId, userId, newSessionKey);              // 새로운 세션 스토리지 값을 서버 내 저장.[m
+             logger.info("[세션키 갱신] sessionKey 재발급 완료: sessionKey={}", newSessionKey);[m
+[31m-[m
+[32m+[m[32m            /* 새로운 세션 스토리지 값을 클라이언트 내 저장 : 이후 새로 고침 혹은 추가적인 중복 탭 방지 목적. */[m
+             session.sendMessage(new TextMessage([m
+                     String.format("{\"type\":\"SESSION_KEY\",\"sessionKey\":\"%s\"}", newSessionKey)[m
+             ));[m
+             logger.info("[클라이언트 전달] sessionKey 전송 완료");[m
+ [m
+[31m-            // 기존 브로드 캐스트 도메인 제거[m
+[31m-            roomUserSessions.get(roomId).remove(userId);[m
+[32m+[m[32m            // 기존 과거의 브로드 캐스트 도메인 제거[m
+[32m+[m[32m            try { roomUserSessions.get(roomId).remove(userId); } catch (Exception e) { logger.error(e.getMessage()); }[m
+             roomList.get(roomId).remove(session);[m
+             logger.info("[세션 제거] 중복탭 이전 세션 제거 완료");[m
+ [m
+[31m-            if(roomUserSessions.get(roomId).isEmpty()) {[m
+[31m-                roomUserSessions.remove(roomId);[m
+[31m-                logger.info("[roomUserSessions 삭제] 사용자 없음 → 제거됨");[m
+[31m-            }[m
+[31m-            if(roomList.get(roomId).isEmpty()) {[m
+[31m-                roomList.remove(roomId);[m
+[31m-                logger.info("[roomList 삭제] 세션 없음 → 제거됨");[m
+[31m-            }[m
+[31m-[m
+             // 새롭운 브로드 캐스트 도메인 갱신[m
+             roomUserSessions.computeIfAbsent(roomId, k -> new ConcurrentHashMap<>()).put(userId, session);[m
+             roomList.computeIfAbsent(roomId, k -> new HashSet<>()).add(session);[m
+[36m@@ -384,15 +374,18 @@[m [mpublic class ChatSessionRegistry {[m
+         }[m
+ [m
+ [m
+[31m-        // [5] 예외/동기화불일치 : 클라 sessionKey 존재, 서버와 불일치 or 서버엔 없음 → 세션키 강제 재발급·동기화[m
+[32m+[m[32m        /* [5] 예외/동기화불일치 : 클라이언트 sessionKey는 포함하나, 서버 측에 존재하지 않는다. 즉 새로운 접속 / 새로고침 / 중복 탭 접근에 해당되지 않는,[m
+[32m+[m[32m            인위적인 접근이라 간주 후 서버 측은 별도의 데이터 저장 안하고, 클라이언트 내 SessionStorage "null" 초기화, 그리고 현재 세션 closd() 수행.[m
+[32m+[m[32m        */[m
+         else {[m
+[32m+[m[32m            logger.info("[예외/동기화 불일치] clientSessionKey={}, serverSessionKey={} ", clientSessionKey, serverSessionKey);[m
+ [m
+[31m-            String newSessionKey = UUID.randomUUID().toString();[m
+[31m-            saveSessionKey(roomId, userId, newSessionKey);[m
+[31m-            session.getAttributes().put("sessionKey", newSessionKey);[m
+[31m-            roomUserSessions.computeIfAbsent(roomId, k -> new ConcurrentHashMap<>()).put(userId, session);[m
+[31m-            roomList.computeIfAbsent(roomId, k -> new HashSet<>()).add(session);[m
+[31m-            // 클라이언트에 newSessionKey 전달 필요(JS sessionStorage 저장)[m
+[32m+[m[32m            String newSessionKey = "null";[m
+[32m+[m[32m            /* 새로운 세션 스토리지 값을 클라이언트 내 저장 : 이후 새로 고침 혹은 추가적인 중복 탭 방지 목적. */[m
+[32m+[m[32m            session.sendMessage(new TextMessage([m
+[32m+[m[32m                    String.format("{\"type\":\"SESSION_KEY\",\"sessionKey\":\"%s\"}", newSessionKey)[m
+[32m+[m[32m            ));[m
+[32m+[m[32m            session.close(new CloseStatus(3001, "중복 세션 강제 종료"));[m
+             return;[m
+         }[m
+     }[m
+[36m@@ -438,7 +431,8 @@[m [mpublic class ChatSessionRegistry {[m
+             서버 측에서 close(3000) 호출로 인해 현 위치 실행하는 것.  */[m
+         else if (closeStatus.getCode() == 3000) {[m
+             logger.info("[중복 탭 따른 접속 종료] roomId={}, 현재 방 인원수={}", roomId, getRoom(roomNum).getCurrentPeople());[m
+[31m-        }[m
+[32m+[m
+[32m+[m[32m        } else if(closeStatus.getCode() == 3001) { logger.info("잘못된 세션 접근 방지 차원 종료"); }[m
+         /* 3. 비 명시적 종료 - 새로고침 또는 단순 탭 혹은 브라우저 단위로 종료, 즉 진짜로 나간 건지, 혹은 새로고침 상태로써 바로 재 접속할 건지, 서버 측에서는 js 에서 별다른 차별점을 주지 못하기 때문에[m
+                 이를 서버 측에서 구현해야 된다.[m
+         */[m
+[36m@@ -475,6 +469,7 @@[m [mpublic class ChatSessionRegistry {[m
+         // [4] 실제 등록/갱신 처리[m
+         userMap.put(userId, new RoomUserStateVO(userId, expireAt));[m
+         logger.info("[markImplicitExitUser] roomUserVOMap 등록 완료: roomNumber={}, userId={}, expireAt={}", roomNumber, userId, userMap.get(userId).getExpireAt());[m
+[32m+[m
+         /* 일단 현재 브로드 캐스트 도메인을 제외 한다, 새로 고침으로 인해 발생된 close() 이든, 단순 종료에 의한 close() 발생이든 간에, 불 필요한 브로드 캐스트 전달 방지 목적 */[m
+         // [A] 방 번호 기준으로 sessionSet 추출[m
+         HashSet<WebSocketSession> sessionSet = roomList.get(String.valueOf(roomNumber));[m
+[36m@@ -497,7 +492,6 @@[m [mpublic class ChatSessionRegistry {[m
+         /* 방 인원 수 감소 : 현 위치에서 삭제를 하지 않으면 기술상, 새로 고침과 진짜 탭 단위 종료 시 구분이 안되는 상황에서 나중에 재 인원수 갱신을 할 지 언정, 사용자 경험에 결함이 생기기 때문.[m
+          *   ** 단, 실제 접속 판별은 TTL 기반으로 일정 시간 내 새로고침으로써 재 접속하지 않으면 "userMap" 에 의해서 실제로 삭제 된다. */[m
+         getRoom(roomNumber).setCurrentPeople(semaphoreRegistry.getAvailablePermits(roomNumber) + 1);[m
+[31m-[m
+         /* 중복 세션 리스트는 삭제하지 않음, 근거는 JoinService.confirm() 접근 시 새로 고침은 결국 현재 존재하는 세션 리스트 목록을 기반하여 판별하기 때문. */[m
+     }[m
+ [m
+[36m@@ -714,13 +708,13 @@[m [mpublic class ChatSessionRegistry {[m
+      * @return sessionKey (UUID 등, String), 저장된 값 없으면 null[m
+      */[m
+     public String getSessionKey(String roomId, String userId) {[m
+[31m-        logger.debug("[getSessionKey] 진입: roomId={}, userId={}", roomId, userId);[m
+[32m+[m[32m        logger.info("[getSessionKey] 진입: roomId={}, userId={}", roomId, userId);[m
+ [m
+         // [1] 방 번호(roomId) 기준, 서버에 등록된 <userId, sessionKey> 맵 조회[m
+         Map<String, String> userKeyMap = roomUserSessionKeyMap.get(roomId);[m
+         if (userKeyMap == null) {[m
+             // [2] 해당 방 번호에 대한 세션키 맵이 존재하지 않음(=등록된 적 없음, 또는 전체 방 삭제 등)[m
+[31m-            logger.debug("[getSessionKey] userKeyMap==null: roomId={}, userId={}", roomId, userId);[m
+[32m+[m[32m            logger.info("[getSessionKey] userKeyMap==null: roomId={}, userId={}", roomId, userId);[m
+             return null;[m
+         }[m
+ [m
+[36m@@ -762,7 +756,6 @@[m [mpublic class ChatSessionRegistry {[m
+             /* 각 방 번호에 대한 <사용자 ID. VO 객체> 집합 추출 */[m
+             Map<String, RoomUserStateVO> userMap = roomUserVOMap.get(roomNumber);[m
+ [m
+[31m-[m
+             /* VO TTL 검사 후 삭제 대상 리스트업 : 현재 위치에서 삭제 진행하지 않고 이후에 삭제 진행할 리스트 업 */[m
+             List<String> expiredUserIds = new ArrayList<>();    // 리스터 업, 즉 "roomUserVOMap" 순회 하면서 각 방 번호 저장 된 자료구조 객체 내부를 확인해서 TTL 초과된 VO 객체들 검사 수행.[m
+             /* 현재 방 번호의 <사용자 ID. VO 객체> 집합 내부를 순차적으로 확인하여 실제 TTL 이 초과된 VO 객체 있는 지 확인. */[m
+[36m@@ -805,9 +798,8 @@[m [mpublic class ChatSessionRegistry {[m
+                     else { logger.info("[cleanupExpiredUsers] 방 종료 - roomNumber={}, userId={}", roomNumber, userId); }[m
+ [m
+                 } catch (Exception e) { logger.error("[cleanupExpiredUsers] 예외: roomNumber={}, userId={}, err={}", roomNumber, userId, e.toString(), e); }[m
+[32m+[m[32m                logger.info("[cleanupExpiredUsers] 종료: 남은 방 개수={}", roomUserVOMap.size());[m
+             }[m
+[31m-            logger.info("[cleanupExpiredUsers] 종료: 남은 방 개수={}", roomUserVOMap.size());[m
+         }[m
+[31m-[m
+     }[m
+ }[m
+\ No newline at end of file[m

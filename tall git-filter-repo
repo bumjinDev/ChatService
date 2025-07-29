@@ -1,0 +1,69 @@
+* [33m040e717[m[33m ([m[1;31morigin/develop[m[33m)[m 각 기능 별 srp 범위 재 정의, 네트워크 순서 불일치에대한 문제 확인 - 수정 예정
+* [33m00d5813[m WebSocket Handler 내 네트워크 불일치성확인 - 수정 예정
+* [33m64c5ca8[m bug fix
+* [33mdb8d13e[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdevelop[m[33m)[m 테스트 시나리오 위한 타임 아웃 조정
+* [33m1d13e88[m exception fix
+* [33me9bb7a4[m devleop 내 불필요한 문서 삭제
+* [33m6f0f4a5[m readme 수정
+*   [33md95c23e[m Merge branch 'feature/web-core' into develop
+[32m|[m[33m\[m  
+[32m|[m * [33m8106dda[m[33m ([m[1;31morigin/feature/web-core[m[33m, [m[1;32mfeature/web-core[m[33m)[m feat: 메인 페이지
+* [33m|[m   [33mba76c9f[m Merge branch 'feature/scheduler' into develop
+[34m|[m[35m\[m [33m\[m  
+[34m|[m * [33m|[m [33mfbeb40b[m[33m ([m[1;31morigin/feature/scheduler[m[33m, [m[1;32mfeature/scheduler[m[33m)[m feat: TTL 만료 방 자동 정리 스케줄러 추가
+[34m|[m [33m|[m[33m/[m  
+* [33m|[m   [33m0e1aafc[m Merge branch 'feature/export' into develop
+[36m|[m[1;31m\[m [33m\[m  
+[36m|[m * [33m|[m [33m698d0e0[m[33m ([m[1;31morigin/feature/export[m[33m, [m[1;32mfeature/export[m[33m)[m feat: 방 정보 외부 전달 모듈 초기 구현
+[36m|[m [33m|[m[33m/[m  
+* [33m|[m   [33mf915832[m Merge branch 'feature/roomlist' into develop
+[1;32m|[m[1;33m\[m [33m\[m  
+[1;32m|[m * [33m|[m [33m45dfdf7[m[33m ([m[1;31morigin/feature/roomlist[m[33m, [m[1;32mfeature/roomlist[m[33m)[m feat: 전체 채팅방 목록 출력 및 DAO 연결 구현
+[1;32m|[m [33m|[m[33m/[m  
+* [33m|[m   [33m66cbe91[m Merge branch 'feature/user-mgmt' into develop
+[1;34m|[m[1;35m\[m [33m\[m  
+[1;34m|[m * [33m|[m [33m91383b2[m[33m ([m[1;31morigin/feature/user-mgmt[m[33m, [m[1;32mfeature/user-mgmt[m[33m)[m feat: 유저 생성/조회/예외처리 기능 구현
+[1;34m|[m [33m|[m[33m/[m  
+* [33m|[m   [33mf2dfdd2[m Merge branch 'feature/redis-sync' into develop
+[1;36m|[m[31m\[m [33m\[m  
+[1;36m|[m * [33m|[m [33me697780[m[33m ([m[1;31morigin/feature/redis-sync[m[33m, [m[1;32mfeature/redis-sync[m[33m)[m feat: Redis 적용
+[1;36m|[m [33m|[m[33m/[m  
+* [33m|[m   [33m9d6d8f0[m Merge branch 'feature/websocket-handler' into develop
+[32m|[m[33m\[m [33m\[m  
+[32m|[m * [33m|[m [33mb490652[m[33m ([m[1;31morigin/feature/websocket-handler[m[33m, [m[1;32mfeature/websocket-handler[m[33m)[m feat: WebSocket 사용자 세션 추적 및 ID 맵핑 기능 추가
+[32m|[m [33m|[m[33m/[m  
+* [33m|[m   [33m009e47d[m Merge branch 'feature/join-logic' into develop
+[34m|[m[35m\[m [33m\[m  
+[34m|[m * [33m|[m [33mde62cc4[m[33m ([m[1;31morigin/feature/join-logic[m[33m, [m[1;32mfeature/join-logic[m[33m)[m feat: 사용자 방 입장 허가 및 세션 연결 로직 구현
+[34m|[m [33m|[m[33m/[m  
+* [33m|[m   [33m6bf6b7d[m Merge branch 'feature/concurrency-guard' into develop
+[36m|[m[1;31m\[m [33m\[m  
+[36m|[m * [33m|[m [33madbb880[m[33m ([m[1;31morigin/feature/concurrency-guard[m[33m, [m[1;32mfeature/concurrency-guard[m[33m)[m feat: 세마포어 기반 동시성 제어 기능 추가
+[36m|[m [33m|[m[33m/[m  
+* [33m|[m   [33m9156155[m Merge branch 'feature/room-queue' into develop
+[1;32m|[m[1;33m\[m [33m\[m  
+[1;32m|[m * [33m|[m [33me6d333a[m[33m ([m[1;31morigin/feature/room-queue[m[33m, [m[1;32mfeature/room-queue[m[33m)[m feat: 방 입장 대기열 및 메모리 큐 처리 구조 반영
+[1;32m|[m [33m|[m[33m/[m  
+* [33m/[m [33me3982a3[m[33m ([m[1;31morigin/feature/auth-session[m[33m, [m[1;32mfeature/auth-session[m[33m)[m feat: JWT 인증 및 사용자 필터 구조 추가
+[33m|[m[33m/[m  
+[33m|[m * [33m4d07fd0[m[33m ([m[1;31morigin/main[m[33m, [m[1;32mmain[m[33m)[m ..
+[33m|[m * [33mf14fad2[m 시나리오 테스트 문서(테스트 미 진행) 보완
+[33m|[m * [33meea7fdc[m 시나리오 테스트 문서(테스트 미 진행) 보완
+[33m|[m * [33m7b80d6a[m 테스트 시나리오(테스트 전) 문서 작성 완료
+[33m|[m * [33m6926b7e[m Update README.md
+[33m|[m * [33m51e278d[m Update README.md
+[33m|[m * [33m00d2fc1[m 문서 수정
+[33m|[m * [33m8df2750[m 시나리오 테스트 초안 작성
+[33m|[m * [33mabf4f79[m readme 파일 수정
+[33m|[m * [33ma3b4e6d[m readme 파일 수정
+[33m|[m * [33m07c5421[m readme 파일 수정
+[33m|[m * [33m60c406b[m readme 파일 수정
+[33m|[m * [33m07230b5[m 필요한 문서 업데이트
+[33m|[m * [33m0d3066f[m devleop 내 불필요한 문서 업데이트
+[33m|[m * [33mb27a061[m 문서 수정
+[33m|[m * [33m8af3fc4[m docs
+[33m|[m * [33m86f31f1[m commit: Read.me 파일 수정
+[33m|[m * [33m24f77d7[m commit: Read.me 파일 작성
+[33m|[m * [33m5dc93df[m docs: 실시간 채팅 시스템 설계 문서 및 중복 로그인 제어 구조 추가
+[33m|[m[33m/[m  
+* [33mf2dcc1b[m[33m ([m[1;31morigin/feature/docs-readme[m[33m, [m[1;32mfeature/docs-readme[m[33m)[m init: 프로젝트 초기 커밋

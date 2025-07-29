@@ -7,19 +7,6 @@ plugins {
 	//id 'war' // <-- 추가 
 }
 
-/*
-bootWar{			// war 배포 파일명
-	archiveBaseName = 'wherehouse'
-    archiveFileName = 'wherehouse.war'
-    archiveVersion = "0.0.0"
-}
-*/
-
-/*
-    - group : 해당 프로젝트 개발하는 회사의 도메인(url)
-    - version : 그냥 프로젝트 버전 관리
-*/
-
 group = 'com.chatservice'
 version = '1.0.0-BUILD-SNAPSHOT'
 description = 'RealTimeChatProgram'
@@ -31,82 +18,67 @@ configurations {
 }
 
 repositories {
-    mavenCentral()
+	mavenCentral()
 }
 
 dependencies {
 
-  	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0' // Jakarta Persistence API
-    implementation 'org.hibernate:hibernate-core:6.2.2.Final' // Hibernate Core 명시적 추가
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	// 아래 두 줄 제거 - Spring Boot가 자동으로 관리함
+	// implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
+	// implementation 'org.hibernate:hibernate-core:6.2.2.Final'
 
 	/* spring websocket 의존성 추가 */
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 
-	// implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-	
 	implementation 'org.json:json:20230227'
-	
+
 	/* spring boot 의 spring mvc 시작 의존성(내장 tomcat 등등) */
-	implementation 'org.springframework.boot:spring-boot-starter-web'		/* 부트 내 스타터 의존성으로써 톰켓 내장 서버, 디스패처 서블릿 및 디스패처 서블릿 컨텍스트 또한 디스패처 서블릿이 Spring MVC를 사용할 수 있게 해주는 것
-																			(/src/main/resource 내 설정은 @Configuration 등의 빈이나 application.properties 파일로 재 설정 가능) */
+	implementation 'org.springframework.boot:spring-boot-starter-web'
 	compileOnly 'jakarta.servlet:jakarta.servlet-api:6.0.0'
 
 	/* spring secuiry 관련 의존성 */
 	implementation 'org.springframework.boot:spring-boot-starter-security'
-	//testImplementation 'org.springframework.security:spring-security-test'
-	
+
 	/* rombok 설정 */
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
-	
-	/* mybatis를 위한 의존성 추가 */
-	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.2.2' // 스프링 부트용 Mybatis 스타터
-    implementation 'org.mybatis:mybatis-spring:3.0.3'
-    /* ORACLE DB 연결 위한 JDBC 의존성 추가 */
-	implementation 'org.springframework.boot:spring-boot-starter-jdbc'		// jdbcTemplate 구현하기 위한 jdbc 의존성 추가
-	implementation 'com.oracle.database.jdbc:ojdbc8:19.8.0.0'				// jdbc의 ojdbc 추가
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	/* ORACLE DB 연결 위한 JDBC 의존성 추가 */
+	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+	implementation 'com.oracle.database.jdbc:ojdbc8:19.8.0.0'
 
 	/* 테스트 코드 작성을 위한 Junit 의존성 추가 */
-	 testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'	// 테스트 작성용 api(@Test 등등) 과 테스트 엔진을 별도로 의존성 추가 안하고 하나로 추가.
+	testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
 
 	/* jsp 의존성 추가 */
 	implementation 'org.apache.tomcat.embed:tomcat-embed-jasper'
-	implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl:2.0.0'		// jsp 내 jstl 태그 인식할 수 있도록 하는 의존성 추가
-	/* 클래스 "Jwts" 생성 및 빌드 패턴 적용. */
-    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
-    implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
-    implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5' // JSON 파싱을 위한 추가 의존성
-    implementation group: 'org.javassist', name: 'javassist', version: '3.15.0-GA'
-	/* 서버 재 부팅 없이도 저장만으로 자동 재 실행 */
-	//developmentOnly 'org.springframework.boot:spring-boot-devtools'
-	
+	implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl:2.0.0'
+
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+	implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
+	implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+	implementation group: 'org.javassist', name: 'javassist', version: '3.15.0-GA'
+
 	/* redis 의존성 추가 */
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-	
-	// 외장 톰켓 애플리케이션 실행에 필요한 의존성 : war 배포 안할 시 꺼둘 것
-	//providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
-	
+
 	implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
-	
-	// Srping Boot Actuator
-	//implementation 'org.springframework.boot:spring-boot-starter-actuator'
-	
-	// JSP 랜더링 및 테스트 코드 작성 시 Cookie 요청
-    //providedCompile 'jakarta.servlet:jakarta.servlet-api:5.0.0'
-    
-    // @Valid 의존성 : 컨트롤러 내 null 및 정규식 대로 값 잘 요청 들어 왔는지 검증
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
-    
-    
-    /* 테스트 관련 의존성 */
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	// @Valid 의존성
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	// ByteBuddy 의존성 제거 - Spring Boot가 자동으로 관리함
+	// implementation 'net.bytebuddy:byte-buddy:1.14.10'
+
+	/* 테스트 관련 의존성 */
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 tasks.test {
-    useJUnitPlatform() // JUnit 5 활성화
+	useJUnitPlatform()
 }
 
 tasks.withType(JavaCompile) {
-    options.compilerArgs << '-parameters'
+	options.compilerArgs << '-parameters'
 }

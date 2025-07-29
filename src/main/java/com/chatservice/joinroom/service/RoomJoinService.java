@@ -72,22 +72,25 @@ public class RoomJoinService implements IRoomJoinService {
         Optional<ChatRoom> chatRoom =
                 Optional.ofNullable(chatSessionRegistry.getRoom(roomNumber));
 
+        /* 현재 위에서는 permit 점유만 시도하고  */
         if (roomQueueVO.isPresent()) {
 
             logger.warn("[신규 방 입장 생성 요청] : roomNumber={}, userId={}", roomNumber, userId);
-            int maxPeople = roomQueueVO.get().getMaxPeople();
 
-            /* 실제로 세션을 맺기 전 단계에서 입장 가능 여부를 확인하면서 가능하면 permit 점유를 시도한다. */
-            boolean acquired = semaphoreRegistry.tryAcquire(roomNumber, userId);
-            if (!acquired) {
-                logger.warn("[입장 거부] 신규 방 permit 점유 실패: roomNumber={}, userId={}", roomNumber, userId);
-                throw new RoomBadJoinFullException("입장 실패: 방 정원이 가득 찼습니다.");
-            }
+            int maxPeople = roomQueueVO.get().getMaxPeople();
+            
            /*
                1. 새로운 방이니 그에 따라 새로운 방 ID에 해당하는 객체 세마포어 생성.
-               2. 새로운 방을 생성 했는데 안 들어올 것을 대비해서 자료구조 "createdAtMap" 내 저장..실제로 방에 들어왔으면 해당 객체를 이후 createroom 도메인 내에서 삭제함.
+               2. 새로운 방을 생성 했는데 안 들어올 것을 대비해서 자료구조 내 방 정보 갱신("createdAtMap") -> 실제 방 입장 해야지만, 해당 객체를 이후 createroom 도메인 내에서 삭제함으로써 생성 요청된 방이 삭제되지 않음.
            * */
             semaphoreRegistry.registerWithTimestamp(roomNumber, maxPeople);
+
+            boolean acquired = semaphoreRegistry.tryAcquire(roomNumber, userId);
+
+            if (!acquired) {
+                logger.warn("[방 생성 실패] 신규 방 permit 점유 실패: roomNumber={}, userId={}", roomNumber, userId);
+                throw new RoomBadJoinFullException("입장 실패 : 생성을 실패 하였습니다. ");
+            }
 
             return;
         }
@@ -95,12 +98,14 @@ public class RoomJoinService implements IRoomJoinService {
         else if (chatRoom.isPresent()) {
 
             logger.warn("[기존 방 입장 요청] : roomNumber={}, userId={}", roomNumber, userId);
+
             boolean acquired = semaphoreRegistry.tryAcquire(roomNumber, userId); // permit 점유
-            logger.warn("[방 여유 인원수] : roomNumber={}, 방 여유 인원수={}", roomNumber, semaphoreRegistry.getAvailablePermits(roomNumber));
+
             if (!acquired) {
                 logger.warn("[입장 거부] 기존 방 permit 점유 실패: roomNumber={}, userId={}", roomNumber, userId);
                 throw new RoomBadJoinFullException("입장 실패: 방 정원이 가득 찼습니다.");
             }
+            logger.warn("[방 여유 인원수] : roomNumber={}, 방 여유 인원수={}", roomNumber, semaphoreRegistry.getAvailablePermits(roomNumber));
             return;
         }
 
@@ -137,7 +142,7 @@ public class RoomJoinService implements IRoomJoinService {
             // 대기열 방 상태를 "생성 완료"로 전환(플래그)
             roomVO.setJoined(true);
         }
-        // [2] 신규/기존 방 상관 없이 세마포어 기반 permit으로 인원수 동기화 : 방 생성 혹은 입장 완료 시점에 이미 동기화.
+        // [2] 신규/기존 방 상관 없이 세마포어 기반 permit을 가지고 방 목록 내 보일 인원수 동기화 : 방 생성 혹은 입장 완료 시점에 이미 동기화.
         chatSessionRegistry.updateRoomCurrentPeople(roomNumber, chatSessionRegistry.getRoom(roomNumber).getMaxPeople() -  semaphoreRegistry.getAvailablePermits(roomNumber));
         logger.info("[updateRoomCurrentPeople] 동기화: roomNumber={}, availablePermits={}", roomNumber, semaphoreRegistry.getAvailablePermits(roomNumber));
     }
