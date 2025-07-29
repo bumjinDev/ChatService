@@ -166,9 +166,7 @@ src
 
 ---
 
-## 8. 기술 검증 결과
-
-- [실시간 채팅 프로젝트](https://github.com/bumjinDev/ChatService/blob/main/docs/%ED%8F%AC%ED%8A%B8%ED%8F%B4%EB%A6%AC%EC%98%A4/%EC%8B%A4%EC%8B%9C%EA%B0%84%20%EC%B1%84%ED%8C%85%20%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8_%ED%8F%AC%ED%8A%B8%ED%8F%B4%EB%A6%AC%EC%98%A4_%EC%A0%95%EB%B2%94%EC%A7%84.pdf)
+## 8. 동시성 테스트 결과서
 
 - [동시성 테스트 결과서](https://github.com/bumjinDev/ChatService/blob/main/docs/%ED%8F%AC%ED%8A%B8%ED%8F%B4%EB%A6%AC%EC%98%A4/Java%20Spring%20%ED%99%98%EA%B2%BD%EC%9D%98%20%EB%8F%99%EC%8B%9C%EC%84%B1%20%EC%A0%9C%EC%96%B4%20%EA%B8%B0%EB%B2%95%20%EB%B3%84%20%EC%A0%81%ED%95%A9%EC%84%B1%20%ED%85%8C%EC%8A%A4%ED%8A%B8_%ED%8F%AC%ED%8A%B8%ED%8F%B4%EB%A6%AC%EC%98%A4_%EC%A0%95%EB%B2%94%EC%A7%84.pdf)
 
