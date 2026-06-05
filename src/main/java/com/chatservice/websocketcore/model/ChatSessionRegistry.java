@@ -28,7 +28,7 @@ public class ChatSessionRegistry {
     /**
      * @brief 새로고침 등 비명시적 종료 사용자의 임시 VO TTL(실서비스 10*1000L=10초, 본 테스트용 0.5초=500ms)
      */
-    private static final long USER_TTL_MILLIS = 1000L; // 1초
+    private static final long USER_TTL_MILLIS = 10 * 1000L; // 10초
 
     /**
      * @staticclass RoomUserStateVO
@@ -110,336 +110,248 @@ public class ChatSessionRegistry {
     // =========================================================================
 
     /**
-     * @param roomId  방 번호(String)
-     * @param userId  사용자ID
-     * @param session 입장 WebSocketSession
      * @method handleUserSessionOnConnect
+     * @brief WebSocket 입장 분기 디스패처. 서버 sessionKey와 클라이언트 sessionKey 두 값만으로
+     *        아래 결정표대로 분기한다. (반드시 afterConnectionEstablished 내부에서만 호출)
      *
-     * WebSocket 입장 요청 시, 클라이언트와 서버의 sessionKey 상태에 따라
-     * 다음의 분기별로 입장/중복탭/새로고침/예외 상황을 구조적으로 처리한다.
-
-    [분기 구조]
-    1. [최초 입장]      : clientKey==null && serverKey==null
-    - 신규 sessionKey 발급, 클라이언트에 전송, 서버 자료구조 등록.
-
-    2. [중복 탭 접속]   : clientKey==null && serverKey!=null
-    - 기존 세션 강제종료(3000), 중복탭 갱신, 새로운 sessionKey 발급/동기화.
-
-    3. [임시퇴장 복귀]  : clientKey==null && roomUserVOMap에 userId 있음
-    - (예외적 분기) 임시퇴장 후 복귀, 관련 리소스 정리 필요(실행 내용 구체화 요망).
-
-    4. [동일탭 새로고침/정상복귀] : clientKey==serverKey(둘 다 null 아님)
-    - 네트워크 race로 인한 close/established 순서역전 구조 흡수.
-    - 기존 세션 정보 덮어쓰기, 상태/인원수/permit 불변, sessionKey 동기화 유지.
-    - roomUserVOMap에 임시 상태 남아있으면 최대 100ms 대기.
-
-    5. [예외/동기화불일치] : clientKey!=null && (serverKey==null || clientKey!=serverKey)
-    - 강제 sessionKey 재발급/동기화(예외상황 복구).
-
-    분기 기준은 clientKey/serverKey의 존재/동등성, roomUserVOMap 내 userId 임시퇴장 여부,
-    그리고 실제 세션/상태/리소스 일치 여부에 따라 엄격히 나뉜다.
-
-    모든 분기에서 race condition, 인원수/permit/세션 상태의 일관성, sessionKey 동기화가
-    강제되어야 하며, 분기별 세부 처리 내용은 실제 구현 코드에 맞게 일관적으로 유지되어야 한다.
-
-     * 본 메서드는 반드시 afterConnectionEstablished 내부에서만 호출한다.
+     *  serverKey | clientKey            | 처리
+     *  --------- | -------------------- | ---------------------------------------------------
+     *  null      | "null"               | onFirstEntry      (신규 키 발급·등록)
+     *  null      | 값 존재              | 강제 리셋 후 onFirstEntry 흐름으로 낙하
+     *  존재      | == serverKey         | onSameTabRefresh  (TTL 잔존 VO 정리 후 세션 덮어쓰기)
+     *  존재      | "null"               | onDuplicateTab    (기존 세션 close(3000) 후 교체)
+     *  존재      | ≠serverKey & ≠"null" | onDesync          (close(3001))
      *
+     *  ※ 분기 평가 순서 자체가 로직이다(유효성 → 최초 → 새로고침 → 중복탭 → desync). 순서 변경 금지.
      */
     public void handleUserSessionOnConnect(String roomId, String userId, WebSocketSession session) throws Exception {
         // 서버 저장 sessionKey 조회(최초 입장 or 기존 세션 판별 기준)
         String serverSessionKey = getSessionKey(roomId, userId);
         logger.info("[서버 측 세션키 조회] 서버 세션키 로드 완료: roomId={}, userId={}, serverSessionKey={}", roomId, userId, serverSessionKey);
 
-        Object rawKey = session.getAttributes().get("sessionKey"); // 핸드셰이크 중 설정된 클라이언트 세션키
-        logger.info("[클라이언트 세션키 조회] 클라이언트 rawKey 추출: rawKey={}", rawKey);
+        String clientSessionKey = resolveClientSessionKey(session);
 
-        String clientSessionKey = (rawKey == null) ? "null" : rawKey.toString(); // null 방어 및 명시적 문자열화
-        logger.info("[클라이언트 세션키 확정] 클라이언트 세션키 처리 완료: clientSessionKey={}", clientSessionKey);
-
-        /* [서버 측 유효성 검사]
-         *
-         * 목적:
-         *   - 최초 접속이 아닌, 한 번 이상의 명시적 종료(leave) 이후 재접속 상황에서
-         *     서버와 클라이언트의 sessionKey가 불일치하는 경우를 방지하고,
-         *     모든 입장 흐름의 논리적 정합성을 강제한다.
-         *
-         * 동작 배경:
-         *   - 클라이언트 JS는 명시적 종료 시(코드 1000) sessionStorage를 "null"로 초기화해야 한다.
-         *   - 그러나 사용자의 임의 조작, JS 오류, sync miss 등으로 인해
-         *     실제 sessionStorage 값이 남아 있을 수 있으므로, 서버단에서 반드시 유효성 검사를 수행해야 한다.
-         *
-         * 내부 동작 원리:
-         *   - 서버는 각 방(roomId)-사용자(userId) 별로 sessionKey를 저장 및 추적한다.
-         *   - 서버 세션키가 null인데 클라이언트 세션키는 남아 있는 경우,
-         *     이는 명시적 종료, 비정상 흐름, 조작 등 예외 상황으로 간주하며,
-         *     서버에서 clientSessionKey를 강제로 "null"로 초기화한다.
-         *
-         * 세부 처리 분기:
-         *   - 중복 탭: 서버에 기존 세션이 남아 있고, 클라의 WebSocket 재호출 시 sessionKey는 "null"이다.
-         *   - 임시 복귀: 기존 탭 삭제 후, 방 이탈 후 짧은 TTL 내 재접속 시 roomUserVOMap 유효 조건으로 복귀를 판정한다.
-         *
-         * 예외적 상황:
-         *   - 클라이언트 SessionStorage 값이 남아 있는데, 서버 sessionKey는 null(문자열 "null" 아님)인 경우,
-         *     이는 명시적 종료 이후 JS 오류 또는 사용자의 조작으로 판단한다.
-         *   - 이 경우 clientSessionKey를 "null"로 초기화하고, 이후 정상 플로우로 진입한다.
-         *
-         * 동작 단계:
-         *   1) clientSessionKey가 "null"이 아님을 확인.
-         *   2) 동시에 serverSessionKey가 null임을 확인.
-         *   3) clientSessionKey를 null로 강제 초기화.
-         */
-
+        /* [유효성] 서버 기록은 없는데 클라이언트가 stale 키를 보유 → 명시적 종료 후 JS 오류/조작으로 간주.
+         *          clientSessionKey를 "null"로 강제 리셋하고 클라이언트에도 초기화를 명령한 뒤, 아래 최초 입장 흐름으로 낙하한다. */
         if(!clientSessionKey.equals("null") && serverSessionKey == null) {
             logger.info("[유효성 검사] 서버 세션키 없음, 클라이언트 세션키 존재 → 강제 초기화: roomId={}, userId={}, clientSessionKey={}", roomId, userId, clientSessionKey);
 
             clientSessionKey = "null"; // 서버 변수 기준에서 세션키 불일치 복원
             logger.info("[세션키 리셋] clientSessionKey 변수 null로 초기화 완료");
 
-            session.sendMessage(new TextMessage("{\"type\":\"SESSION_KEY\",\"sessionKey\":null}")); // 클라이언트 세션키 초기화 명령 전송
+            sendSessionKeyNull(session); // 클라이언트 세션키 초기화 명령 전송({"sessionKey":null})
             logger.info("[클라이언트 동기화] sessionKey=null 메시지 전송 완료");
         }
 
-        // [1] 최초 입장 : 클라이언트·서버 모두 sessionKey 없음 → 신규 세션키 발급·등록
-        /* 최초 입장 시의 세마포어 증가는 Joinservice.confirm() 내 이미 수행. */
+        if (clientSessionKey.equals("null") && serverSessionKey == null) { onFirstEntry(roomId, userId, session); return; }
+        if (clientSessionKey.equals(serverSessionKey))                  { onSameTabRefresh(roomId, userId, session); return; }
+        if (clientSessionKey.equals("null"))                            { onDuplicateTab(roomId, userId, session); return; }
+        onDesync(session, clientSessionKey, serverSessionKey);
+    }
 
-        /* [최초 입장 분기]
-         *
-         * 목적:
-         *   - 클라이언트와 서버 모두 sessionKey가 없는 상태에서 새로운 세션을 발급하고, 시스템에 등록한다.
-         *
-         * 동작 배경:
-         *   - 클라이언트는 WebSocket 연결 전 sessionStorage=null 상태이며,
-         *     서버 역시 roomId-userId 조합으로 sessionKey를 저장하지 않은 경우,
-         *     완전 신규 접속으로 간주된다.
-         *
-         * 조건:
-         *   - clientSessionKey.equals("null")
-         *   - serverSessionKey == null
-         *
-         * 처리 흐름:
-         *   1) UUID 기반 sessionKey 발급
-         *   2) 서버에 저장
-         *   3) 클라이언트에 전송
-         *   4) roomUserSessions / roomList에 등록
-         *
-         * 예외 상황:
-         *   - 없음 (세마포어 획득은 사전에 완료된 것으로 가정)
-         */
-        if (clientSessionKey.equals("null") && serverSessionKey == null) {
-            logger.info("[최초 입장] 신규 접속 판정 → 세션키 발급 시작: roomId={}, userId={}", roomId, userId);
+    /**
+     * @method resolveClientSessionKey
+     * @brief 핸드셰이크에서 주입된 클라이언트 sessionKey(attr)를 문자열로 정규화한다(미존재 시 문자열 "null").
+     */
+    private String resolveClientSessionKey(WebSocketSession session) {
+        Object rawKey = session.getAttributes().get("sessionKey"); // 핸드셰이크 중 설정된 클라이언트 세션키
+        logger.info("[클라이언트 세션키 조회] 클라이언트 rawKey 추출: rawKey={}", rawKey);
 
-            String newSessionKey = UUID.randomUUID().toString(); // UUID 기반 새 sessionKey 생성
-            logger.info("[세션키 생성] UUID 생성 완료: sessionKey={}", newSessionKey);
+        String clientSessionKey = (rawKey == null) ? "null" : rawKey.toString(); // null 방어 및 명시적 문자열화
+        logger.info("[클라이언트 세션키 확정] 클라이언트 세션키 처리 완료: clientSessionKey={}", clientSessionKey);
+        return clientSessionKey;
+    }
 
-            saveSessionKey(roomId, userId, newSessionKey); // 서버 세션키 저장
-            logger.info("[세션키 저장] 서버 registry에 저장 완료");
+    /**
+     * @method sendSessionKey
+     * @brief 클라이언트에 sessionKey 동기화 명령 전송 → {"type":"SESSION_KEY","sessionKey":"<sessionKey>"}
+     *        (값을 따옴표로 감싸는 형태. desync 분기는 의도적으로 "null" 문자열을 그대로 보낸다.)
+     */
+    private void sendSessionKey(WebSocketSession session, String sessionKey) throws Exception {
+        session.sendMessage(new TextMessage(
+                String.format("{\"type\":\"SESSION_KEY\",\"sessionKey\":\"%s\"}", sessionKey)));
+    }
 
-            session.sendMessage(new TextMessage(
-                    String.format("{\"type\":\"SESSION_KEY\",\"sessionKey\":\"%s\"}", newSessionKey))); // 클라이언트에 세션키 전송
-            logger.info("[세션키 전송] 클라이언트 전달 완료: sessionKey={}", newSessionKey);
+    /**
+     * @method sendSessionKeyNull
+     * @brief 클라이언트 sessionKey 초기화 명령 전송 → {"type":"SESSION_KEY","sessionKey":null} (JSON literal null).
+     *        sendSessionKey(…,"null")의 따옴표 형태와 페이로드가 다르므로 별도 메서드로 분리 유지.
+     */
+    private void sendSessionKeyNull(WebSocketSession session) throws Exception {
+        session.sendMessage(new TextMessage("{\"type\":\"SESSION_KEY\",\"sessionKey\":null}"));
+    }
 
-            roomUserSessions.computeIfAbsent(roomId, k -> new ConcurrentHashMap<>()).put(userId, session); // 사용자 세션 등록
-            logger.info("[세션 등록] roomUserSessions 등록 완료");
+    /**
+     * @method onFirstEntry
+     * @brief [최초 입장] clientKey=="null" && serverKey==null. 신규 UUID 발급·저장·전송 후 세션 등록.
+     *        (세마포어 증가는 JoinService.confirm()에서 이미 수행됨)
+     */
+    private void onFirstEntry(String roomId, String userId, WebSocketSession session) throws Exception {
+        logger.info("[최초 입장] 신규 접속 판정 → 세션키 발급 시작: roomId={}, userId={}", roomId, userId);
 
-            roomList.computeIfAbsent(roomId, k -> new HashSet<>()).add(session); // 브로드캐스트용 등록
-            logger.info("[브로드캐스트 등록] roomList 등록 완료");
+        String newSessionKey = UUID.randomUUID().toString(); // UUID 기반 새 sessionKey 생성
+        logger.info("[세션키 생성] UUID 생성 완료: sessionKey={}", newSessionKey);
 
-            return; // 최초 입장 흐름 종료
+        saveSessionKey(roomId, userId, newSessionKey); // 서버 세션키 저장
+        logger.info("[세션키 저장] 서버 registry에 저장 완료");
+
+        sendSessionKey(session, newSessionKey); // 클라이언트에 세션키 전송
+        logger.info("[세션키 전송] 클라이언트 전달 완료: sessionKey={}", newSessionKey);
+
+        roomUserSessions.computeIfAbsent(roomId, k -> new ConcurrentHashMap<>()).put(userId, session); // 사용자 세션 등록
+        logger.info("[세션 등록] roomUserSessions 등록 완료");
+
+        roomList.computeIfAbsent(roomId, k -> new HashSet<>()).add(session); // 브로드캐스트용 등록
+        logger.info("[브로드캐스트 등록] roomList 등록 완료");
+    }
+
+    /**
+     * @method onSameTabRefresh
+     * @brief [동일탭 새로고침/정상 복귀] clientKey==serverKey. race로 close() 미완료일 수 있어 TTL VO를
+     *        최대 100ms polling 후 정리하고, 동일 세션으로 덮어쓰기 한다.
+     *        ※ roomList/roomUserSessions의 remove(session) 줄은 원본 동작(키 불일치 포함)을 그대로 유지한다.
+     */
+    private void onSameTabRefresh(String roomId, String userId, WebSocketSession session) throws Exception {
+        logger.info("[새로 고침 복귀] 동일 sessionKey 감지: roomId={}, userId={}", roomId, userId);
+
+        int roomNum = Integer.parseInt(roomId);
+        int maxWaitMs = 100, waited = 0;
+
+        // race로 인해 close() 처리 미완료시 최대 100ms까지 대기(상태 동기화 보장)
+        while (
+                roomUserVOMap.containsKey(roomNum) &&
+                        roomUserVOMap.get(roomNum).containsKey(userId) &&
+                        waited < maxWaitMs
+        ) {
+            Thread.sleep(5);
+            waited += 5;
+        }
+        logger.info("[race polling 종료] 대기 시간: {}ms", waited);
+
+        // TTL 값 내 재 접속 했으니 해당 목록을 삭제, 스케줄러에서 오인 없도록 처리 함.
+        if (roomUserVOMap.containsKey(roomNum)) {
+            roomUserVOMap.get(roomNum).remove(userId);
+            logger.info("[TTL 제거] roomUserVOMap 내 userId 제거 완료");
+
+            if (roomUserVOMap.get(roomNum).isEmpty()) {
+                roomUserVOMap.remove(roomNum);
+                logger.info("[roomUserVOMap 삭제] 해당 방 비어 있음 → roomNum={} 제거", roomNum);
+            }
         }
 
-        /* [동일탭 새로고침 또는 정상 복귀 분기]
-         *
-         * 목적:
-         *   - 동일한 탭에서의 재접속(새로고침 등)을 감지하여,
-         *     기존 TTL 잔존 상태를 정리한 뒤, 동일 세션으로 덮어쓰기 처리한다.
-         *
-         * 동작 배경:
-         *   - sessionKey가 클라이언트·서버 모두 동일한 경우 동일 탭 복귀로 간주하고,
-         *     race로 인한 close() 미완료 상태가 존재할 수 있으므로 최대 100ms까지 polling 후 상태 정리
-         *
-         * 조건:
-         *   - clientSessionKey.equals(serverSessionKey)
-         *
-         * 처리 흐름:
-         *   1) TTL 삭제 polling
-         *   2) roomUserVOMap 상태 제거
-         *   3) 기존 세션 제거
-         *   4) 새 세션 덮어쓰기
-         *
-         * 예외 상황:
-         *   - roomUserVOMap, roomUserSessions, roomList의 NPE 가능성 대비
-         */
-        if (clientSessionKey.equals(serverSessionKey)) {
-            logger.info("[새로 고침 복귀] 동일 sessionKey 감지: roomId={}, userId={}", roomId, userId);
+        // 기존 브로드 캐스트 도메인 제거
+        if(roomList.get(roomId) != null) { roomList.get(roomId).remove(session); }
+        if(roomUserSessions.get(roomId) != null) { roomUserSessions.get(roomId).remove(session); }
+        logger.info("[세션 제거] 기존 broadcast 세션 제거 완료");
 
-            int roomNum = Integer.parseInt(roomId);
-            int maxWaitMs = 100, waited = 0;
-
-            // race로 인해 close() 처리 미완료시 최대 100ms까지 대기(상태 동기화 보장)
-            while (
-                    roomUserVOMap.containsKey(roomNum) &&
-                            roomUserVOMap.get(roomNum).containsKey(userId) &&
-                            waited < maxWaitMs
-            ) {
-                Thread.sleep(5);
-                waited += 5;
-            }
-            logger.info("[race polling 종료] 대기 시간: {}ms", waited);
-
-            // TTL 값 내 재 접속 했으니 해당 목록을 삭제, 스케줄러에서 오인 없도록 처리 함.
-            if (roomUserVOMap.containsKey(roomNum)) {
-                roomUserVOMap.get(roomNum).remove(userId);
-                logger.info("[TTL 제거] roomUserVOMap 내 userId 제거 완료");
-
-                if (roomUserVOMap.get(roomNum).isEmpty()) {
-                    roomUserVOMap.remove(roomNum);
-                    logger.info("[roomUserVOMap 삭제] 해당 방 비어 있음 → roomNum={} 제거", roomNum);
-                }
-            }
-
-            // 기존 브로드 캐스트 도메인 제거
-            if(roomList.get(roomId) != null) { roomList.get(roomId).remove(session); }
-            if(roomUserSessions.get(roomId) != null) { roomUserSessions.get(roomId).remove(session); }
-            logger.info("[세션 제거] 기존 broadcast 세션 제거 완료");
-
-            if(roomUserSessions.get(roomId) != null && roomUserSessions.get(roomId).isEmpty()) {
-                roomUserSessions.remove(roomId);
-                logger.info("[roomUserSessions 삭제] roomId={} 제거됨", roomId);
-            }
-            if(roomList.get(roomId) != null && roomList.get(roomId).isEmpty()) {
-                roomList.remove(roomId);
-                logger.info("[roomList 삭제] roomId={} 제거됨", roomId);
-            }
-
-            // 새로운 브로드 캐스트 도메인 갱신
-            roomUserSessions.computeIfAbsent(roomId, k -> new ConcurrentHashMap<>()).put(userId, session);
-            roomList.computeIfAbsent(roomId, k -> new HashSet<>()).add(session);
-            logger.info("[세션 갱신] 동일 탭 정상 복귀 완료: roomId={}, userId={}", roomId, userId);
-
-            return;
+        if(roomUserSessions.get(roomId) != null && roomUserSessions.get(roomId).isEmpty()) {
+            roomUserSessions.remove(roomId);
+            logger.info("[roomUserSessions 삭제] roomId={} 제거됨", roomId);
+        }
+        if(roomList.get(roomId) != null && roomList.get(roomId).isEmpty()) {
+            roomList.remove(roomId);
+            logger.info("[roomList 삭제] roomId={} 제거됨", roomId);
         }
 
+        // 새로운 브로드 캐스트 도메인 갱신
+        roomUserSessions.computeIfAbsent(roomId, k -> new ConcurrentHashMap<>()).put(userId, session);
+        roomList.computeIfAbsent(roomId, k -> new HashSet<>()).add(session);
+        logger.info("[세션 갱신] 동일 탭 정상 복귀 완료: roomId={}, userId={}", roomId, userId);
+    }
 
-        /* [중복탭 접속 분기]
-         *
-         * 목적:
-         *   - 기존 세션이 서버에 남아 있는 상태에서 클라이언트가 sessionKey 없이 재접속하면,
-         *     이를 중복 탭으로 간주하고 기존 세션을 강제 종료한다.
-         *
-         * 동작 배경:
-         *   - 중복 탭은 세션 충돌을 유발하므로, 서버는 항상 선행 세션을 제거하고 새로운 세션을 등록한다.
-         *
-         * 조건:
-         *   - clientSessionKey.equals("null") && serverSessionKey != null
-         *
-         * 처리 흐름:
-         *   1) 기존 세션 강제 종료
-         *   2) sessionKey 재발급 및 동기화
-         *   3) 세션 등록
-         *
-         * 예외 상황:
-         *   - prevSession null일 경우 종료 불필요
-         */
-        if (clientSessionKey.equals("null")) {
-            logger.info("[중복탭 진입] clientSessionKey=null, serverSessionKey 존재 → 기존 세션 제거 시작: roomId={}, userId={}", roomId, userId);
+    /**
+     * @method onDuplicateTab
+     * @brief [중복 탭] clientKey=="null" && serverKey!=null. 기존 세션을 close(3000)로 강제 종료하고
+     *        새 sessionKey를 발급·동기화한 뒤 세션을 교체한다.
+     *        ※ roomList.get(roomId).remove(session) 줄은 원본 동작을 그대로 유지한다.
+     */
+    private void onDuplicateTab(String roomId, String userId, WebSocketSession session) throws Exception {
+        logger.info("[중복탭 진입] clientSessionKey=null, serverSessionKey 존재 → 기존 세션 제거 시작: roomId={}, userId={}", roomId, userId);
 
-            /* 이전 세션 강제 종료 수행 */
-            WebSocketSession prevSession = roomUserSessions.get(roomId).get(userId);
-            if (prevSession != null) {
-                prevSession.close(new CloseStatus(3000, "중복 세션 강제 종료"));
-                logger.info("[세션 종료] 기존 prevSession 강제 close 완료");
-            }
-
-            /* 새로운 탭 접속 했으므로, 세션 스토리지 내 값 또한 새로운 값으로 갱신 */
-            String newSessionKey = UUID.randomUUID().toString();        // 새로운 세션 스토리지 값
-            saveSessionKey(roomId, userId, newSessionKey);              // 새로운 세션 스토리지 값을 서버 내 저장.
-            logger.info("[세션키 갱신] sessionKey 재발급 완료: sessionKey={}", newSessionKey);
-            /* 새로운 세션 스토리지 값을 클라이언트 내 저장 : 이후 새로 고침 혹은 추가적인 중복 탭 방지 목적. */
-            session.sendMessage(new TextMessage(
-                    String.format("{\"type\":\"SESSION_KEY\",\"sessionKey\":\"%s\"}", newSessionKey)
-            ));
-            logger.info("[클라이언트 전달] sessionKey 전송 완료");
-
-            // 기존 과거의 브로드 캐스트 도메인 제거
-            try { roomUserSessions.get(roomId).remove(userId); } catch (Exception e) { logger.error(e.getMessage()); }
-            roomList.get(roomId).remove(session);
-            logger.info("[세션 제거] 중복탭 이전 세션 제거 완료");
-
-            // 새롭운 브로드 캐스트 도메인 갱신
-            roomUserSessions.computeIfAbsent(roomId, k -> new ConcurrentHashMap<>()).put(userId, session);
-            roomList.computeIfAbsent(roomId, k -> new HashSet<>()).add(session);
-            logger.info("[세션 등록 완료] 중복탭 세션 교체 완료: roomId={}, userId={}", roomId, userId);
-
-            return;
+        /* 이전 세션 강제 종료 수행 */
+        WebSocketSession prevSession = roomUserSessions.get(roomId).get(userId);
+        if (prevSession != null) {
+            prevSession.close(new CloseStatus(3000, "중복 세션 강제 종료"));
+            logger.info("[세션 종료] 기존 prevSession 강제 close 완료");
         }
 
+        /* 새로운 탭 접속 했으므로, 세션 스토리지 내 값 또한 새로운 값으로 갱신 */
+        String newSessionKey = UUID.randomUUID().toString();        // 새로운 세션 스토리지 값
+        saveSessionKey(roomId, userId, newSessionKey);              // 새로운 세션 스토리지 값을 서버 내 저장.
+        logger.info("[세션키 갱신] sessionKey 재발급 완료: sessionKey={}", newSessionKey);
+        /* 새로운 세션 스토리지 값을 클라이언트 내 저장 : 이후 새로 고침 혹은 추가적인 중복 탭 방지 목적. */
+        sendSessionKey(session, newSessionKey);
+        logger.info("[클라이언트 전달] sessionKey 전송 완료");
 
-        /* [5] 예외/동기화불일치 : 클라이언트 sessionKey는 포함하나, 서버 측에 존재하지 않는다. 즉 새로운 접속 / 새로고침 / 중복 탭 접근에 해당되지 않는,
-            인위적인 접근이라 간주 후 서버 측은 별도의 데이터 저장 안하고, 클라이언트 내 SessionStorage "null" 초기화, 그리고 현재 세션 closd() 수행.
-        */
-        else {
-            logger.info("[예외/동기화 불일치] clientSessionKey={}, serverSessionKey={} ", clientSessionKey, serverSessionKey);
+        // 기존 과거의 브로드 캐스트 도메인 제거
+        try { roomUserSessions.get(roomId).remove(userId); } catch (Exception e) { logger.error(e.getMessage()); }
+        roomList.get(roomId).remove(session);
+        logger.info("[세션 제거] 중복탭 이전 세션 제거 완료");
 
-            String newSessionKey = "null";
-            /* 새로운 세션 스토리지 값을 클라이언트 내 저장 : 이후 새로 고침 혹은 추가적인 중복 탭 방지 목적. */
-            session.sendMessage(new TextMessage(
-                    String.format("{\"type\":\"SESSION_KEY\",\"sessionKey\":\"%s\"}", newSessionKey)
-            ));
-            session.close(new CloseStatus(3001, "중복 세션 강제 종료"));
-            return;
-        }
+        // 새롭운 브로드 캐스트 도메인 갱신
+        roomUserSessions.computeIfAbsent(roomId, k -> new ConcurrentHashMap<>()).put(userId, session);
+        roomList.computeIfAbsent(roomId, k -> new HashSet<>()).add(session);
+        logger.info("[세션 등록 완료] 중복탭 세션 교체 완료: roomId={}, userId={}", roomId, userId);
+    }
+
+    /**
+     * @method onDesync
+     * @brief [예외/동기화 불일치] 클라이언트가 키를 가졌으나 서버에 없거나 불일치 → 인위적 접근으로 간주.
+     *        서버는 별도 저장 없이 클라이언트 SessionStorage 초기화를 명령하고 현재 세션을 close(3001)한다.
+     *        ※ 여기서는 의도적으로 sendSessionKey(session,"null") → {"sessionKey":"null"}(따옴표 형태)를 보낸다.
+     */
+    private void onDesync(WebSocketSession session, String clientSessionKey, String serverSessionKey) throws Exception {
+        logger.info("[예외/동기화 불일치] clientSessionKey={}, serverSessionKey={} ", clientSessionKey, serverSessionKey);
+        sendSessionKey(session, "null");
+        session.close(new CloseStatus(3001, "중복 세션 강제 종료"));
     }
 
 
     /**
-     * @param roomId      방 번호(String)
-     * @param userId      사용자ID
-     * @param closeStatus 종료 코드/정보
      * @method handleUserSessionOnClose
-     * @brief WebSocket 세션 종료(명시적/중복탭/비명시적) 일괄 처리. 반드시 afterConnectionClosed에서만 호출.
+     * @brief WebSocket 종료 분기 디스패처. close code로 분기한다. (반드시 afterConnectionClosed에서만 호출)
+     *
+     *  code  | 의미                      | 처리
+     *  ----- | ------------------------- | ---------------------------------------------
+     *  1000  | 명시적 나가기             | onExplicitClose (permit 반환·키 삭제·방 정리)
+     *  3000  | 중복탭 강제종료(서버발)   | 로그만 (데이터는 새 탭이 이미 인수)
+     *  3001  | 잘못된 접근 차단          | 로그만
+     *  그 외 | 새로고침·탭·브라우저 종료 | markImplicitExitUser (TTL VO 등록)
      */
     public void handleUserSessionOnClose(String roomId, String userId, WebSocketSession session, CloseStatus closeStatus) {
         int roomNum = Integer.parseInt(roomId);
         logger.debug("[handleUserSessionOnClose] 진입: roomId={}, userId={}, closeStatus={}", roomId, userId, closeStatus);
 
-        /* 1. 명시적 종료 */
         if (closeStatus.getCode() == 1000) {
-
-            logger.info("[명시적 종료] roomId={}, userId={}", roomId, userId);
-            // 무조건 세마포어 감소 우선..그걸 기반으로 "removeUserFromRoom" 호출 시 ChatRoom 내역 정리
-            semaphoreRegistry.releasePermitOnly(roomNum);
-
-            /* [중요] - 현재 탭과 서버 측 관계 정리 :
-                1) 브라우저 SessionStory 제거
-                2) 서버 내 리스트 제거
-
-                완전히 방을 나간 상태라는 것은 현재 방과 아무런 관계가 없어진 다는 의미인데, 여기서 1번을 수행하지 않으면 이후 재 진입할 때 중복탭으로,
-                오인 가능하다.
-                그리고 JS의 명시적 종료(코드 1000번) 시점에 SessionStorge 삭제 해야 되나, close() 이후는 서버 측에서 직접 전달이 불가능하며,
-                JS 가 직접 삭제하도록 코드를 작성한다고 해도, 이는 사용자가 임의 수정이 가능하다. 그렇기 때문에 서버 측에서 현재의 방 ID 내 해당하는
-                사용자 Id 를 목록에서 제거한다. 이렇게 해서 최초 접속은 "saveSessionKey" 가 null 혹은 문자열 "null" 일 경우 최초 접속으로 판정. */
-
-            /* 서버 내 세션 스토리지 제거 */
-            removeSessionKey(roomId, userId);
-            /* 브로드 캐스트 및 중복 확인 리스트 제거.  */
-            removeUserFromRoom(roomNum, userId);
-
-            logger.info("[정상 종료] roomId={}, 현재 방 인원수={}", roomId, getRoom(roomNum).getCurrentPeople());
-
-        }
-        /* 2. 비 명시적 종료 - 중복 탭 생성으로 인한 종료 신호 : "handleUserSessionOnConnect()"의 호출, 즉 close() 가 브라우저 측에서 호출될 일은 없으며, 이후 처리 방침에 따라,
-            서버 측에서 close(3000) 호출로 인해 현 위치 실행하는 것.  */
-        else if (closeStatus.getCode() == 3000) {
+            onExplicitClose(roomId, userId, roomNum);
+        } else if (closeStatus.getCode() == 3000) {
+            /* 중복 탭 생성으로 인한 종료 신호: 브라우저가 아니라 서버가 close(3000)을 호출한 결과다.
+               자료구조는 새 탭이 onDuplicateTab에서 이미 인수했으므로 여기서는 로그만 남긴다. */
             logger.info("[중복 탭 따른 접속 종료] roomId={}, 현재 방 인원수={}", roomId, getRoom(roomNum).getCurrentPeople());
-
-        } else if(closeStatus.getCode() == 3001) { logger.info("잘못된 세션 접근 방지 차원 종료"); }
-        /* 3. 비 명시적 종료 - 새로고침 또는 단순 탭 혹은 브라우저 단위로 종료, 즉 진짜로 나간 건지, 혹은 새로고침 상태로써 바로 재 접속할 건지, 서버 측에서는 js 에서 별다른 차별점을 주지 못하기 때문에
-                이를 서버 측에서 구현해야 된다.
-        */
-        else {
+        } else if (closeStatus.getCode() == 3001) {
+            logger.info("잘못된 세션 접근 방지 차원 종료");
+        } else {
+            /* 새로고침/탭/브라우저 종료: 진짜 퇴장인지 새로고침 재접속인지 JS로는 구분 불가 → 서버가 TTL로 판정한다. */
             logger.info("[비 명시적 종료] 탭 또는 브라우저 종료 - roomId={}, userId={}, closeStatus={}", roomId, userId, closeStatus);
             markImplicitExitUser(roomNum, userId);
         }
+    }
+
+    /**
+     * @method onExplicitClose
+     * @brief [명시적 종료(1000)] 세마포어 permit 반환 → 서버 sessionKey 삭제 → 방/세션 정리.
+     *        서버가 sessionKey를 지워야(saveSessionKey 부재) 재진입 시 "최초 접속"으로 판정되어 중복탭 오인을 막는다.
+     *        JS가 SessionStorage를 지우는 것은 사용자가 조작 가능하므로 서버 측 삭제가 정합성의 기준이 된다.
+     */
+    private void onExplicitClose(String roomId, String userId, int roomNum) {
+        logger.info("[명시적 종료] roomId={}, userId={}", roomId, userId);
+        // 무조건 세마포어 감소 우선..그걸 기반으로 "removeUserFromRoom" 호출 시 ChatRoom 내역 정리
+        semaphoreRegistry.releasePermitOnly(roomNum);
+        /* 서버 내 세션 스토리지 제거 */
+        removeSessionKey(roomId, userId);
+        /* 브로드 캐스트 및 중복 확인 리스트 제거.  */
+        removeUserFromRoom(roomNum, userId);
+        logger.info("[정상 종료] roomId={}, 현재 방 인원수={}", roomId, getRoom(roomNum).getCurrentPeople());
     }
 
     // =========================================================================
