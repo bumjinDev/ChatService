@@ -162,7 +162,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
      */
     private void addJwtToCookie(HttpServletResponse response, String jwtToken) {
         Cookie cookie = new Cookie("Authorization", jwtToken);
-        cookie.setSecure(false);  // HTTPS에서만 사용
+        cookie.setSecure(true);  // HTTPS에서만 사용
         cookie.setHttpOnly(true); // JavaScript 접근 방지
         cookie.setPath("/");      // 전체 경로에서 유효
         response.addCookie(cookie);
