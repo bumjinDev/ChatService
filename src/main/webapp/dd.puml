@@ -1,0 +1,136 @@
+@startuml chat_room_architecture
+
+' ============================================
+' 크기 설정 (1740 x 520 px 내 포함 목표)
+' ============================================
+scale 0.83
+skinparam dpi 96
+skinparam defaultFontSize 9
+skinparam defaultFontName "NanumGothic"
+skinparam linetype ortho
+skinparam ranksep 20
+skinparam nodesep 10
+
+skinparam backgroundColor white
+skinparam shadowing false
+
+skinparam rectangle {
+    BackgroundColor white
+    BorderColor #888888
+    FontSize 9
+    RoundCorner 5
+}
+
+skinparam package {
+    BackgroundColor #F8F8F8
+    BorderColor #999999
+    FontSize 10
+    FontStyle bold
+}
+
+skinparam card {
+    BackgroundColor white
+    BorderColor #AAAAAA
+    FontSize 8
+}
+
+skinparam arrow {
+    Color #555555
+    FontSize 7
+}
+
+skinparam actor {
+    BackgroundColor white
+    BorderColor #666666
+}
+
+' ============================================
+' 가로 레이아웃
+' ============================================
+left to right direction
+
+' ============================================
+' Actor
+' ============================================
+actor "채팅방 접속\n요청자" as User
+
+' ============================================
+' Phase 0: 방 생성
+' ============================================
+together {
+    package "Phase 0 : 방 생성" as P0 <<Rectangle>> {
+        rectangle "RoomQueueApiController" as RQAC {
+            label "Create Room ()"
+        }
+        rectangle "RoomQueueService" as RQS {
+            label "creationQueueService()"
+        }
+        rectangle "InMemoryRoomQueueTracker" as IMRQT {
+            label "getRoom()\naddRoom()"
+        }
+    }
+}
+
+' ============================================
+' Phase 1: 방 입장 예약
+' ============================================
+together {
+    package "Phase 1 : 방 입장 예약" as P1 <<Rectangle>> {
+        rectangle "RoomJoinViewController" as RJVC {
+            label "showChatRoomPage ()"
+        }
+        rectangle "RoomJoinService" as RJS {
+            label "confirmJoinRoom()\njoinRoom()"
+        }
+        rectangle "SemaphoreRegistry" as SR {
+            label "tryAcquire()"
+        }
+    }
+}
+
+' ============================================
+' Phase 2: 방 연결 확정
+' ============================================
+together {
+    package "Phase 2 : 방 연결 확정" as P2 <<Rectangle>> {
+        rectangle "ChatSessionRegistry" as CSR {
+            label "updateRoomCurrentPeople ()\nhandleUserSessionOnConnect ()"
+        }
+        rectangle "ChatTextWebSocketHandler" as CTWSH {
+            label "afterConnectionEstablished()"
+        }
+    }
+}
+
+' ============================================
+' Phase 0 흐름
+' ============================================
+User --> RQAC : \n[과정1] 방 생성 요청
+RQAC --> RQS : [과정2] 방 생성\n대기열 등록
+RQS --> IMRQT : [과정3] 메모리\n대기열 내 저장
+
+' ============================================
+' Phase 1 흐름
+' ============================================
+User --> RJVC : \n[과정4] 방 입장 요청
+RJVC --> RJS : [과정5] 입장 가능\n여부 확인
+RJS ..> IMRQT : \n\n\n[과정6]\n방 생성 대기열 확인
+RJS --> SR : [과정7]\nSemaphore\npermit 요청
+SR --> RJS : [과정8]\n요청 결과 반환\n(성공/실패)
+RJS ..> RJVC : \n\n\n      [과정9-실패]\n      예외 반환
+RJVC ..> User : \n\n\n      [과정10-실패]\n      입장 불가 응답
+
+' ============================================
+' Phase 2 흐름 (성공 케이스)
+' ============================================
+SR --> CTWSH : [과정9-성공]\n웹 소켓 연결
+RJS --> CSR : \n\n\n[과정10-성공]\n실제 입장 처리 요청
+CTWSH --> CSR : [과정11]\n방 상태 동기화
+
+' ============================================
+' 레이아웃 힌트
+' ============================================
+P0 -[hidden]down-> P1
+P1 -[hidden]down-> P2
+
+@enduml
