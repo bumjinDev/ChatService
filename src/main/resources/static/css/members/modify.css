@@ -1,0 +1,5 @@
+@charset "UTF-8";
+
+/* modify.jsp — 회원 정보 수정. 카드/폼은 theme.css의 .auth / .grid2 컴포넌트 사용. */
+
+.auth { width: min(560px, 100%); }

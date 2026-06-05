@@ -1,83 +1,68 @@
 @charset "UTF-8";
 
-/* 공통 배경 설정 */
-body {
-    background-image: url("/ChatService/images/chat.jpg");
-    background-repeat: no-repeat;
-    background-size: 100% 100%;
-    position: relative;
-}
+/* index.jsp — 메인(랜딩) 공통 레이아웃. theme.css 위에서 동작. */
 
-/* 제목 스타일 */
-.titles {
-    position: absolute;
-    left: 40%;
-    top: 25px;
-    border-radius: 5px;
-    border: 5px solid blue;
-    background-color: skyblue;
-    font-size: 50px;
-    color: white;
-    padding: 20px;
-}
-
-/* 채팅방 및 사용자 정보 영역 */
-.information {
-    width: 30%; 
-    position: relative;
-    top: 250px;
-    left: 30%;
-    transform: translateX(20%);
+.hero {
+    width: min(560px, 100%);
+    padding: 48px 44px;
     text-align: center;
-    border-radius: 10px;
-    padding: 20px;
-    height: 70%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-label, span {
-    display: inline-block;
-    border-radius: 10px;
-    padding: 20px;
-    text-align: center;
-    color: black;
-    margin-bottom: 10px;
+.hero__brand { margin-bottom: 22px; }
+
+.hero__title {
+    font-size: 2.1rem;
+    font-weight: 900;
+    line-height: 1.2;
 }
 
-label {
-    border: 4px solid gray;
-    background-color: yellow;
-    height: 100%;
-    width: 150px;
+.hero__subtitle {
+    margin-top: 12px;
+    color: var(--text-muted);
+    font-size: .98rem;
 }
 
-span {
-    border: 4px solid gray;
-    background-color: white;
-    position: relative;
-    height: 20px;
-    width: 25%;
+.hero__stats {
+    display: flex;
+    gap: 14px;
+    width: 100%;
+    margin: 30px 0 4px;
+}
+.stat {
+    flex: 1;
+    padding: 20px 14px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+}
+.stat__value {
+    display: block;
+    font-size: 1.95rem;
+    font-weight: 900;
+    color: var(--accent-strong);
+    line-height: 1;
+}
+.stat__label {
+    display: block;
+    margin-top: 8px;
+    color: var(--text-muted);
+    font-size: .85rem;
+    font-weight: 600;
 }
 
-/* 닉네임 입력 영역 */
-.inputnickname {
-    width: 40%;
-    position: relative;
-    top: 250px;
-    left: 44%;
-    border-radius: 10px;
+.hero__actions {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    margin-top: 28px;
 }
+.hero__actions .btn { flex: 1; }
 
-.nicklable {
-    background-color: orange;
-    position: relative;
-}
-
-#nickname {
-    height: 30px;
-    width: 30%;
-    text-align: center;
-    background-color: white;
-    border: 4px solid gray;
-    border-radius: 5px;
-    padding: 15px;
+@media (max-width: 480px) {
+    .hero { padding: 34px 22px; }
+    .hero__title { font-size: 1.7rem; }
+    .hero__actions { flex-direction: column; }
 }

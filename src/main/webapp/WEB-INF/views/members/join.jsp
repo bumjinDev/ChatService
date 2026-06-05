@@ -1,76 +1,67 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="/ChatService/images/home_icon.jpg">
+    <link rel="stylesheet" href="/ChatService/css/common/theme.css">
     <link rel="stylesheet" href="/ChatService/css/join/join.css">
-    
-    <!-- Google Fonts & Bootstrap -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Courgette&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
-            crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.1/font/bootstrap-icons.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
-    <!-- Client JS (fetch 요청 처리용) -->
+    <!-- 기존 기능 유지: jQuery + join.js (DOM id로 값 조회) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="/ChatService/js/join/join.js" defer></script>
 
-    <title>Chat Service</title>
+    <title>회원가입 · ChatService</title>
 </head>
 
 <body>
-<div class="container">
-    <header>
-        <div id="logo" class="mb-5">
-            <a id="logo_text" href="/ChatService">Chat Service</a>
+<main class="center-stage">
+    <section class="auth auth--wide card rise">
+        <div class="auth__head">
+            <span class="brand"><span class="brand__dot">C</span>ChatService</span>
+            <h1 class="auth__title">회원가입</h1>
+            <p class="auth__sub muted">정보를 입력하고 ChatService에 가입하세요.</p>
         </div>
-    </header>
 
-    <section class="text-center" id="join-all-section">
-        <div id="inputBox" class="me-3 ms-3 row">
-            <div id="login-form-border" class="pt-3 pb-3">
+        <div class="auth__form">
+            <div class="field">
+                <label for="id">아이디</label>
+                <input type="text" id="id" name="id" class="input" placeholder="아이디">
+            </div>
 
-                <div class="mt-3 mb-1" id="join-id">
-                    <input type="text" id="id" name="id" class="form-control" placeholder="아이디">
+            <div class="grid2">
+                <div class="field">
+                    <label for="pw">비밀번호</label>
+                    <input type="password" id="pw" name="pw" class="input" placeholder="비밀번호">
                 </div>
-                <div class="mb-1" id="join-pw">
-                    <input type="password" id="pw" name="pw" class="form-control" placeholder="비밀번호">
-                </div>
-                <div class="mb-5" id="join-pwCheck">
-                    <input type="password" id="pw_check" class="form-control" placeholder="비밀번호 확인">
-                </div>
-                <div class="mb-1" id="join-nickName">
-                    <input type="text" id="nickname" name="nickName" class="form-control" placeholder="닉네임">
-                </div>
-                <div class="mb-1" id="join-tel">
-                    <input type="text" id="tel" name="tel" class="form-control" placeholder="전화번호">
-                </div>
-                <div class="mb-4" id="join-email">
-                    <input type="text" id="email" name="email" class="form-control" placeholder="이메일">
-                </div>
-
-                <div id="logo-img">
-                    <img src="/ChatService/images/home_icon.jpg" alt="">
-                </div>
-
-                <div class="mt-3 mb-5"></div>
-
-                <div id="join-btn" class="button-login-box">
-                    <input type="button" value="회원가입" id="joinBtn"
-                           class="btn btn-primary btn-xs mt-3 mb-4"
-                           style="width:100%; height:60px;">
+                <div class="field">
+                    <label for="pw_check">비밀번호 확인</label>
+                    <input type="password" id="pw_check" class="input" placeholder="비밀번호 확인">
                 </div>
             </div>
+
+            <div class="field">
+                <label for="nickname">닉네임</label>
+                <input type="text" id="nickname" name="nickName" class="input" placeholder="닉네임">
+            </div>
+
+            <div class="grid2">
+                <div class="field">
+                    <label for="tel">전화번호</label>
+                    <input type="text" id="tel" name="tel" class="input" placeholder="010-0000-0000">
+                </div>
+                <div class="field">
+                    <label for="email">이메일</label>
+                    <input type="text" id="email" name="email" class="input" placeholder="email@example.com">
+                </div>
+            </div>
+
+            <button type="button" id="joinBtn" class="btn btn--primary btn--block btn--lg">회원가입</button>
         </div>
+
+        <p class="auth__foot muted">이미 계정이 있으신가요? <a href="/ChatService/members/login">로그인</a></p>
     </section>
-</div>
+</main>
 </body>
 </html>
