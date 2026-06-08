@@ -8,7 +8,7 @@ pipeline {
 
     environment {
         APP_NAME    = 'chatservice'        // systemd 서비스명과 일치
-        PROJECT_DIR = '.'                  // ★ 프로젝트가 repo 루트면 '.', 하위 디렉토리면 그 이름
+        PROJECT_DIR = '.'                  // 프로젝트(build.gradle)가 repo 루트에 있으므로 '.'
         DEPLOY_DIR  = '/opt/chatservice'
         WAR_NAME    = 'ChatService.war'    // systemd ExecStart의 파일명과 일치
         APP_PORT    = '8186'               // application.yml의 server.port
@@ -20,17 +20,12 @@ pipeline {
         timestamps()
     }
 
-    stages {
-        stage('Git Clone') {
-            steps {
-                echo "=== Git Clone ==="
-                cleanWs()
-                git branch: 'master',      // ★ 기본 브랜치가 main이면 'main'
-                    url: 'https://github.com/bumjinDev/ChatService.git',
-                    credentialsId: 'github-credentials'
-            }
-        }
+    // Git Clone 단계 제거:
+    //   'Pipeline script from SCM'이 잡의 Branch Specifier(*/main)로
+    //   이미 repo를 워크스페이스에 체크아웃한다. 별도 clone은 중복이고
+    //   브랜치를 두 번 지정하게 되어 불일치 시 깨진다.
 
+    stages {
         stage('Setup Build Environment') {
             steps {
                 dir("${PROJECT_DIR}") {
