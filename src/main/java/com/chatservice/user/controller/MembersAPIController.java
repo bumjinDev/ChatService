@@ -1,6 +1,7 @@
 package com.chatservice.user.controller;
 
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
@@ -56,6 +57,7 @@ public class MembersAPIController {
     public ResponseEntity<Map<String, Object>> editMember(
             @CookieValue(name = "Authorization", required = true) String jwt,
             @Valid @RequestBody MemberDTO editRequestDTO,	/* 모든 정보 빠짐 없이 전부 입력 시킴. */
+            HttpServletRequest httpRequest,
             HttpServletResponse httpResponse,
             Model model) {
 
@@ -67,7 +69,7 @@ public class MembersAPIController {
         Cookie cookie = new Cookie("Authorization", editToken);
         cookie.setHttpOnly(true);
         cookie.setPath("/");
-        cookie.setSecure(true);  // 운영 환경에서는 true 적용
+        cookie.setSecure(httpRequest.isSecure());  // HTTPS 접속일 때만 Secure (HTTP 배포에선 false)
         httpResponse.addCookie(cookie);
 
         return ResponseEntity.ok(Map.of("message", "회원 수정이 정상적으로 완료되었습니다."));

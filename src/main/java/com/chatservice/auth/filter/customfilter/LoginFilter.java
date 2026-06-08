@@ -106,7 +106,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     	logger.info("LoginFilter.successfulAuthentication - 사용자 : {}", authResult.getName());
         // JWT 생성 후 브러우저에 반환할 HostOnly 쿠키에 추가
-        addJwtToCookie(response, generateAndStoreJwt(authResult));
+        addJwtToCookie(request, response, generateAndStoreJwt(authResult));
         // 로그인 성공 후 페이지 이동
         try { response.sendRedirect("/ChatService/"); }
         catch (IOException e) { e.printStackTrace(); }
@@ -160,9 +160,9 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     /**
      * JWT 토큰을 응답 쿠키에 추가
      */
-    private void addJwtToCookie(HttpServletResponse response, String jwtToken) {
+    private void addJwtToCookie(HttpServletRequest request, HttpServletResponse response, String jwtToken) {
         Cookie cookie = new Cookie("Authorization", jwtToken);
-        cookie.setSecure(true);  // HTTPS에서만 사용
+        cookie.setSecure(request.isSecure());  // HTTPS 접속일 때만 Secure (HTTP 배포에선 false → 브라우저가 쿠키 저장)
         cookie.setHttpOnly(true); // JavaScript 접근 방지
         cookie.setPath("/");      // 전체 경로에서 유효
         response.addCookie(cookie);
