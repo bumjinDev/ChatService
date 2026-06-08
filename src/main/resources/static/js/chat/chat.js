@@ -92,8 +92,9 @@ const ChatManager = {
 
     connectWebSocket() {
         const sessionKeyForSend = sessionStorage.getItem("sessionKey");
-        // ws:// URI 내 템플릿 리터럴 백틱(`) 필수
-        const websocketUrl = `ws://localhost:8186/ChatService/chat?roomNumber=${this.roomNumber}&sessionKey=${sessionKeyForSend}`;
+        // WS 주소는 현재 페이지의 host/scheme 기준으로 동적 생성 (로컬/원격/HTTPS 모두 대응) — localhost 하드코딩 금지
+        const wsProtocol = (window.location.protocol === 'https:') ? 'wss:' : 'ws:';
+        const websocketUrl = `${wsProtocol}//${window.location.host}/ChatService/chat?roomNumber=${this.roomNumber}&sessionKey=${sessionKeyForSend}`;
         try {
             this.socket = new WebSocket(websocketUrl);
             console.log(`WebSocket 연결 시도: ${websocketUrl}`);
