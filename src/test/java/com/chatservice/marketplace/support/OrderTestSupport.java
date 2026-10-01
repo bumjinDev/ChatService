@@ -13,6 +13,7 @@ import com.chatservice.marketplace.conversation.Conversation;
 import com.chatservice.marketplace.order.IOrderCancellationService;
 import com.chatservice.marketplace.order.IOrderService;
 import com.chatservice.marketplace.order.IShipmentService;
+import com.chatservice.marketplace.order.ITradeCompletionService;
 import com.chatservice.marketplace.order.scheduler.TradeScheduler;
 import com.chatservice.marketplace.order.OrderDetailResponse;
 import com.chatservice.marketplace.order.OrderPlaceRequest;
@@ -44,6 +45,9 @@ public abstract class OrderTestSupport extends IntegrationTestSupport {
 
 	@Autowired
 	private IShipmentService schedulerShipmentService;
+
+	@Autowired
+	private ITradeCompletionService schedulerCompletionService;
 
 	protected void charge(String memberId, long amount) {
 		walletService.charge(memberId, new ChargeRequest(amount, null));
@@ -83,7 +87,8 @@ public abstract class OrderTestSupport extends IntegrationTestSupport {
 
 	/** 테스트 설정에서는 스케줄러 빈이 없으므로 같은 서비스 빈으로 직접 만든다. */
 	protected TradeScheduler newScheduler() {
-		return new TradeScheduler(schedulerCancellationService, schedulerShipmentService, clock);
+		return new TradeScheduler(schedulerCancellationService, schedulerShipmentService, schedulerCompletionService,
+				clock);
 	}
 
 	protected long balance(String memberId) {

@@ -2,11 +2,14 @@ package com.chatservice.marketplace.order;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import com.chatservice.marketplace.common.BusinessException;
 import com.chatservice.marketplace.common.ErrorCode;
@@ -21,14 +24,22 @@ public class TradeCompletionService implements ITradeCompletionService {
 	private static final Logger log = LoggerFactory.getLogger(TradeCompletionService.class);
 
 	private final OrderAccess orderAccess;
+	private final PurchaseOrderRepository orderRepository;
+	private final RefundRequestRepository refundRequestRepository;
+	private final TransactionTemplate transactionTemplate;
 	private final IWalletService walletService;
 	private final ConversationNotifier conversationNotifier;
 	private final OrderDetailAssembler assembler;
 	private final Clock clock;
 
-	public TradeCompletionService(OrderAccess orderAccess, IWalletService walletService,
-			ConversationNotifier conversationNotifier, OrderDetailAssembler assembler, Clock clock) {
+	public TradeCompletionService(OrderAccess orderAccess, PurchaseOrderRepository orderRepository,
+			RefundRequestRepository refundRequestRepository, PlatformTransactionManager transactionManager,
+			IWalletService walletService, ConversationNotifier conversationNotifier, OrderDetailAssembler assembler,
+			Clock clock) {
 		this.orderAccess = orderAccess;
+		this.orderRepository = orderRepository;
+		this.refundRequestRepository = refundRequestRepository;
+		this.transactionTemplate = new TransactionTemplate(transactionManager);
 		this.walletService = walletService;
 		this.conversationNotifier = conversationNotifier;
 		this.assembler = assembler;
@@ -62,6 +73,40 @@ public class TradeCompletionService implements ITradeCompletionService {
 		}
 		complete(order, CompletionCause.BUYER_CONFIRMED, now, memberId);
 		return assembler.detail(order, memberId);
+	}
+
+	/**
+	 * 처리 순서(설계 명세서 6.16절)
+	 * 1. 진행 중, 배송 완료, 상품 확인 기한이 now 이하인 주문을 조회한다
+	 * 2. 주문마다 트랜잭션 하나에서 조건을 다시 확인하고 환불 요청이 없을 때만 공통 완료 처리(AUTO_EXPIRED)를 실행한다.
+	 *    환불이 접수된 주문은 보류(ON_HOLD)라 조회 조건에서 빠지지만 한 번 더 확인한다
+	 */
+	@Override
+	public int completeExpiredInspections(Instant now) {
+		List<Long> targetIds = orderRepository.findExpiredInspectionIds(now);
+		int processed = 0;
+		for (Long orderId : targetIds) {
+			Boolean done = transactionTemplate.execute(status -> completeIfExpired(orderId, now));
+			if (Boolean.TRUE.equals(done)) {
+				processed++;
+			}
+		}
+		log.info("상품 확인 기간 만료 자동 완료 실행 now={} 대상={} 처리={}", now, targetIds.size(), processed);
+		return processed;
+	}
+
+	private boolean completeIfExpired(Long orderId, Instant now) {
+		PurchaseOrder order = orderRepository.findById(orderId).orElse(null);
+		if (order == null
+				|| order.getTradeStatus() != TradeStatus.IN_PROGRESS
+				|| order.getShippingStatus() != ShippingStatus.DELIVERED
+				|| order.getInspectionDeadlineAt() == null
+				|| now.isBefore(order.getInspectionDeadlineAt())
+				|| refundRequestRepository.existsByOrderId(orderId)) {
+			return false;
+		}
+		complete(order, CompletionCause.AUTO_EXPIRED, now, null);
+		return true;
 	}
 
 	/**

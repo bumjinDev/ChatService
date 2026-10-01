@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.chatservice.marketplace.order.IOrderCancellationService;
 import com.chatservice.marketplace.order.IShipmentService;
+import com.chatservice.marketplace.order.ITradeCompletionService;
 
 /**
  * 자동 처리를 주기적으로 실행한다(설계 명세서 7.1절). 실제 처리는 각 주문 서비스의 자동 처리 메서드에 위임한다.
@@ -25,12 +26,14 @@ public class TradeScheduler {
 
 	private final IOrderCancellationService cancellationService;
 	private final IShipmentService shipmentService;
+	private final ITradeCompletionService completionService;
 	private final Clock clock;
 
 	public TradeScheduler(IOrderCancellationService cancellationService, IShipmentService shipmentService,
-			Clock clock) {
+			ITradeCompletionService completionService, Clock clock) {
 		this.cancellationService = cancellationService;
 		this.shipmentService = shipmentService;
+		this.completionService = completionService;
 		this.clock = clock;
 	}
 
@@ -39,6 +42,7 @@ public class TradeScheduler {
 		Instant now = clock.instant();
 		runJob("미발송 자동 취소", () -> cancellationService.cancelExpiredUnshipped(now));
 		runJob("모의 배송 완료", () -> shipmentService.completeDueDeliveries(now));
+		runJob("상품 확인 기간 만료 자동 완료", () -> completionService.completeExpiredInspections(now));
 	}
 
 	/** 한 작업의 예외가 다른 작업의 실행을 막지 않도록 작업별로 예외를 기록한다. */
