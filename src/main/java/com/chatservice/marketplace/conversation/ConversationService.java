@@ -1,6 +1,9 @@
 package com.chatservice.marketplace.conversation;
 
 import java.time.Clock;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -10,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.chatservice.marketplace.common.BusinessException;
 import com.chatservice.marketplace.common.ErrorCode;
+import com.chatservice.marketplace.common.MemberDirectory;
+import com.chatservice.marketplace.conversation.ConversationSummaryResponse.ProductSummary;
 import com.chatservice.marketplace.product.Product;
 import com.chatservice.marketplace.product.ProductRepository;
 
@@ -21,13 +26,23 @@ public class ConversationService implements IConversationService {
 	private final ConversationRepository conversationRepository;
 	private final ProductRepository productRepository;
 	private final ConversationAssembler assembler;
+	private final ConversationAccess conversationAccess;
+	private final ConversationStateEvaluator stateEvaluator;
+	private final ChatMessageRepository messageRepository;
+	private final MemberDirectory memberDirectory;
 	private final Clock clock;
 
 	public ConversationService(ConversationRepository conversationRepository, ProductRepository productRepository,
-			ConversationAssembler assembler, Clock clock) {
+			ConversationAssembler assembler, ConversationAccess conversationAccess,
+			ConversationStateEvaluator stateEvaluator, ChatMessageRepository messageRepository,
+			MemberDirectory memberDirectory, Clock clock) {
 		this.conversationRepository = conversationRepository;
 		this.productRepository = productRepository;
 		this.assembler = assembler;
+		this.conversationAccess = conversationAccess;
+		this.stateEvaluator = stateEvaluator;
+		this.messageRepository = messageRepository;
+		this.memberDirectory = memberDirectory;
 		this.clock = clock;
 	}
 
@@ -60,5 +75,47 @@ public class ConversationService implements IConversationService {
 		log.info("대화 생성 conversationId={} productId={} memberId={}", conversation.getConversationId(), productId,
 				memberId);
 		return new ConversationStartResult(true, assembler.detail(conversation, memberId));
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<ConversationSummaryResponse> listMine(String memberId) {
+		List<Conversation> conversations = conversationRepository.findAllOfMember(memberId);
+		Map<String, String> nicknames = memberDirectory
+				.nicknames(conversations.stream().map(c -> c.counterpartOf(memberId)).toList());
+		List<ConversationSummaryResponse> result = new ArrayList<>();
+		for (Conversation conversation : conversations) {
+			ConversationState state = stateEvaluator.evaluate(conversation);
+			Product product = state.product();
+			result.add(new ConversationSummaryResponse(
+					conversation.getConversationId(),
+					new ProductSummary(product.getProductId(), product.getName(), product.getPrice(),
+							product.getStatus()),
+					conversation.roleOf(memberId),
+					nicknames.get(conversation.counterpartOf(memberId)),
+					state.writable(),
+					conversation.getCreatedAt()));
+		}
+		return result;
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public ConversationDetailResponse getDetail(String memberId, Long conversationId) {
+		Conversation conversation = conversationAccess.requireParticipant(memberId, conversationId);
+		return assembler.detail(conversation, memberId);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<MessageResponse> getMessages(String memberId, Long conversationId, Long afterId) {
+		conversationAccess.requireParticipant(memberId, conversationId);
+		List<ChatMessage> messages = (afterId == null)
+				? messageRepository.findByConversationIdOrderByMessageIdAsc(conversationId)
+				: messageRepository.findByConversationIdAndMessageIdGreaterThanOrderByMessageIdAsc(conversationId,
+						afterId);
+		Map<String, String> nicknames = memberDirectory
+				.nicknames(messages.stream().map(ChatMessage::getSenderId).toList());
+		return messages.stream().map(m -> MessageResponse.of(m, nicknames.get(m.getSenderId()))).toList();
 	}
 }

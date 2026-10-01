@@ -1,11 +1,15 @@
 package com.chatservice.marketplace.conversation;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
@@ -35,5 +39,24 @@ public class ConversationController {
 	public ResponseEntity<MessageResponse> send(@AuthenticationPrincipal String memberId,
 			@PathVariable("conversationId") Long conversationId, @Valid @RequestBody MessageSendRequest request) {
 		return ResponseEntity.status(HttpStatus.CREATED).body(messageService.send(memberId, conversationId, request));
+	}
+
+	@GetMapping("/api/conversations")
+	public List<ConversationSummaryResponse> listMine(@AuthenticationPrincipal String memberId) {
+		return conversationService.listMine(memberId);
+	}
+
+	@GetMapping("/api/conversations/{conversationId}")
+	public ConversationDetailResponse detail(@AuthenticationPrincipal String memberId,
+			@PathVariable("conversationId") Long conversationId) {
+		return conversationService.getDetail(memberId, conversationId);
+	}
+
+	/** afterId 를 주면 그보다 큰 messageId 만 돌려준다. 다시 접속한 클라이언트가 놓친 메시지만 가져올 때 쓴다. */
+	@GetMapping("/api/conversations/{conversationId}/messages")
+	public List<MessageResponse> messages(@AuthenticationPrincipal String memberId,
+			@PathVariable("conversationId") Long conversationId,
+			@RequestParam(name = "afterId", required = false) Long afterId) {
+		return conversationService.getMessages(memberId, conversationId, afterId);
 	}
 }
