@@ -1,0 +1,17 @@
+# 통합 테스트 설정. 접속 정보는 운영과 같이 환경변수(ORACLE_URL, ORACLE_USERNAME, ORACLE_PASSWORD, REDIS_*)로 받는다.
+marketplace:
+  scheduler:
+    # 테스트는 자동 처리 메서드를 직접 호출하므로 스케줄러를 끈다.
+    enabled: false
+  mock-delivery:
+    duration: PT2M
+
+spring:
+  jpa:
+    properties:
+      hibernate:
+        format_sql: false
+
+logging:
+  level:
+    org.springframework.web.socket: INFO

@@ -23,7 +23,10 @@ import com.chatservice.auth.filter.util.JWTUtil;
 import com.chatservice.auth.provider.UserAuthenticationProvider;
 import com.chatservice.auth.repository.UserEntityRepository;
 import com.chatservice.auth.userdetailservice.UserEntityDetailService;
+import com.chatservice.marketplace.common.ApiAccessDeniedHandler;
+import com.chatservice.marketplace.common.ApiAuthenticationEntryPoint;
 import com.chatservice.redis.handler.RedisHandler;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 
@@ -37,6 +40,7 @@ public class SecurityConfig {
     private final JWTUtil jwtUtil;
     private final CookieUtil cookieUtil;
     private final RedisHandler redisHandler;
+    private final ObjectMapper objectMapper;
 
     public SecurityConfig(
     		
@@ -45,7 +49,8 @@ public class SecurityConfig {
         UserEntityRepository userEntityRepository,
         JWTUtil jwtUtil,
         CookieUtil cookieUtil,
-        RedisHandler redisHandler
+        RedisHandler redisHandler,
+        ObjectMapper objectMapper
     ) {
         this.authenticationConfiguration = authenticationConfiguration;
         this.userEntityDetailService = userEntityDetailService;
@@ -53,6 +58,7 @@ public class SecurityConfig {
         this.jwtUtil = jwtUtil;
         this.cookieUtil = cookieUtil;
         this.redisHandler = redisHandler;
+        this.objectMapper = objectMapper;
     }
 
     @Bean
@@ -158,6 +164,44 @@ public class SecurityConfig {
             .exceptionHandling(exception ->
                 exception.authenticationEntryPoint(new JwtAuthenticationFailureHandler())
                          .accessDeniedHandler(new JwtAccessDeniedHandler()));
+        return http.build();
+    }
+
+    /*
+     * [C2C Marketplace HTTP API] /api/** 경로.
+     * - 상품 공개 조회(GET /api/products, GET /api/products/{id})는 인증 없이 허용한다(F-002).
+     * - 그 밖의 /api/** 는 인증이 필요하다. 인증은 기존 JWT 쿠키 필터로 확인한다.
+     * - 인증 실패와 접근 거부는 JSON 으로 응답한다.
+     */
+    @Bean
+    public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
+        http.securityMatcher("/api/**")
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(HttpMethod.GET, "/api/products", "/api/products/*").permitAll()
+                .anyRequest().authenticated())
+            .csrf(csrf -> csrf.disable())
+            .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .addFilterAt(new JwtAuthProcessorFilter(cookieUtil, jwtUtil, redisHandler), UsernamePasswordAuthenticationFilter.class)
+            .exceptionHandling(exception ->
+                exception.authenticationEntryPoint(new ApiAuthenticationEntryPoint(objectMapper))
+                         .accessDeniedHandler(new ApiAccessDeniedHandler(objectMapper)));
+        return http.build();
+    }
+
+    /*
+     * [C2C Marketplace 대화 WebSocket] /ws/** 경로. 핸드셰이크 요청에 인증이 필요하다.
+     * 구성은 기존 chatWebSocketFilterChain 과 같고, 실패 응답만 JSON 으로 돌려준다.
+     */
+    @Bean
+    public SecurityFilterChain conversationWebSocketFilterChain(HttpSecurity http) throws Exception {
+        http.securityMatcher("/ws/**")
+            .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+            .csrf(csrf -> csrf.disable())
+            .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .addFilterAt(new JwtAuthProcessorFilter(cookieUtil, jwtUtil, redisHandler), UsernamePasswordAuthenticationFilter.class)
+            .exceptionHandling(exception ->
+                exception.authenticationEntryPoint(new ApiAuthenticationEntryPoint(objectMapper))
+                         .accessDeniedHandler(new ApiAccessDeniedHandler(objectMapper)));
         return http.build();
     }
 

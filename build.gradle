@@ -11,6 +11,12 @@ group = 'com.chatservice'
 version = '1.0.0-BUILD-SNAPSHOT'
 description = 'RealTimeChatProgram'
 
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
 configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
@@ -73,10 +79,24 @@ dependencies {
 
 	/* 테스트 관련 의존성 */
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+// 통합 테스트가 빈 스키마에 적용할 DDL 스크립트를 테스트 클래스패스(db/)에 복사한다.
+tasks.named('processTestResources') {
+	from("docs/1. 프로젝트개발/2. db") {
+		include 'ddl_toychat.sql', 'ddl_marketplace.sql'
+		into 'db'
+	}
 }
 
 tasks.test {
 	useJUnitPlatform()
+	// 통합 테스트는 Oracle 테스트 스키마와 Redis 를 사용한다. 접속 정보는 환경변수로만 받는다(README 참고).
+	testLogging {
+		events 'passed', 'skipped', 'failed'
+		exceptionFormat 'full'
+	}
 }
 
 tasks.withType(JavaCompile) {

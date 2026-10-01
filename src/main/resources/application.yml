@@ -9,8 +9,9 @@ spring:
 
   datasource:
     driver-class-name: oracle.jdbc.OracleDriver
-    url: jdbc:oracle:thin:@127.0.0.1:1521:xe
-    username: TOYCHAT
+    # 접속 정보와 비밀번호는 환경변수로만 받는다. 예: ORACLE_URL=jdbc:oracle:thin:@127.0.0.1:1521:xe, ORACLE_USERNAME=TOYCHAT
+    url: ${ORACLE_URL}
+    username: ${ORACLE_USERNAME}
     # 비밀번호는 systemd 환경변수에서 주입 (레포에 평문 보관 금지) — Cowork가 systemd 유닛에 ORACLE_PASSWORD 설정
     password: ${ORACLE_PASSWORD}
 
@@ -29,8 +30,9 @@ spring:
 
   data:
     redis:
-      host: 127.0.0.1   # 배포 미니PC 로컬. 변경 필요 시 외부 IP 입력
-      port: 6379
+      # 접속 정보는 환경변수 REDIS_HOST, REDIS_PORT 로 받는다. 값이 없으면 로컬 기본값을 쓴다.
+      host: ${REDIS_HOST:127.0.0.1}
+      port: ${REDIS_PORT:6379}
       # 미니PC Redis는 인증이 걸려 있음 — Cowork가 systemd 유닛에 REDIS_PASSWORD 설정
       password: ${REDIS_PASSWORD}
       timeout: 10s
@@ -55,12 +57,30 @@ spring:
         jdbc.fetch_size: 100
         cache.use_query_cache: false
         physical_naming_strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+        # Instant 를 TIMESTAMP 컬럼에 UTC 기준으로 저장하고 읽는다(설계 명세서 4.3절).
+        jdbc.time_zone: UTC
+        type.preferred_instant_jdbc_type: TIMESTAMP
     open-in-view: false
+
+  jackson:
+    deserialization:
+      # 금액 필드에 소수가 들어오면 버리지 않고 입력 오류(400)로 처리한다.
+      accept-float-as-int: false
 
   mvc:
     view:
       prefix: /WEB-INF/views/
       suffix: .jsp
+# C2C Marketplace 설정
+marketplace:
+  scheduler:
+    # 자동 처리 4종(미발송 자동 취소, 모의 배송 완료, 확인 기간 만료 자동 완료, 무응답 자동 환불)의 실행 여부와 폴링 간격
+    enabled: true
+    fixed-delay: PT30S
+  mock-delivery:
+    # 발송 등록 시각부터 모의 배송 완료까지의 기간(ISO-8601 Duration)
+    duration: PT2M
+
 logging:
   level:
     org:
