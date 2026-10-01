@@ -3,6 +3,7 @@ package com.chatservice.marketplace.order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,14 +17,23 @@ import jakarta.validation.Valid;
 public class OrderController {
 
 	private final IOrderService orderService;
+	private final IShipmentService shipmentService;
 
-	public OrderController(IOrderService orderService) {
+	public OrderController(IOrderService orderService, IShipmentService shipmentService) {
 		this.orderService = orderService;
+		this.shipmentService = shipmentService;
 	}
 
 	@PostMapping
 	public ResponseEntity<OrderDetailResponse> placeOrder(@AuthenticationPrincipal String memberId,
 			@Valid @RequestBody OrderPlaceRequest request) {
 		return ResponseEntity.status(HttpStatus.CREATED).body(orderService.placeOrder(memberId, request));
+	}
+
+	@PostMapping("/{orderId}/shipment")
+	public ResponseEntity<OrderDetailResponse> registerShipment(@AuthenticationPrincipal String memberId,
+			@PathVariable("orderId") Long orderId, @Valid @RequestBody ShipmentRegisterRequest request) {
+		return ResponseEntity.status(HttpStatus.CREATED)
+				.body(shipmentService.registerShipment(memberId, orderId, request));
 	}
 }
