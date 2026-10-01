@@ -1,11 +1,18 @@
 package com.chatservice.marketplace.wallet;
 
 import java.time.Instant;
+import java.util.List;
 
 public interface IWalletService {
 
 	/** 요청한 회원 본인의 잔액을 충전하고 CHARGE 내역을 남긴다(F-003). */
 	ChargeResponse charge(String memberId, ChargeRequest request);
+
+	/** 요청한 회원 본인의 잔액. 지갑이 없으면 잔액 0 으로 만든다(F-004). */
+	WalletResponse getMyWallet(String memberId);
+
+	/** 요청한 회원 본인의 변동 내역을 최신순으로 돌려준다(F-004). */
+	List<TransactionResponse> getMyTransactions(String memberId);
 
 	/**
 	 * 회원 잔액을 늘리고 내역을 남긴다. 지갑이 없으면 잔액 0 으로 만든 뒤 더한다.

@@ -2,6 +2,7 @@ package com.chatservice.marketplace.wallet;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +35,22 @@ public class WalletService implements IWalletService {
 		BalanceTransaction tx = credit(memberId, TransactionType.CHARGE, request.amount(), null, request.requestId(),
 				clock.instant());
 		return new ChargeResponse(tx.getBalanceAfter(), TransactionResponse.of(tx));
+	}
+
+	@Override
+	@Transactional
+	public WalletResponse getMyWallet(String memberId) {
+		Wallet wallet = getOrOpen(memberId, clock.instant());
+		return new WalletResponse(wallet.getMemberId(), wallet.getBalance());
+	}
+
+	@Override
+	@Transactional
+	public List<TransactionResponse> getMyTransactions(String memberId) {
+		getOrOpen(memberId, clock.instant());
+		return transactionRepository.findByMemberIdOrderByTransactionIdDesc(memberId).stream()
+				.map(TransactionResponse::of)
+				.toList();
 	}
 
 	@Override
