@@ -19,12 +19,14 @@ public class OrderController {
 	private final IOrderService orderService;
 	private final IShipmentService shipmentService;
 	private final IOrderCancellationService cancellationService;
+	private final ITradeCompletionService completionService;
 
 	public OrderController(IOrderService orderService, IShipmentService shipmentService,
-			IOrderCancellationService cancellationService) {
+			IOrderCancellationService cancellationService, ITradeCompletionService completionService) {
 		this.orderService = orderService;
 		this.shipmentService = shipmentService;
 		this.cancellationService = cancellationService;
+		this.completionService = completionService;
 	}
 
 	@PostMapping
@@ -44,5 +46,11 @@ public class OrderController {
 	public OrderDetailResponse cancel(@AuthenticationPrincipal String memberId, @PathVariable("orderId") Long orderId,
 			@Valid @RequestBody OrderCancelRequest request) {
 		return cancellationService.cancelByParty(memberId, orderId, request);
+	}
+
+	@PostMapping("/{orderId}/confirm-receipt")
+	public OrderDetailResponse confirmReceipt(@AuthenticationPrincipal String memberId,
+			@PathVariable("orderId") Long orderId) {
+		return completionService.confirmReceipt(memberId, orderId);
 	}
 }

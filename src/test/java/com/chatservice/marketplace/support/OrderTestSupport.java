@@ -16,6 +16,7 @@ import com.chatservice.marketplace.order.IShipmentService;
 import com.chatservice.marketplace.order.scheduler.TradeScheduler;
 import com.chatservice.marketplace.order.OrderDetailResponse;
 import com.chatservice.marketplace.order.OrderPlaceRequest;
+import com.chatservice.marketplace.order.PurchaseOrder;
 import com.chatservice.marketplace.product.Product;
 import com.chatservice.marketplace.wallet.BalanceTransaction;
 import com.chatservice.marketplace.wallet.BalanceTransactionRepository;
@@ -64,6 +65,20 @@ public abstract class OrderTestSupport extends IntegrationTestSupport {
 		OfferResponse offer = offerService.propose(buyerId, conv.getConversationId(),
 				new OfferProposeRequest(amount, null));
 		return offerService.respond(product.getSellerId(), offer.offerId(), true);
+	}
+
+	/**
+	 * 결제 → 발송 등록 → 모의 배송 완료까지 진행한 주문을 돌려준다.
+	 * 배송 완료 안내 시점은 현재 시각 + 1시간 + 모의 배송 기간이며, 반환 후 Clock 은 그 시점에 있다.
+	 */
+	protected PurchaseOrder deliveredOrder(String sellerId, String buyerId, long price) {
+		OrderDetailResponse order = purchase(buyerId, product(sellerId, price));
+		clock.advance(java.time.Duration.ofHours(1));
+		OrderDetailResponse shipped = schedulerShipmentService.registerShipment(sellerId, order.orderId(),
+				new com.chatservice.marketplace.order.ShipmentRegisterRequest("우체국", "123", null));
+		clock.set(shipped.shipment().deliveryDueAt());
+		schedulerShipmentService.completeDueDeliveries(clock.instant());
+		return orderRepository.findById(order.orderId()).orElseThrow();
 	}
 
 	/** 테스트 설정에서는 스케줄러 빈이 없으므로 같은 서비스 빈으로 직접 만든다. */
