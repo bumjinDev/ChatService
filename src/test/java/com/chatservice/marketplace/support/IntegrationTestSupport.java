@@ -17,6 +17,9 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.chatservice.auth.filter.util.JWTUtil;
+import com.chatservice.marketplace.product.Category;
+import com.chatservice.marketplace.product.Product;
+import com.chatservice.marketplace.product.ProductRepository;
 import com.chatservice.redis.handler.RedisHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -55,6 +58,9 @@ public abstract class IntegrationTestSupport {
 
 	@Autowired
 	private JWTUtil jwtUtil;
+
+	@Autowired
+	protected ProductRepository productRepository;
 
 	@Autowired
 	private RedisHandler redisHandler;
@@ -102,6 +108,18 @@ public abstract class IntegrationTestSupport {
 		String nickname = jdbcTemplate.queryForObject("SELECT NICKNAME FROM MEMBERTBL WHERE ID = ?", String.class,
 				memberId);
 		return new Cookie("Authorization", token(memberId, nickname));
+	}
+
+	/** 판매 중 상품을 저장소로 직접 만든다. */
+	protected Product product(String sellerId, long price) {
+		return productRepository.saveAndFlush(
+				Product.register(sellerId, "상품" + price, "상품 설명", Category.ETC, price, clock.instant()));
+	}
+
+	/** 상품을 판매 종료 상태로 바꾼다(주문 없이 상태만 바꾸는 준비 작업). */
+	protected Product markSold(Product product) {
+		product.markSold(clock.instant());
+		return productRepository.saveAndFlush(product);
 	}
 
 	protected String json(Object body) throws Exception {

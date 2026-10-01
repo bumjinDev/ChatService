@@ -8,7 +8,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
 import com.chatservice.marketplace.support.IntegrationTestSupport;
@@ -16,9 +15,6 @@ import com.chatservice.marketplace.support.TestTimes;
 
 /** F-001 상품 등록 API 검증. */
 class ProductRegisterApiTest extends IntegrationTestSupport {
-
-	@Autowired
-	private ProductRepository productRepository;
 
 	@Test
 	void F001_AC01_유효한_네_필수_정보로_등록하면_201과_ON_SALE() throws Exception {

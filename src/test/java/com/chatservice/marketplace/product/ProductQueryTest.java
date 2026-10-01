@@ -21,19 +21,11 @@ class ProductQueryTest extends IntegrationTestSupport {
 	@Autowired
 	private IProductService productService;
 
-	@Autowired
-	private ProductRepository productRepository;
-
 	private Product saveProduct(String sellerId, String name, Category category, long price) {
 		Product product = productRepository.saveAndFlush(
 				Product.register(sellerId, name, name + " 설명", category, price, clock.instant()));
 		clock.advance(Duration.ofMinutes(1));
 		return product;
-	}
-
-	private void markSold(Product product) {
-		product.markSold(clock.instant());
-		productRepository.saveAndFlush(product);
 	}
 
 	@Test

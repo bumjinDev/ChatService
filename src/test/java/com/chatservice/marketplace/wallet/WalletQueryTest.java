@@ -17,7 +17,6 @@ import com.chatservice.marketplace.order.PurchaseOrder;
 import com.chatservice.marketplace.order.PurchaseOrderRepository;
 import com.chatservice.marketplace.product.Category;
 import com.chatservice.marketplace.product.Product;
-import com.chatservice.marketplace.product.ProductRepository;
 import com.chatservice.marketplace.support.IntegrationTestSupport;
 
 /** F-004 잔액·변동 내역 조회 검증. */
@@ -31,9 +30,6 @@ class WalletQueryTest extends IntegrationTestSupport {
 
 	@Autowired
 	private BalanceTransactionRepository transactionRepository;
-
-	@Autowired
-	private ProductRepository productRepository;
 
 	@Autowired
 	private PurchaseOrderRepository orderRepository;

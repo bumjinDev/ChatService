@@ -16,7 +16,6 @@ import org.springframework.context.ApplicationContext;
 
 import com.chatservice.marketplace.product.Category;
 import com.chatservice.marketplace.product.Product;
-import com.chatservice.marketplace.product.ProductRepository;
 import com.chatservice.marketplace.support.IntegrationTestSupport;
 
 /**
@@ -26,9 +25,6 @@ class FoundationIntegrationTest extends IntegrationTestSupport {
 
 	@Autowired
 	private ApplicationContext context;
-
-	@Autowired
-	private ProductRepository productRepository;
 
 	@Autowired
 	private Clock appClock;
