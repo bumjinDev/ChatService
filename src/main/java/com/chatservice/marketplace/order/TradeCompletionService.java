@@ -114,7 +114,9 @@ public class TradeCompletionService implements ITradeCompletionService {
 	 * 호출한 쪽의 트랜잭션 안에서 함께 반영하고, 커밋 뒤 당사자 대화에 CONVERSATION_STATE 를 보낸다.
 	 * actorId 가 null 이면 시스템 처리로 보고 두 참여자 모두에게 보낸다.
 	 */
-	void complete(PurchaseOrder order, CompletionCause cause, Instant now, String actorId) {
+	@Override
+	@Transactional
+	public void complete(PurchaseOrder order, CompletionCause cause, Instant now, String actorId) {
 		TradeStatus before = order.getTradeStatus();
 		order.complete(cause, now);
 		walletService.credit(order.getSellerId(), TransactionType.SALE_PAYOUT, order.getPaidAmount(),

@@ -10,6 +10,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.chatservice.marketplace.order.IOrderCancellationService;
+import com.chatservice.marketplace.order.IRefundService;
 import com.chatservice.marketplace.order.IShipmentService;
 import com.chatservice.marketplace.order.ITradeCompletionService;
 
@@ -27,13 +28,15 @@ public class TradeScheduler {
 	private final IOrderCancellationService cancellationService;
 	private final IShipmentService shipmentService;
 	private final ITradeCompletionService completionService;
+	private final IRefundService refundService;
 	private final Clock clock;
 
 	public TradeScheduler(IOrderCancellationService cancellationService, IShipmentService shipmentService,
-			ITradeCompletionService completionService, Clock clock) {
+			ITradeCompletionService completionService, IRefundService refundService, Clock clock) {
 		this.cancellationService = cancellationService;
 		this.shipmentService = shipmentService;
 		this.completionService = completionService;
+		this.refundService = refundService;
 		this.clock = clock;
 	}
 
@@ -43,6 +46,7 @@ public class TradeScheduler {
 		runJob("미발송 자동 취소", () -> cancellationService.cancelExpiredUnshipped(now));
 		runJob("모의 배송 완료", () -> shipmentService.completeDueDeliveries(now));
 		runJob("상품 확인 기간 만료 자동 완료", () -> completionService.completeExpiredInspections(now));
+		runJob("환불 무응답 자동 환불", () -> refundService.autoApproveExpired(now));
 	}
 
 	/** 한 작업의 예외가 다른 작업의 실행을 막지 않도록 작업별로 예외를 기록한다. */

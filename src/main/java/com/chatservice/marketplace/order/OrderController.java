@@ -62,4 +62,16 @@ public class OrderController {
 			@PathVariable("orderId") Long orderId, @Valid @RequestBody RefundRequestCreateRequest request) {
 		return ResponseEntity.status(HttpStatus.CREATED).body(refundService.requestRefund(memberId, orderId, request));
 	}
+
+	@PostMapping("/{orderId}/refund-request/approve")
+	public OrderDetailResponse approveRefund(@AuthenticationPrincipal String memberId,
+			@PathVariable("orderId") Long orderId) {
+		return refundService.decide(memberId, orderId, true);
+	}
+
+	@PostMapping("/{orderId}/refund-request/reject")
+	public OrderDetailResponse rejectRefund(@AuthenticationPrincipal String memberId,
+			@PathVariable("orderId") Long orderId) {
+		return refundService.decide(memberId, orderId, false);
+	}
 }
