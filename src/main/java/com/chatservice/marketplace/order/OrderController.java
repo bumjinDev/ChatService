@@ -18,10 +18,13 @@ public class OrderController {
 
 	private final IOrderService orderService;
 	private final IShipmentService shipmentService;
+	private final IOrderCancellationService cancellationService;
 
-	public OrderController(IOrderService orderService, IShipmentService shipmentService) {
+	public OrderController(IOrderService orderService, IShipmentService shipmentService,
+			IOrderCancellationService cancellationService) {
 		this.orderService = orderService;
 		this.shipmentService = shipmentService;
+		this.cancellationService = cancellationService;
 	}
 
 	@PostMapping
@@ -35,5 +38,11 @@ public class OrderController {
 			@PathVariable("orderId") Long orderId, @Valid @RequestBody ShipmentRegisterRequest request) {
 		return ResponseEntity.status(HttpStatus.CREATED)
 				.body(shipmentService.registerShipment(memberId, orderId, request));
+	}
+
+	@PostMapping("/{orderId}/cancel")
+	public OrderDetailResponse cancel(@AuthenticationPrincipal String memberId, @PathVariable("orderId") Long orderId,
+			@Valid @RequestBody OrderCancelRequest request) {
+		return cancellationService.cancelByParty(memberId, orderId, request);
 	}
 }
