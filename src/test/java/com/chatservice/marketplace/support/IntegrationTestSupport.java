@@ -17,6 +17,11 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.chatservice.auth.filter.util.JWTUtil;
+import com.chatservice.marketplace.conversation.Conversation;
+import com.chatservice.marketplace.conversation.ConversationRepository;
+import com.chatservice.marketplace.order.PriceSource;
+import com.chatservice.marketplace.order.PurchaseOrder;
+import com.chatservice.marketplace.order.PurchaseOrderRepository;
 import com.chatservice.marketplace.product.Category;
 import com.chatservice.marketplace.product.Product;
 import com.chatservice.marketplace.product.ProductRepository;
@@ -61,6 +66,12 @@ public abstract class IntegrationTestSupport {
 
 	@Autowired
 	protected ProductRepository productRepository;
+
+	@Autowired
+	protected ConversationRepository conversationRepository;
+
+	@Autowired
+	protected PurchaseOrderRepository orderRepository;
 
 	@Autowired
 	private RedisHandler redisHandler;
@@ -120,6 +131,23 @@ public abstract class IntegrationTestSupport {
 	protected Product markSold(Product product) {
 		product.markSold(clock.instant());
 		return productRepository.saveAndFlush(product);
+	}
+
+	/** 대화를 저장소로 직접 만든다. */
+	protected Conversation conversation(Product product, String buyerId) {
+		return conversationRepository.saveAndFlush(
+				Conversation.open(product.getProductId(), buyerId, product.getSellerId(), clock.instant(), false));
+	}
+
+	/**
+	 * 결제 기능을 거치지 않고 주문과 판매 종료 상태를 저장소로 직접 만든다.
+	 * 결제 자체가 검증 대상이 아닌 테스트(쓰기 가능 판단 등)의 준비 작업에 쓴다.
+	 */
+	protected PurchaseOrder orderFixture(Product product, String buyerId) {
+		markSold(product);
+		return orderRepository.saveAndFlush(PurchaseOrder.confirm(product.getProductId(), buyerId,
+				product.getSellerId(), product.getPrice(), PriceSource.LISTED, null, "수령인", "서울시 어딘가",
+				clock.instant(), clock.instant().plus(java.time.Duration.ofDays(8)), null));
 	}
 
 	protected String json(Object body) throws Exception {
