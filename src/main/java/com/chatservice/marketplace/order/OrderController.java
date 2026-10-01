@@ -1,8 +1,11 @@
 package com.chatservice.marketplace.order;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,15 +24,17 @@ public class OrderController {
 	private final IOrderCancellationService cancellationService;
 	private final ITradeCompletionService completionService;
 	private final IRefundService refundService;
+	private final IOrderQueryService queryService;
 
 	public OrderController(IOrderService orderService, IShipmentService shipmentService,
 			IOrderCancellationService cancellationService, ITradeCompletionService completionService,
-			IRefundService refundService) {
+			IRefundService refundService, IOrderQueryService queryService) {
 		this.orderService = orderService;
 		this.shipmentService = shipmentService;
 		this.cancellationService = cancellationService;
 		this.completionService = completionService;
 		this.refundService = refundService;
+		this.queryService = queryService;
 	}
 
 	@PostMapping
@@ -73,5 +78,20 @@ public class OrderController {
 	public OrderDetailResponse rejectRefund(@AuthenticationPrincipal String memberId,
 			@PathVariable("orderId") Long orderId) {
 		return refundService.decide(memberId, orderId, false);
+	}
+
+	@GetMapping("/purchases")
+	public List<OrderSummaryResponse> purchases(@AuthenticationPrincipal String memberId) {
+		return queryService.listPurchases(memberId);
+	}
+
+	@GetMapping("/sales")
+	public List<OrderSummaryResponse> sales(@AuthenticationPrincipal String memberId) {
+		return queryService.listSales(memberId);
+	}
+
+	@GetMapping("/{orderId}")
+	public OrderDetailResponse detail(@AuthenticationPrincipal String memberId, @PathVariable("orderId") Long orderId) {
+		return queryService.getDetail(memberId, orderId);
 	}
 }
