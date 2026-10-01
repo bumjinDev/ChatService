@@ -10,7 +10,10 @@ import com.chatservice.marketplace.offer.IOfferService;
 import com.chatservice.marketplace.offer.OfferProposeRequest;
 import com.chatservice.marketplace.offer.OfferResponse;
 import com.chatservice.marketplace.conversation.Conversation;
+import com.chatservice.marketplace.order.IOrderCancellationService;
 import com.chatservice.marketplace.order.IOrderService;
+import com.chatservice.marketplace.order.IShipmentService;
+import com.chatservice.marketplace.order.scheduler.TradeScheduler;
 import com.chatservice.marketplace.order.OrderDetailResponse;
 import com.chatservice.marketplace.order.OrderPlaceRequest;
 import com.chatservice.marketplace.product.Product;
@@ -35,6 +38,12 @@ public abstract class OrderTestSupport extends IntegrationTestSupport {
 	@Autowired
 	protected BalanceTransactionRepository transactionRepository;
 
+	@Autowired
+	private IOrderCancellationService schedulerCancellationService;
+
+	@Autowired
+	private IShipmentService schedulerShipmentService;
+
 	protected void charge(String memberId, long amount) {
 		walletService.charge(memberId, new ChargeRequest(amount, null));
 	}
@@ -55,6 +64,11 @@ public abstract class OrderTestSupport extends IntegrationTestSupport {
 		OfferResponse offer = offerService.propose(buyerId, conv.getConversationId(),
 				new OfferProposeRequest(amount, null));
 		return offerService.respond(product.getSellerId(), offer.offerId(), true);
+	}
+
+	/** 테스트 설정에서는 스케줄러 빈이 없으므로 같은 서비스 빈으로 직접 만든다. */
+	protected TradeScheduler newScheduler() {
+		return new TradeScheduler(schedulerCancellationService, schedulerShipmentService, clock);
 	}
 
 	protected long balance(String memberId) {

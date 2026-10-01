@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
-import com.chatservice.marketplace.order.scheduler.TradeScheduler;
 import com.chatservice.marketplace.support.OrderTestSupport;
 import com.chatservice.marketplace.support.TestTimes;
 import com.chatservice.marketplace.wallet.TransactionType;
@@ -85,14 +84,14 @@ class AutoCancelTest extends OrderTestSupport {
 
 	@Test
 	void 테스트_설정에서는_스케줄러_빈이_만들어지지_않고_스케줄러는_현재_시각으로_자동_취소를_호출한다() {
-		assertThat(context.getBeansOfType(TradeScheduler.class)).isEmpty();
+		assertThat(context.getBeansOfType(com.chatservice.marketplace.order.scheduler.TradeScheduler.class)).isEmpty();
 
 		String seller = member("it_seller", "판매자");
 		String buyer = member("it_buyer", "구매자");
 		OrderDetailResponse order = purchase(buyer, product(seller, 30_000));
 		clock.set(TestTimes.kst(2026, 10, 6, 0, 0));
 
-		new TradeScheduler(cancellationService, clock).run();
+		newScheduler().run();
 
 		assertThat(orderRepository.findById(order.orderId()).orElseThrow().getTradeStatus())
 				.isEqualTo(TradeStatus.CANCELLED);
