@@ -20,4 +20,14 @@ public interface IWalletService {
 	 */
 	BalanceTransaction credit(String memberId, TransactionType type, long amount, Long orderId, String requestId,
 			Instant now);
+
+	/** 현재 잔액. 지갑이 없으면 0 이며 지갑을 만들지 않는다. */
+	long balanceOf(String memberId);
+
+	/**
+	 * 회원 잔액을 줄이고 내역을 남긴다. 잔액이 충분한지는 호출하는 쪽이 먼저 검사한다.
+	 * 결제(PURCHASE)에서 호출한다. 호출한 쪽의 트랜잭션에 참여한다.
+	 */
+	BalanceTransaction debit(String memberId, TransactionType type, long amount, Long orderId, String requestId,
+			Instant now);
 }

@@ -1,6 +1,7 @@
 package com.chatservice.marketplace.conversation;
 
 import java.time.Clock;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -117,5 +118,19 @@ public class ConversationService implements IConversationService {
 		Map<String, String> nicknames = memberDirectory
 				.nicknames(messages.stream().map(ChatMessage::getSenderId).toList());
 		return messages.stream().map(m -> MessageResponse.of(m, nicknames.get(m.getSenderId()))).toList();
+	}
+
+	@Override
+	@Transactional
+	public Conversation ensurePartyConversation(Long productId, String buyerId, String sellerId,
+			Instant now) {
+		return conversationRepository.findFirstByProductIdAndBuyerIdOrderByConversationIdAsc(productId, buyerId)
+				.orElseGet(() -> {
+					Conversation created = conversationRepository
+							.save(Conversation.open(productId, buyerId, sellerId, now, true));
+					log.info("결제에 따른 당사자 대화 생성 conversationId={} productId={} memberId={}",
+							created.getConversationId(), productId, buyerId);
+					return created;
+				});
 	}
 }

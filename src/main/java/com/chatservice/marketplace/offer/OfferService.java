@@ -106,6 +106,16 @@ public class OfferService implements IOfferService {
 		return OfferResponse.of(offer);
 	}
 
+	@Override
+	@Transactional(readOnly = true)
+	public PriceOffer requireAgreedOffer(Long offerId, Long productId, String buyerId) {
+		return offerRepository.findById(offerId)
+				.filter(o -> o.getStatus() == OfferStatus.ACCEPTED)
+				.filter(o -> o.getProductId().equals(productId))
+				.filter(o -> o.getBuyerId().equals(buyerId))
+				.orElseThrow(() -> new BusinessException(ErrorCode.INVALID_OFFER_SELECTION));
+	}
+
 	static OfferEvent toEvent(PriceOffer offer) {
 		return new OfferEvent(offer.getOfferId(), offer.getConversationId(), offer.getAmount(), offer.getStatus(),
 				offer.getCreatedAt(), offer.getRespondedAt());

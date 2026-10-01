@@ -66,6 +66,25 @@ public class WalletService implements IWalletService {
 		return tx;
 	}
 
+	@Override
+	@Transactional(readOnly = true)
+	public long balanceOf(String memberId) {
+		return walletRepository.findById(memberId).map(Wallet::getBalance).orElse(0L);
+	}
+
+	@Override
+	@Transactional
+	public BalanceTransaction debit(String memberId, TransactionType type, long amount, Long orderId,
+			String requestId, Instant now) {
+		Wallet wallet = getOrOpen(memberId, now);
+		long balanceAfter = wallet.withdraw(amount, now);
+		BalanceTransaction tx = transactionRepository.save(
+				BalanceTransaction.record(memberId, type, -amount, balanceAfter, orderId, requestId, now));
+		log.info("잔액 감소 memberId={} type={} amount={} balanceAfter={} orderId={}", memberId, type, amount,
+				balanceAfter, orderId);
+		return tx;
+	}
+
 	/** 지갑을 조회하고, 없으면 잔액 0 인 지갑을 만든다. */
 	Wallet getOrOpen(String memberId, Instant now) {
 		return walletRepository.findById(memberId)
