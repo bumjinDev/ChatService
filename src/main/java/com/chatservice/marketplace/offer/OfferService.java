@@ -74,6 +74,38 @@ public class OfferService implements IOfferService {
 		return OfferResponse.of(offer);
 	}
 
+	/**
+	 * 처리 순서(설계 명세서 6.9절)
+	 * 1. 제안이 없으면 404, 요청한 회원이 판매자가 아니면 403 NOT_SELLER
+	 * 2. 상품이 판매 중이 아니면 409 PRODUCT_NOT_ON_SALE. 제안 상태는 바꾸지 않는다
+	 * 3. 제안이 PENDING 이 아니면 409 OFFER_ALREADY_RESPONDED
+	 * 4. 상태와 응답 시각을 기록하고 커밋 뒤 구매 희망자 세션에 OFFER 이벤트를 보낸다
+	 * 수락해도 상품을 예약하거나 등록 가격을 바꾸지 않는다.
+	 */
+	@Override
+	@Transactional
+	public OfferResponse respond(String memberId, Long offerId, boolean accept) {
+		PriceOffer offer = offerRepository.findById(offerId)
+				.orElseThrow(() -> new BusinessException(ErrorCode.OFFER_NOT_FOUND));
+		if (!offer.getSellerId().equals(memberId)) {
+			throw new BusinessException(ErrorCode.NOT_SELLER);
+		}
+		Product product = productRepository.findById(offer.getProductId())
+				.orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
+		if (!product.isOnSale()) {
+			throw new BusinessException(ErrorCode.PRODUCT_NOT_ON_SALE);
+		}
+		if (offer.getStatus() != OfferStatus.PENDING) {
+			throw new BusinessException(ErrorCode.OFFER_ALREADY_RESPONDED);
+		}
+		OfferStatus before = offer.getStatus();
+		offer.respond(accept, clock.instant());
+		log.info("가격 제안 응답 offerId={} conversationId={} memberId={} {} -> {}", offerId,
+				offer.getConversationId(), memberId, before, offer.getStatus());
+		realtimePublisher.publish(offer.getConversationId(), toEvent(offer), memberId);
+		return OfferResponse.of(offer);
+	}
+
 	static OfferEvent toEvent(PriceOffer offer) {
 		return new OfferEvent(offer.getOfferId(), offer.getConversationId(), offer.getAmount(), offer.getStatus(),
 				offer.getCreatedAt(), offer.getRespondedAt());

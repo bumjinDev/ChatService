@@ -25,4 +25,14 @@ public class OfferController {
 			@PathVariable("conversationId") Long conversationId, @Valid @RequestBody OfferProposeRequest request) {
 		return ResponseEntity.status(HttpStatus.CREATED).body(offerService.propose(memberId, conversationId, request));
 	}
+
+	@PostMapping("/api/offers/{offerId}/accept")
+	public OfferResponse accept(@AuthenticationPrincipal String memberId, @PathVariable("offerId") Long offerId) {
+		return offerService.respond(memberId, offerId, true);
+	}
+
+	@PostMapping("/api/offers/{offerId}/reject")
+	public OfferResponse reject(@AuthenticationPrincipal String memberId, @PathVariable("offerId") Long offerId) {
+		return offerService.respond(memberId, offerId, false);
+	}
 }
