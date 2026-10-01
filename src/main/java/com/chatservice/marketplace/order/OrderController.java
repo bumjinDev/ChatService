@@ -20,13 +20,16 @@ public class OrderController {
 	private final IShipmentService shipmentService;
 	private final IOrderCancellationService cancellationService;
 	private final ITradeCompletionService completionService;
+	private final IRefundService refundService;
 
 	public OrderController(IOrderService orderService, IShipmentService shipmentService,
-			IOrderCancellationService cancellationService, ITradeCompletionService completionService) {
+			IOrderCancellationService cancellationService, ITradeCompletionService completionService,
+			IRefundService refundService) {
 		this.orderService = orderService;
 		this.shipmentService = shipmentService;
 		this.cancellationService = cancellationService;
 		this.completionService = completionService;
+		this.refundService = refundService;
 	}
 
 	@PostMapping
@@ -52,5 +55,11 @@ public class OrderController {
 	public OrderDetailResponse confirmReceipt(@AuthenticationPrincipal String memberId,
 			@PathVariable("orderId") Long orderId) {
 		return completionService.confirmReceipt(memberId, orderId);
+	}
+
+	@PostMapping("/{orderId}/refund-request")
+	public ResponseEntity<OrderDetailResponse> requestRefund(@AuthenticationPrincipal String memberId,
+			@PathVariable("orderId") Long orderId, @Valid @RequestBody RefundRequestCreateRequest request) {
+		return ResponseEntity.status(HttpStatus.CREATED).body(refundService.requestRefund(memberId, orderId, request));
 	}
 }
