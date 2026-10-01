@@ -41,6 +41,7 @@
 6. [데이터베이스 설계](#데이터베이스-설계)
 7. [API 명세](#api-명세)
 8. [디렉토리 구조](#디렉토리-구조)
+9. [C2C Marketplace 확장](#c2c-marketplace-확장)
 
 ---
 
@@ -294,6 +295,150 @@ ChatService
 ```
 
 > 각 핵심 클래스의 설계 책임·실행 흐름은 `docs/클래스해설/` 의 클래스별 `.md` 문서에 정리되어 있다.
+
+---
+
+## C2C Marketplace 확장
+
+기존 ChatService 를 개인 간 중고거래 서비스(C2C Marketplace)로 확장했다. 기준 문서는 `docs/4. 프로젝트고도화/` 의 기획서, 요구사항 명세서, 설계 명세서이며 문서 사이에 내용이 다르면 설계 명세서 → 요구사항 명세서 → 기획서 순으로 따랐다. 환불 정책은 요구사항 명세서 변경 이력 CH-001(판매자 동의 = 전액 환불, 거절 = 정상 완료, 접수 후 48시간 무응답 = 자동 환불)을 따른다. 구현 중 내린 판단은 [`docs/C2C_Marketplace_구현_판단_기록.md`](docs/C2C_Marketplace_구현_판단_기록.md)에 있다.
+
+### 구현 범위
+
+설계 명세서 1.1절의 기본 기능(F-001~F-019)의 정상 처리, 입력 검증, 당사자 권한 확인, 순차 요청에서의 상태 변경, 저장과 조회를 구현했다. 기능마다 "함께 반영할 변경"은 트랜잭션 하나로 반영한다(전파 속성과 격리 수준은 기본값).
+
+다음은 설계 명세서가 후속 과제로 정한 항목이라 구현하지 않았다.
+
+- 동시 요청 제어(락, 격리 수준 조정, 낙관적 잠금 등)
+- 같은 요청이 다시 전송되었을 때의 중복 처리 방지(`requestId` 는 저장만 한다)
+- 처리 도중 실패했을 때의 복구, 스케줄러 중복 실행 방지
+- 성능 최적화와 인덱스 설계
+
+| 기능 | 내용 | API |
+| --- | --- | --- |
+| F-001 | 상품 등록 | `POST /api/products` |
+| F-002 | 판매 중 상품 목록·상세 공개 조회 | `GET /api/products?category=`, `GET /api/products/{productId}` |
+| F-003 | 테스트 잔액 충전 | `POST /api/wallet/charges` |
+| F-004 | 잔액·변동 내역 조회 | `GET /api/wallet`, `GET /api/wallet/transactions` |
+| F-005 | 상품별 1:1 채팅 시작·이어가기 | `POST /api/products/{productId}/conversations` |
+| F-006 | 메시지 전송(저장 후 실시간 전달) | `POST /api/conversations/{id}/messages` |
+| F-007 | 채팅 목록·상세·메시지 내역(`afterId`) | `GET /api/conversations`, `GET /api/conversations/{id}`, `GET /api/conversations/{id}/messages?afterId=` |
+| F-008 | 가격 제안 | `POST /api/conversations/{id}/offers` |
+| F-009 | 가격 제안 수락·거절 | `POST /api/offers/{offerId}/accept`, `POST /api/offers/{offerId}/reject` |
+| F-010 | 구매·잔액 결제(등록가 또는 합의가) | `POST /api/orders` |
+| F-011 | 발송 정보 등록 | `POST /api/orders/{orderId}/shipment` |
+| F-012 | 발송 전 주문 취소 | `POST /api/orders/{orderId}/cancel` |
+| F-013 | 미발송 자동 취소(5영업일) | 스케줄러 |
+| F-014 | 모의 배송 완료 | 스케줄러 |
+| F-015 | 정상 수령 확인·판매대금 지급 | `POST /api/orders/{orderId}/confirm-receipt` |
+| F-016 | 상품 확인 기간(48시간) 만료 자동 완료 | 스케줄러 |
+| F-017 | 환불 요청·거래 보류 | `POST /api/orders/{orderId}/refund-request` |
+| F-018 | 판매자 환불 동의·거절, 무응답 자동 환불 | `POST /api/orders/{orderId}/refund-request/approve`, `/reject`, 스케줄러 |
+| F-019 | 구매·판매 목록, 주문 상세와 금전 결과 | `GET /api/orders/purchases`, `GET /api/orders/sales`, `GET /api/orders/{orderId}` |
+
+- 실시간 이벤트: `GET /ws/conversations?conversationId={id}`(WebSocket). 서버가 `MESSAGE`, `OFFER`, `CONVERSATION_STATE` 를 보낸다. 같은 회원의 새 연결은 기존 연결을 종료 코드 3000 으로 닫는다.
+- 대화 화면: `GET /ChatService/conversations/{conversationId}` (`conversation.jsp`, `conversation.js`)
+- 인증: 기존 JWT 쿠키(`Authorization`) 로그인을 그대로 쓴다. 상품 공개 조회를 제외한 `/api/**` 와 `/ws/**` 는 인증이 필요하다.
+- 오류 응답: `{ "code": "PRODUCT_NOT_ON_SALE", "status": 409, "message": "..." }`. 입력 오류는 `VALIDATION_ERROR`(400)와 `fieldErrors` 를 함께 돌려준다.
+- 시각: DB 에는 UTC 로 저장하고 API 는 ISO-8601 UTC 문자열로 응답한다. 업무 기한(5영업일, 48시간)은 KST 기준으로 계산한다.
+
+### 패키지 구성
+
+```
+com.chatservice.marketplace
+├── common        # ErrorCode, BusinessException, ApiExceptionHandler, Clock 빈, TimeRules(KST 영업일·48시간)
+├── product       # 상품 등록·공개 조회
+├── wallet        # 잔액, 변동 내역, 충전·조회
+├── conversation  # 대화, 메시지, 쓰기 가능 판단, 대화 화면 컨트롤러
+│   └── realtime  # WebSocket 설정·핸드셰이크·핸들러·세션 레지스트리·이벤트 전달
+├── offer         # 가격 제안과 응답
+├── order         # 결제, 발송, 취소, 정상 완료, 환불, 주문 조회
+│   └── scheduler # TradeScheduler(자동 처리 4종)
+└── web           # MainPageController(메인 화면)
+```
+
+설계 명세서 2.2.3절에 따라 `createroom`, `joinroom`, `concurrency`, `scheduler`, `roomlist`, `web`, `websocketcore`, `redis.controller`, `redis.service` 패키지는 소스를 남겨 두고 `ChatServiceApplication` 의 컴포넌트 스캔 제외 필터로 실행에서만 뺐다. 따라서 기존 방 목록·방 생성·채팅방 경로(`/rooms`, `/chat` 등)는 동작하지 않는다.
+
+### 환경변수
+
+DB 접속 정보와 비밀번호 같은 비밀값은 코드와 `application.yml` 에 두지 않고 환경변수로만 받는다.
+
+| 환경변수 | 필수 | 설명 | 예 |
+| --- | --- | --- | --- |
+| `ORACLE_URL` | 필수 | Oracle JDBC URL | `jdbc:oracle:thin:@127.0.0.1:1521/XEPDB1` |
+| `ORACLE_USERNAME` | 필수 | 스키마 계정 | `TOYCHAT` |
+| `ORACLE_PASSWORD` | 필수 | 스키마 비밀번호 | |
+| `REDIS_HOST` | 선택 | Redis 호스트(기본 `127.0.0.1`) | |
+| `REDIS_PORT` | 선택 | Redis 포트(기본 `6379`) | |
+| `REDIS_PASSWORD` | 필수 | Redis 비밀번호. 인증이 없는 Redis 는 빈 문자열로 둔다 | |
+
+`application.yml` 의 마켓플레이스 설정은 다음과 같다. 환경변수(`MARKETPLACE_SCHEDULER_FIXED_DELAY` 등)로 바꿀 수 있다.
+
+| 설정 | 기본값 | 설명 |
+| --- | --- | --- |
+| `marketplace.scheduler.enabled` | `true` | 자동 처리 스케줄러 사용 여부 |
+| `marketplace.scheduler.fixed-delay` | `PT30S` | 자동 처리 실행 간격(이전 실행이 끝난 뒤의 간격) |
+| `marketplace.mock-delivery.duration` | `PT2M` | 발송 등록부터 모의 배송 완료까지의 기간 |
+
+### Oracle XE 와 Redis 준비
+
+Oracle XE 는 Docker 컨테이너로 실행할 수 있다. 아래 예는 `XEPDB1` 에 `TOYCHAT` 계정을 만든다.
+
+```bash
+export ORACLE_PASSWORD='<TOYCHAT 비밀번호>'
+docker run -d --name chatservice-oracle -p 1521:1521 \
+  -e ORACLE_PASSWORD='<SYS 비밀번호>' \
+  -e APP_USER=TOYCHAT -e APP_USER_PASSWORD="$ORACLE_PASSWORD" \
+  gvenzl/oracle-xe:21-slim-faststart
+docker logs -f chatservice-oracle   # "DATABASE IS READY TO USE!" 가 나오면 준비 완료
+
+export ORACLE_URL=jdbc:oracle:thin:@127.0.0.1:1521/XEPDB1
+export ORACLE_USERNAME=TOYCHAT
+```
+
+기존 방식(직접 설치한 Oracle)이라면 `docs/1. 프로젝트개발/2. db/00_create_toychat_user.sql` 로 계정을 만든다.
+
+Redis 는 로컬에 설치된 것을 실행한다.
+
+```bash
+export REDIS_PASSWORD='<Redis 비밀번호>'
+redis-server --port 6379 --requirepass "$REDIS_PASSWORD" --daemonize yes
+```
+
+### DDL 적용
+
+`ddl-auto: none` 이므로 테이블은 직접 만든다. 기존 테이블 DDL 다음에 마켓플레이스 DDL 을 적용한다.
+
+```bash
+cd "docs/1. 프로젝트개발/2. db"
+cat ddl_toychat.sql ddl_marketplace.sql | \
+  docker exec -i chatservice-oracle sqlplus -s "TOYCHAT/$ORACLE_PASSWORD@//localhost:1521/XEPDB1"
+```
+
+`ddl_marketplace.sql` 은 `PRODUCT`, `WALLET`, `CONVERSATION`, `PRICE_OFFER`, `PURCHASE_ORDER`, `SHIPMENT`, `REFUND_REQUEST`, `CHAT_MESSAGE`, `BALANCE_TRANSACTION` 9개 테이블을 만든다. 되돌릴 때는 파일 앞부분의 DROP 문(주석)을 자식 → 부모 순서로 실행한다.
+
+### 실행
+
+```bash
+./gradlew bootRun          # 또는 ./gradlew bootWar 후 build/libs/*.war 실행
+```
+
+브라우저에서 `http://localhost:8186/ChatService/` 로 접속해 회원 가입·로그인한 뒤 API 를 호출한다. 대화 화면은 `http://localhost:8186/ChatService/conversations/{conversationId}` 이다.
+
+### 테스트 실행
+
+통합 테스트는 실제 Oracle 테스트 스키마와 Redis 를 사용한다. 위 환경변수를 설정한 뒤 실행한다.
+
+```bash
+./gradlew test     # 테스트만
+./gradlew build    # 컴파일, 테스트, war 패키징
+```
+
+- 테스트 스키마에 테이블이 없으면 테스트가 시작할 때 `ddl_toychat.sql`, `ddl_marketplace.sql` 을 자동으로 적용한다(빌드 시 테스트 클래스패스 `db/` 로 복사된다).
+- 테스트는 매번 마켓플레이스 테이블 9개의 모든 행과 ID 가 `it_` 로 시작하는 회원을 지운다. **운영 스키마를 가리키는 환경변수로 테스트를 실행하지 않는다.**
+- 테스트는 `test` 프로필(`src/test/resources/application-test.yml`)로 스케줄러를 끄고, 시각을 옮길 수 있는 `MutableClock` 을 주입한 뒤 자동 처리 메서드를 직접 호출한다.
+- 문서 경로에 한글이 있으므로 Linux 에서는 UTF-8 로케일(예: `export LC_ALL=C.UTF-8`)에서 Gradle 을 실행한다.
+
+테스트 구성은 설계 명세서 9장의 검증 표를 따른다(후속 과제로 표시된 항목 제외). 서비스 통합 테스트, `MockMvc` API 테스트, `StandardWebSocketClient` WebSocket 테스트로 나뉜다.
 
 ---
 
