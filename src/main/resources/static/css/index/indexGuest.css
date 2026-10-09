@@ -1,6 +1,0 @@
-@charset "UTF-8";
-
-/* index.jsp — 비로그인(게스트) 전용 보조 스타일.
-   공통 레이아웃은 indexCommon.css, 컴포넌트는 theme.css에서 처리한다. */
-
-.hero__subtitle { max-width: 30rem; }
