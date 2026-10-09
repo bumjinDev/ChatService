@@ -53,6 +53,9 @@ spring:
         format_sql: true
         default_batch_fetch_size: 50
         jdbc.fetch_size: 100
+        # Instant 를 UTC 기준 TIMESTAMP 로 저장·조회한다. JVM·DB 세션 시간대와 무관하게 같은 값을 쓰기 위한 설정이다.
+        jdbc.time_zone: UTC
+        type.preferred_instant_jdbc_type: TIMESTAMP
         cache.use_query_cache: false
         physical_naming_strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     open-in-view: false
@@ -61,6 +64,21 @@ spring:
     view:
       prefix: /WEB-INF/views/
       suffix: .jsp
+
+  jackson:
+    deserialization:
+      # 금액·수량에 소수가 들어오면 정수로 잘라 받지 않고 400 으로 거절한다(요구사항 2.3절).
+      accept-float-as-int: false
+
+marketplace:
+  scheduler:
+    # 자동 처리 4종(미발송 자동 취소, 모의 배송 완료, 확인 기간 만료 완료, 무응답 자동 환불)의 폴링 간격(ms)
+    enabled: true
+    fixed-delay: 30000
+  mock-delivery:
+    # 발송 등록 시각부터 모의 배송 완료까지의 기간(ISO-8601 Duration). 운영 성능 목표가 아니다.
+    duration: PT2M
+
 logging:
   level:
     org:
