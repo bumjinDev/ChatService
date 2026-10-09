@@ -35,10 +35,11 @@ pipeline {
             }
         }
 
-        stage('Compile Test') {
+        stage('Unit Test') {
             steps {
                 dir("${PROJECT_DIR}") {
-                    sh './gradlew compileJava'
+                    // build.gradle의 test 태스크는 @Tag("integration")을 제외하므로 DB·Redis 없이 단위 테스트만 돈다
+                    sh './gradlew clean test'
                 }
             }
         }
@@ -46,8 +47,8 @@ pipeline {
         stage('Build WAR') {
             steps {
                 dir("${PROJECT_DIR}") {
-                    // build.gradle에 war 플러그인이 적용돼 있어야 bootWar 존재
-                    sh './gradlew clean bootWar'
+                    // bootWar만 실행해 실행용 WAR 하나만 만든다(build를 쓰면 -plain.war도 생긴다)
+                    sh './gradlew bootWar'
                     sh 'ls -lah build/libs/*.war'
                 }
             }
@@ -55,29 +56,36 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                script {
-                    echo "=== Deploy ==="
-                    sh "sudo mkdir -p ${DEPLOY_DIR}"
-                    // 버전 붙은 산출물명을 고정명(ChatService.war)으로 복사 -> systemd가 이 경로를 실행
-                    sh "sudo cp \$(ls ${PROJECT_DIR}/build/libs/*.war | head -1) ${DEPLOY_DIR}/${WAR_NAME}"
-                    // ProcessTreeKiller 회피 + 부팅 자동기동: 직접 java 실행이 아니라 systemd 재시작
-                    sh "sudo systemctl restart ${APP_NAME}"
-                    echo "=== Deploy Done ==="
-                }
+                echo '=== Deploy ==='
+                // 버전 붙은 산출물명을 고정명(ChatService.war)으로 복사 -> systemd가 이 경로를 실행
+                // ProcessTreeKiller 회피 + 부팅 자동기동: 직접 java 실행이 아니라 systemd 재시작
+                sh '''
+                    WAR=$(find "$PROJECT_DIR/build/libs" -maxdepth 1 -name '*.war' ! -name '*-plain.war')
+                    [ "$(echo "$WAR" | grep -c .)" -eq 1 ] || { echo "실행용 WAR가 정확히 1개가 아니다: $WAR"; exit 1; }
+                    sudo mkdir -p "$DEPLOY_DIR"
+                    sudo cp "$WAR" "$DEPLOY_DIR/$WAR_NAME"
+                    sudo systemctl restart "$APP_NAME"
+                '''
+                echo '=== Deploy Done ==='
             }
         }
 
         stage('Health Check') {
             steps {
-                script {
-                    sleep(20)
-                    sh "sudo systemctl is-active ${APP_NAME}"
-                    sh "sudo netstat -tlnp | grep :${APP_PORT} || echo 'port ${APP_PORT} not listening'"
-                    sh """
-                        code=\$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:${APP_PORT}/ChatService/ || echo 000)
-                        echo "HTTP \$code (000이면 미응답, 그 외면 컨텍스트 기동됨)"
-                    """
-                }
+                // 5초 간격으로 최대 120초 동안 확인한다. 메인 화면과 공개 상품 API가 모두 200이어야 성공이다.
+                // /api/products는 새 테이블을 조회하므로 운영 DB에 DDL이 없으면 여기서 실패한다.
+                sh '''
+                    for i in $(seq 1 24); do
+                        main=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:$APP_PORT/ChatService/" || true)
+                        api=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:$APP_PORT/ChatService/api/products" || true)
+                        echo "health check $i/24: main=$main api=$api"
+                        if [ "$main" = "200" ] && [ "$api" = "200" ]; then exit 0; fi
+                        sleep 5
+                    done
+                    echo "health check failed: 120초 안에 200 응답을 받지 못했다"
+                    exit 1
+                '''
+                sh 'sudo systemctl is-active "$APP_NAME"'
             }
         }
     }

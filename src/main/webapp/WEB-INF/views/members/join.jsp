@@ -7,33 +7,32 @@
     <link rel="icon" href="/ChatService/images/home_icon.jpg">
     <link rel="stylesheet" href="/ChatService/css/common/theme.css">
     <link rel="stylesheet" href="/ChatService/css/join/join.css">
-
-    <!-- 기존 기능 유지: jQuery + join.js (DOM id로 값 조회) -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="/ChatService/css/market/market.css">
     <script src="/ChatService/js/join/join.js" defer></script>
 
-    <title>회원가입 · ChatService</title>
+    <title>회원가입 · C2C Marketplace</title>
 </head>
 
 <body>
 <main class="center-stage">
     <section class="auth auth--wide card rise">
         <div class="auth__head">
-            <span class="brand"><span class="brand__dot">C</span>ChatService</span>
+            <a class="brand" href="/ChatService/"><span class="brand__dot">C</span>C2C Marketplace</a>
             <h1 class="auth__title">회원가입</h1>
-            <p class="auth__sub muted">정보를 입력하고 ChatService에 가입하세요.</p>
+            <p class="auth__sub muted">가입하면 상품을 사고팔고 판매자와 대화할 수 있습니다.</p>
         </div>
 
         <div class="auth__form">
+            <p id="formError" class="form__error" role="alert" hidden></p>
             <div class="field">
                 <label for="id">아이디</label>
-                <input type="text" id="id" name="id" class="input" placeholder="아이디">
+                <input type="text" id="id" name="id" class="input" placeholder="4~20자">
             </div>
 
             <div class="grid2">
                 <div class="field">
                     <label for="pw">비밀번호</label>
-                    <input type="password" id="pw" name="pw" class="input" placeholder="비밀번호">
+                    <input type="password" id="pw" name="pw" class="input" placeholder="8자 이상">
                 </div>
                 <div class="field">
                     <label for="pw_check">비밀번호 확인</label>

@@ -1,51 +1,100 @@
-window.onload = function () {
+/*
+ * 회원 가입 화면. POST /ChatService/members/join 에 JSON 으로 보낸다.
+ * 입력 형식 오류(400)는 서버가 돌려준 fieldErrors 를 각 입력 칸 아래에 보여 준다.
+ */
+(function () {
+    const FIELDS = [
+        { key: "id", input: "id" },
+        { key: "pw", input: "pw" },
+        { key: "nickName", input: "nickname" },
+        { key: "tel", input: "tel" },
+        { key: "email", input: "email" }
+    ];
 
-    document.getElementById("joinBtn").addEventListener("click", async function () {
-        const id = $('input[id="id"]').val();
-        const pw = $('input[id="pw"]').val();
-        const pwCheck = $('input[id="pw_check"]').val();
-        const nickName = $('input[id="nickname"]').val();
-        const tel = $('input[id="tel"]').val();
-        const email = $('input[id="email"]').val();
-
-        if (!id) return alert("아이디를 입력하세요");
-        if (!pw) return alert("비밀번호를 입력하세요");
-        if (pw !== pwCheck) return alert("비밀번호가 일치하지 않습니다.");
-        if (!nickName) return alert("닉네임을 입력하세요");
-        if (!tel) return alert("전화번호를 입력하세요");
-        if (!email) return alert("이메일을 입력하세요");
-
-        try {
-            const response = await fetch("/ChatService/members/join", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ id, pw, nickName, tel, email })
-            });
-
-            if (response.ok) {
-                alert("회원가입이 정상적으로 되었습니다.");
-                window.location.href = "/ChatService/members/login";
-				
-            } else if (response.status === 400 || response.status === 401 || response.status === 404 || response.status === 409) {
-                
-				const res = await response.json();
-                const messages = Object.values(res).join('\n');
-                alert(messages);
-                
-				//window.location.href = "/wherehouse/members/join";
-				/* 재 입력 해야 되니 리다이렉트 대신 공백 값으로 치환 */
-				document.getElementById("pw").value = '';
-				document.getElementById("pw_check").value = '';
-				document.getElementById("nickname").value = '';
-				document.getElementById("tel").value = '';
-				document.getElementById("email").value = '';
-				
-            } else { alert("알 수 없는 오류가 발생했습니다. 잠시 후 다시 시도해주세요."); }
-
-        } catch (error) {
-			
-            console.error("서버 오류:", error);
-            alert("서버와 통신 중 오류가 발생했습니다.");
+    function errorSlot(input) {
+        const wrap = input.closest(".field");
+        let slot = wrap.querySelector(".field__error");
+        if (!slot) {
+            slot = document.createElement("p");
+            slot.className = "field__error";
+            slot.hidden = true;
+            wrap.appendChild(slot);
         }
+        return slot;
+    }
+
+    function clearErrors(formError) {
+        document.querySelectorAll(".field__error").forEach((slot) => { slot.hidden = true; slot.textContent = ""; });
+        document.querySelectorAll(".is-invalid").forEach((input) => input.classList.remove("is-invalid"));
+        formError.hidden = true;
+        formError.textContent = "";
+    }
+
+    function showFieldError(inputId, message) {
+        const input = document.getElementById(inputId);
+        input.classList.add("is-invalid");
+        const slot = errorSlot(input);
+        slot.textContent = message;
+        slot.hidden = false;
+    }
+
+    function showFormError(formError, message) {
+        formError.textContent = message;
+        formError.hidden = false;
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const button = document.getElementById("joinBtn");
+        const formError = document.getElementById("formError");
+        const value = (id) => document.getElementById(id).value.trim();
+
+        button.addEventListener("click", async function () {
+            clearErrors(formError);
+            const body = { id: value("id"), pw: document.getElementById("pw").value, nickName: value("nickname"), tel: value("tel"), email: value("email") };
+
+            if (body.pw !== document.getElementById("pw_check").value) {
+                showFieldError("pw_check", "비밀번호가 일치하지 않습니다.");
+                return;
+            }
+
+            button.disabled = true;
+            try {
+                const response = await fetch("/ChatService/members/join", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", Accept: "application/json" },
+                    body: JSON.stringify(body)
+                });
+                if (response.ok) {
+                    alert("회원가입이 완료되었습니다. 로그인해 주세요.");
+                    window.location.href = "/ChatService/members/login";
+                    return;
+                }
+                const data = await response.json().catch(() => null);
+                if (response.status === 400 && data && data.fieldErrors) {
+                    let placed = 0;
+                    FIELDS.forEach(({ key, input }) => {
+                        if (data.fieldErrors[key]) {
+                            showFieldError(input, data.fieldErrors[key]);
+                            placed++;
+                        }
+                    });
+                    if (placed === 0) {
+                        showFormError(formError, data.message || "입력값을 확인하세요.");
+                    }
+                    return;
+                }
+                // 아이디·닉네임 중복은 기존 예외의 @ResponseStatus 로 409 가 오며, 응답 본문에는 어느 값이 중복인지 담기지 않는다.
+                if (response.status === 409) {
+                    showFormError(formError, "이미 사용 중인 아이디 또는 닉네임입니다. 다른 값으로 다시 시도하세요.");
+                    return;
+                }
+                showFormError(formError, "가입하지 못했습니다. 잠시 후 다시 시도하세요.");
+            } catch (error) {
+                console.error("회원 가입 요청 실패", error);
+                showFormError(formError, "서버와 통신하지 못했습니다. 잠시 후 다시 시도하세요.");
+            } finally {
+                button.disabled = false;
+            }
+        });
     });
-};
+})();
