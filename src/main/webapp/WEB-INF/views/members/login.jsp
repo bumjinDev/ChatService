@@ -14,16 +14,17 @@
     <link rel="icon" href="/ChatService/images/home_icon.jpg">
     <link rel="stylesheet" href="/ChatService/css/common/theme.css">
     <link rel="stylesheet" href="/ChatService/css/login/login.css">
-    <title>로그인 · ChatService</title>
+    <link rel="stylesheet" href="/ChatService/css/market/market.css">
+    <title>로그인 · C2C Marketplace</title>
 </head>
 
 <body>
 <main class="center-stage">
     <section class="auth card rise">
         <div class="auth__head">
-            <span class="brand"><span class="brand__dot">C</span>ChatService</span>
+            <a class="brand" href="/ChatService/"><span class="brand__dot">C</span>C2C Marketplace</a>
             <h1 class="auth__title">로그인</h1>
-            <p class="auth__sub muted">계정으로 로그인하고 실시간 채팅을 시작하세요.</p>
+            <p class="auth__sub muted">로그인하고 상품을 사고팔아 보세요.</p>
         </div>
 
         <!-- 로그인 요청 : "loginFilter" 로 요청이 전달. (name=userid, name=password 유지) -->
@@ -45,6 +46,8 @@
 
         <button type="button" class="btn btn--ghost btn--block"
                 onclick="window.location.href='/ChatService/members/join'">회원가입</button>
+
+        <p class="auth__foot muted"><a href="/ChatService/">로그인 없이 상품 둘러보기</a></p>
     </section>
 </main>
 </body>
