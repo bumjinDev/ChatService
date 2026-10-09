@@ -1,0 +1,13 @@
+# Oracle 테스트 스키마를 쓸 수 없는 환경에서만 쓰는 보조 실행 설정(-PintegrationDb=h2).
+# H2 의 Oracle 호환 모드는 Oracle 과 같은 DB 가 아니다. 이 설정으로 얻은 결과를 Oracle 검증 결과로 보고하지 않는다.
+# 데이터소스는 H2IntegrationDataSourceConfig 가 만든다(기본 설정의 Oracle 전용 연결 속성을 쓰지 않기 위해서다).
+spring:
+  datasource:
+    url: jdbc:h2:mem:marketplace_it;MODE=Oracle;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect

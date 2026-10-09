@@ -1,0 +1,28 @@
+# 통합 테스트 전용 설정. 비밀값은 파일에 넣지 않고 환경변수로만 받는다.
+#   MARKETPLACE_TEST_DB_URL       예) jdbc:oracle:thin:@127.0.0.1:1521/XEPDB1
+#   MARKETPLACE_TEST_DB_USERNAME  예) TOYCHAT_TEST  (운영·개발 스키마와 다른 테스트 전용 스키마)
+#   MARKETPLACE_TEST_DB_PASSWORD
+#   MARKETPLACE_TEST_REDIS_HOST   기본값 127.0.0.1
+#   MARKETPLACE_TEST_REDIS_PORT   운영·개발 Redis 와 분리된 테스트 인스턴스의 포트
+#   MARKETPLACE_TEST_REDIS_PASSWORD  (선택)
+spring:
+  datasource:
+    url: ${MARKETPLACE_TEST_DB_URL}
+    username: ${MARKETPLACE_TEST_DB_USERNAME}
+    password: ${MARKETPLACE_TEST_DB_PASSWORD}
+  data:
+    redis:
+      host: ${MARKETPLACE_TEST_REDIS_HOST:127.0.0.1}
+      port: ${MARKETPLACE_TEST_REDIS_PORT}
+      password: ${MARKETPLACE_TEST_REDIS_PASSWORD:}
+
+marketplace:
+  scheduler:
+    # 테스트는 자동 처리 메서드를 직접 호출한다. 스케줄러가 테스트 도중 고정 Clock 으로 대상을 처리하지 않게 끈다.
+    enabled: false
+  mock-delivery:
+    duration: PT2M
+
+logging:
+  level:
+    org.springframework.web.socket: INFO
