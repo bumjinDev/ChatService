@@ -1,0 +1,3084 @@
+{
+  "info": {
+    "_postman_id": "7c011f1d-eb3a-4e59-900a-553dc291e3cd",
+    "name": "ChatService C2C Marketplace API",
+    "description": "미니PC 에 배포한 ChatService C2C Marketplace API 를 거래 흐름 순서로 확인하는 컬렉션이다.\n\n## 먼저 할 일\n1. 환경 파일(ChatService-MiniPC.postman_environment.json)을 가져와 오른쪽 위에서 선택한다.\n2. 환경 변수 sellerId, sellerPassword, sellerNickname, buyerId, buyerPassword, buyerNickname 에 테스트 계정 값을 넣는다(가입 규칙: 아이디 4~20자, 비밀번호 8자 이상, 닉네임 20자 이하·중복 불가).\n3. 계정이 없으면 0번 폴더로 가입한다. 이미 있으면 0번은 건너뛴다.\n\n## 실행 순서\n- 1번부터 12번까지 폴더 순서대로 실행한다. 역할이 바뀌는 폴더마다 첫 요청이 로그인이다.\n- 로그인 응답의 Authorization 쿠키(JWT, 1시간 유효)를 Postman 쿠키 저장소가 자동으로 붙인다. 다른 계정으로 로그인하면 쿠키가 바뀐다.\n- 응답의 상품·대화·가격 제안·주문 ID 는 테스트 스크립트가 컬렉션 변수에 저장하고 다음 요청에서 쓴다.\n- [오류] 로 시작하는 요청은 명세서에 정의된 오류 응답(상태 코드와 code)을 확인한다.\n\n## 대기 조건\n- 10번 폴더는 9번 폴더의 발송 등록 후 2분 30초 이상 지나야 한다(모의 배송 완료 2분, 자동 처리 30초 간격). 10번의 배송 완료 확인 요청이 남은 시간만큼 기다린다.\n- 미발송 자동 취소(5영업일), 확인 기간 만료 자동 완료(48시간), 판매자 무응답 자동 환불(48시간)은 Postman 으로 기다리지 않는다.\n\n## 주의\n- 운영 서버에 실제 데이터(회원, 상품, 주문, 잔액 변동)가 생긴다. 실행할 때마다 새 상품을 등록하므로 이전 실행과 섞이지 않는다.\n- 실시간 전달 WebSocket(/ws/conversations)은 Collection v2.1 형식에 넣을 수 없어 포함하지 않았다. Postman 의 WebSocket 요청으로 따로 확인한다.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "0. 계정 준비 (계정이 없을 때만)",
+      "description": "판매자와 구매자 계정을 만든다. 이미 가입한 계정이면 이 폴더는 건너뛴다(같은 아이디·닉네임으로 다시 보내면 오류가 난다).",
+      "item": [
+        {
+          "name": "판매자 회원가입",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const missing = [\"sellerId\", \"sellerPassword\", \"sellerNickname\"].filter(function (n) { return !pm.variables.get(n); });",
+                  "if (missing.length) { throw new Error(\"환경 변수를 먼저 입력하세요: \" + missing.join(\", \")); }"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/members/join",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "members",
+                "join"
+              ]
+            },
+            "description": "회원가입(JSON). 아이디 4~20자, 비밀번호 8자 이상, 닉네임 20자 이하(중복 불가), 전화번호 010-1234-5678 형식, 이메일 형식이어야 한다.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"{{sellerId}}\",\n  \"pw\": \"{{sellerPassword}}\",\n  \"nickName\": \"{{sellerNickname}}\",\n  \"tel\": \"{{sellerTel}}\",\n  \"email\": \"{{sellerEmail}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "구매자 회원가입",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const missing = [\"buyerId\", \"buyerPassword\", \"buyerNickname\"].filter(function (n) { return !pm.variables.get(n); });",
+                  "if (missing.length) { throw new Error(\"환경 변수를 먼저 입력하세요: \" + missing.join(\", \")); }"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/members/join",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "members",
+                "join"
+              ]
+            },
+            "description": "판매자 회원가입과 같은 규칙. 판매자와 다른 아이디·닉네임을 쓴다.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"{{buyerId}}\",\n  \"pw\": \"{{buyerPassword}}\",\n  \"nickName\": \"{{buyerNickname}}\",\n  \"tel\": \"{{buyerTel}}\",\n  \"email\": \"{{buyerEmail}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "1. 판매자 - 상품 등록",
+      "description": "판매자로 로그인해 상품(수량 5)을 등록한다. 실행할 때마다 새 상품을 등록하므로 이전 실행과 섞이지 않는다.",
+      "item": [
+        {
+          "name": "판매자 로그인",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const missing = [\"sellerId\", \"sellerPassword\"].filter(function (n) { return !pm.variables.get(n); });",
+                  "if (missing.length) { throw new Error(\"환경 변수를 먼저 입력하세요: \" + missing.join(\", \")); }"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 302 (로그인 성공 후 메인 화면으로 리다이렉트)\", function () { pm.response.to.have.status(302); });",
+                  "pm.test(\"Authorization 쿠키 발급\", function () {",
+                  "    const setCookies = pm.response.headers.all()",
+                  "        .filter(function (h) { return h.key.toLowerCase() === \"set-cookie\"; })",
+                  "        .map(function (h) { return h.value; });",
+                  "    pm.expect(setCookies.some(function (v) { return v.indexOf(\"Authorization=\") === 0; })).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "description": "판매자 계정으로 로그인한다(폼 파라미터 userid, password). 성공하면 302 와 함께 Authorization 쿠키(JWT, 1시간 유효)를 받고, 이후 요청에는 Postman 쿠키 저장소가 이 쿠키를 자동으로 붙인다. 다른 계정으로 로그인하면 쿠키가 덮어써진다. 실패하면 401.",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "userid",
+                  "value": "{{sellerId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{sellerPassword}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          }
+        },
+        {
+          "name": "[오류] 가격 0으로 상품 등록",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"오류 code VALIDATION_ERROR\", function () { pm.expect(pm.response.json().code).to.eql(\"VALIDATION_ERROR\"); });",
+                  "pm.test(\"price 필드 오류 포함\", function () { pm.expect(pm.response.json().fieldErrors).to.have.property(\"price\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ]
+            },
+            "description": "가격은 1 이상이어야 한다(요구사항의 입력 검증). 400 VALIDATION_ERROR 와 fieldErrors.price 를 확인한다.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{productName}}\",\n  \"description\": \"{{productDescription}}\",\n  \"category\": \"{{productCategory}}\",\n  \"price\": 0,\n  \"quantity\": {{productQuantity}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "상품 등록",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) {",
+                  "    const b = pm.response.json();",
+                  "    pm.collectionVariables.set(\"productId\", b.productId);",
+                  "    pm.test(\"판매 중 ON_SALE\", function () { pm.expect(b.status).to.eql(\"ON_SALE\"); });",
+                  "    pm.test(\"남은 수량 = 등록 수량\", function () { pm.expect(b.remainingQuantity).to.eql(Number(pm.collectionVariables.get(\"productQuantity\"))); });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ]
+            },
+            "description": "상품을 등록하고 응답의 productId 를 컬렉션 변수 productId 에 저장한다. 카테고리: CLOTHING_ACCESSORIES, LIVING, ELECTRONICS, BOOKS_HOBBY.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{productName}}\",\n  \"description\": \"{{productDescription}}\",\n  \"category\": \"{{productCategory}}\",\n  \"price\": {{productPrice}},\n  \"quantity\": {{productQuantity}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "[오류] 판매자가 자기 상품에 대화 시작",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 403\", function () { pm.response.to.have.status(403); });",
+                  "pm.test(\"오류 code SELF_TRADE_NOT_ALLOWED\", function () { pm.expect(pm.response.json().code).to.eql(\"SELF_TRADE_NOT_ALLOWED\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{productId}}/conversations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{productId}}",
+                "conversations"
+              ]
+            },
+            "description": "자기 상품과는 거래할 수 없다. 403 SELF_TRADE_NOT_ALLOWED."
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. 공개 조회 (로그인 없이)",
+      "description": "쿠키를 보내지 않도록 설정한 요청들이다(요청 Settings 의 Disable cookie jar).",
+      "item": [
+        {
+          "name": "[오류] 로그인 없이 상품 등록",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 401\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"오류 code UNAUTHENTICATED\", function () { pm.expect(pm.response.json().code).to.eql(\"UNAUTHENTICATED\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ]
+            },
+            "description": "/api/** 중 상품 목록·상세 조회만 인증 없이 허용한다. 쿠키 없이 등록하면 401 UNAUTHENTICATED.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{productName}}\",\n  \"description\": \"{{productDescription}}\",\n  \"category\": \"{{productCategory}}\",\n  \"price\": {{productPrice}},\n  \"quantity\": {{productQuantity}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          }
+        },
+        {
+          "name": "상품 목록",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"방금 등록한 상품 포함\", function () {",
+                  "    const id = String(pm.collectionVariables.get(\"productId\"));",
+                  "    pm.expect(pm.response.json().some(function (p) { return String(p.productId) === id; })).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ]
+            },
+            "description": "판매 중인 상품 목록(최신순). 로그인 없이 조회한다."
+          },
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          }
+        },
+        {
+          "name": "카테고리별 상품 목록",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"모든 상품이 요청한 카테고리\", function () {",
+                  "    const c = pm.collectionVariables.get(\"productCategory\");",
+                  "    pm.expect(pm.response.json().every(function (p) { return p.category === c; })).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products?category={{productCategory}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "{{productCategory}}"
+                }
+              ]
+            },
+            "description": "category 쿼리로 거른 판매 중 상품 목록."
+          },
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          }
+        },
+        {
+          "name": "상품 상세",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"요청한 상품\", function () { pm.expect(String(pm.response.json().productId)).to.eql(String(pm.collectionVariables.get(\"productId\"))); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{productId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{productId}}"
+              ]
+            },
+            "description": "상품 상세. 로그인 없이 조회한다."
+          },
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          }
+        },
+        {
+          "name": "[오류] 없는 상품 조회",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 404\", function () { pm.response.to.have.status(404); });",
+                  "pm.test(\"오류 code PRODUCT_NOT_FOUND\", function () { pm.expect(pm.response.json().code).to.eql(\"PRODUCT_NOT_FOUND\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/999999999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "999999999999"
+              ]
+            },
+            "description": "존재하지 않는 상품. 404 PRODUCT_NOT_FOUND."
+          },
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. 구매자 - 잔액",
+      "description": "구매자로 로그인해 잔액 부족 주문을 확인한 뒤 테스트 잔액을 충전한다.",
+      "item": [
+        {
+          "name": "구매자 로그인",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const missing = [\"buyerId\", \"buyerPassword\"].filter(function (n) { return !pm.variables.get(n); });",
+                  "if (missing.length) { throw new Error(\"환경 변수를 먼저 입력하세요: \" + missing.join(\", \")); }"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 302 (로그인 성공 후 메인 화면으로 리다이렉트)\", function () { pm.response.to.have.status(302); });",
+                  "pm.test(\"Authorization 쿠키 발급\", function () {",
+                  "    const setCookies = pm.response.headers.all()",
+                  "        .filter(function (h) { return h.key.toLowerCase() === \"set-cookie\"; })",
+                  "        .map(function (h) { return h.value; });",
+                  "    pm.expect(setCookies.some(function (v) { return v.indexOf(\"Authorization=\") === 0; })).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "description": "구매자 계정으로 로그인한다(폼 파라미터 userid, password). 성공하면 302 와 함께 Authorization 쿠키(JWT, 1시간 유효)를 받고, 이후 요청에는 Postman 쿠키 저장소가 이 쿠키를 자동으로 붙인다. 다른 계정으로 로그인하면 쿠키가 덮어써진다. 실패하면 401.",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "userid",
+                  "value": "{{buyerId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{buyerPassword}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          }
+        },
+        {
+          "name": "구매자 잔액 조회 (충전 전)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 200\", function () { pm.response.to.have.status(200); });",
+                  "if (pm.response.code === 200) { pm.collectionVariables.set(\"buyerBalanceBefore\", pm.response.json().balance); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/wallet",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "wallet"
+              ]
+            },
+            "description": "충전 전 잔액을 buyerBalanceBefore 에 저장한다. 다음 요청이 이 잔액보다 비싼 주문을 만드는 데 쓴다."
+          }
+        },
+        {
+          "name": "[오류] 잔액보다 비싼 주문",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const balance = Number(pm.collectionVariables.get(\"buyerBalanceBefore\") || 0);",
+                  "const price = Number(pm.collectionVariables.get(\"productPrice\"));",
+                  "const stock = Number(pm.collectionVariables.get(\"productQuantity\"));",
+                  "const qty = Math.floor(balance / price) + 1;",
+                  "if (qty <= stock) {",
+                  "    pm.collectionVariables.set(\"insufficientQty\", qty);",
+                  "} else {",
+                  "    console.log(\"구매자 잔액(\" + balance + \")이 재고 전체 금액 이상이라 잔액 부족 주문을 만들 수 없어 이 요청을 건너뜁니다.\");",
+                  "    if (pm.execution && typeof pm.execution.skipRequest === \"function\") {",
+                  "        pm.execution.skipRequest();",
+                  "    } else {",
+                  "        pm.collectionVariables.set(\"insufficientQty\", 0); // 0 이면 400 으로 거절되어 주문이 만들어지지 않는다",
+                  "    }",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 409\", function () { pm.response.to.have.status(409); });",
+                  "pm.test(\"오류 code INSUFFICIENT_BALANCE\", function () { pm.expect(pm.response.json().code).to.eql(\"INSUFFICIENT_BALANCE\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders"
+              ]
+            },
+            "description": "현재 잔액으로 결제할 수 없는 수량(잔액 / 가격 + 1)으로 주문한다. 409 INSUFFICIENT_BALANCE. 같은 구매자로 여러 번 실행해 잔액이 재고 전체 금액 이상이면 이 요청은 건너뛴다.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": {{productId}},\n  \"quantity\": {{insufficientQty}},\n  \"recipientName\": \"{{recipientName}}\",\n  \"shippingAddress\": \"{{shippingAddress}}\",\n  \"requestId\": \"{{$guid}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "테스트 잔액 충전",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) {",
+                  "    const b = pm.response.json();",
+                  "    pm.test(\"잔액 = 충전 전 잔액 + 충전 금액\", function () {",
+                  "        pm.expect(b.balance).to.eql(Number(pm.collectionVariables.get(\"buyerBalanceBefore\") || 0) + Number(pm.collectionVariables.get(\"chargeAmount\")));",
+                  "    });",
+                  "    pm.test(\"변동 유형 CHARGE\", function () { pm.expect(b.transaction.type).to.eql(\"CHARGE\"); });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wallet/charges",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "wallet",
+                "charges"
+              ]
+            },
+            "description": "테스트 잔액을 충전한다(실제 결제 없음).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": {{chargeAmount}},\n  \"requestId\": \"{{$guid}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "구매자 잔액 조회",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"잔액 필드 존재\", function () { pm.expect(pm.response.json()).to.have.property(\"balance\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/wallet",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "wallet"
+              ]
+            },
+            "description": "로그인한 구매자의 현재 잔액을 조회한다. 지갑이 없으면 잔액 0 으로 응답한다."
+          }
+        },
+        {
+          "name": "구매자 잔액 변동 내역",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"배열 응답\", function () { pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/wallet/transactions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "wallet",
+                "transactions"
+              ]
+            },
+            "description": "로그인한 구매자의 잔액 변동 내역(CHARGE, PURCHASE, CANCEL_REFUND, REFUND, SALE_PAYOUT)을 조회한다."
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. 구매자 - 대화와 가격 제안",
+      "description": "상품별 대화를 시작하고 메시지를 주고받은 뒤 가격 제안 1 을 보낸다.",
+      "item": [
+        {
+          "name": "대화 시작",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 201(새 대화) 또는 200(기존 대화)\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });",
+                  "if ([200, 201].includes(pm.response.code)) {",
+                  "    const b = pm.response.json();",
+                  "    pm.collectionVariables.set(\"conversationId\", b.conversationId);",
+                  "    pm.test(\"내 역할 BUYER\", function () { pm.expect(b.myRole).to.eql(\"BUYER\"); });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{productId}}/conversations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{productId}}",
+                "conversations"
+              ]
+            },
+            "description": "구매자가 상품별 대화를 시작한다. 처음이면 201, 이미 있으면 200 으로 같은 대화를 돌려준다. conversationId 를 저장한다."
+          }
+        },
+        {
+          "name": "대화 목록",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"시작한 대화 포함\", function () {",
+                  "    const id = String(pm.collectionVariables.get(\"conversationId\"));",
+                  "    pm.expect(pm.response.json().some(function (c) { return String(c.conversationId) === id; })).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/conversations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "conversations"
+              ]
+            },
+            "description": "내가 참여한 대화 목록."
+          }
+        },
+        {
+          "name": "대화 상세",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"요청한 대화\", function () { pm.expect(String(pm.response.json().conversationId)).to.eql(String(pm.collectionVariables.get(\"conversationId\"))); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/conversations/{{conversationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "conversations",
+                "{{conversationId}}"
+              ]
+            },
+            "description": "상품 정보, 당사자, 내 역할, 작성 가능 여부, 가격 제안·주문 요약을 포함한다."
+          }
+        },
+        {
+          "name": "메시지 전송",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) {",
+                  "    pm.collectionVariables.set(\"messageId\", pm.response.json().messageId);",
+                  "    pm.test(\"보낸 내용 그대로\", function () { pm.expect(pm.response.json().content).to.eql(pm.variables.replaceIn(\"{{messageContent}}\")); });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/conversations/{{conversationId}}/messages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "conversations",
+                "{{conversationId}}",
+                "messages"
+              ]
+            },
+            "description": "대화에 메시지를 보낸다(1~1000자). messageId 를 저장한다. 실시간 전달은 WebSocket 으로 별도 확인한다.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"{{messageContent}}\",\n  \"requestId\": \"{{$guid}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "메시지 조회",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"보낸 메시지 포함\", function () {",
+                  "    const id = String(pm.collectionVariables.get(\"messageId\"));",
+                  "    pm.expect(pm.response.json().some(function (m) { return String(m.messageId) === id; })).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/conversations/{{conversationId}}/messages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "conversations",
+                "{{conversationId}}",
+                "messages"
+              ],
+              "query": [
+                {
+                  "key": "afterId",
+                  "value": "{{messageId}}",
+                  "disabled": true,
+                  "description": "켜면 이 ID 다음 메시지만 조회한다"
+                }
+              ]
+            },
+            "description": "대화의 메시지 목록. Params 의 afterId 를 켜면 그 ID 이후 메시지만 받는다(놓친 메시지 따라잡기용)."
+          }
+        },
+        {
+          "name": "가격 제안 1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) {",
+                  "    pm.collectionVariables.set(\"offer1Id\", pm.response.json().offerId);",
+                  "    pm.test(\"제안 상태 PENDING\", function () { pm.expect(pm.response.json().status).to.eql(\"PENDING\"); });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/conversations/{{conversationId}}/offers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "conversations",
+                "{{conversationId}}",
+                "offers"
+              ]
+            },
+            "description": "구매자가 가격을 제안한다. offer1Id 를 저장한다. 이 제안은 판매자가 거절한다.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": {{offer1Amount}},\n  \"requestId\": \"{{$guid}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "[오류] 대기 중인 제안이 있는데 다시 제안",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 409\", function () { pm.response.to.have.status(409); });",
+                  "pm.test(\"오류 code OFFER_PENDING_EXISTS\", function () { pm.expect(pm.response.json().code).to.eql(\"OFFER_PENDING_EXISTS\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/conversations/{{conversationId}}/offers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "conversations",
+                "{{conversationId}}",
+                "offers"
+              ]
+            },
+            "description": "응답을 기다리는 제안이 있으면 새 제안을 보낼 수 없다. 409 OFFER_PENDING_EXISTS.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": {{offer2Amount}},\n  \"requestId\": \"{{$guid}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "[오류] 구매자가 제안 수락 시도",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 403\", function () { pm.response.to.have.status(403); });",
+                  "pm.test(\"오류 code NOT_SELLER\", function () { pm.expect(pm.response.json().code).to.eql(\"NOT_SELLER\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/offers/{{offer1Id}}/accept",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "offers",
+                "{{offer1Id}}",
+                "accept"
+              ]
+            },
+            "description": "제안 수락·거절은 판매자만 할 수 있다. 403 NOT_SELLER."
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. 판매자 - 가격 제안 1 거절",
+      "description": "판매자로 로그인해 가격 제안 1 을 거절한다.",
+      "item": [
+        {
+          "name": "판매자 로그인",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const missing = [\"sellerId\", \"sellerPassword\"].filter(function (n) { return !pm.variables.get(n); });",
+                  "if (missing.length) { throw new Error(\"환경 변수를 먼저 입력하세요: \" + missing.join(\", \")); }"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 302 (로그인 성공 후 메인 화면으로 리다이렉트)\", function () { pm.response.to.have.status(302); });",
+                  "pm.test(\"Authorization 쿠키 발급\", function () {",
+                  "    const setCookies = pm.response.headers.all()",
+                  "        .filter(function (h) { return h.key.toLowerCase() === \"set-cookie\"; })",
+                  "        .map(function (h) { return h.value; });",
+                  "    pm.expect(setCookies.some(function (v) { return v.indexOf(\"Authorization=\") === 0; })).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "description": "판매자 계정으로 로그인한다(폼 파라미터 userid, password). 성공하면 302 와 함께 Authorization 쿠키(JWT, 1시간 유효)를 받고, 이후 요청에는 Postman 쿠키 저장소가 이 쿠키를 자동으로 붙인다. 다른 계정으로 로그인하면 쿠키가 덮어써진다. 실패하면 401.",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "userid",
+                  "value": "{{sellerId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{sellerPassword}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          }
+        },
+        {
+          "name": "가격 제안 1 거절",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"제안 상태 REJECTED\", function () { pm.expect(pm.response.json().status).to.eql(\"REJECTED\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/offers/{{offer1Id}}/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "offers",
+                "{{offer1Id}}",
+                "reject"
+              ]
+            },
+            "description": "판매자가 제안을 거절한다."
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. 구매자 - 가격 제안 2",
+      "description": "구매자로 로그인해 가격 제안 2 를 보낸다.",
+      "item": [
+        {
+          "name": "구매자 로그인",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const missing = [\"buyerId\", \"buyerPassword\"].filter(function (n) { return !pm.variables.get(n); });",
+                  "if (missing.length) { throw new Error(\"환경 변수를 먼저 입력하세요: \" + missing.join(\", \")); }"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 302 (로그인 성공 후 메인 화면으로 리다이렉트)\", function () { pm.response.to.have.status(302); });",
+                  "pm.test(\"Authorization 쿠키 발급\", function () {",
+                  "    const setCookies = pm.response.headers.all()",
+                  "        .filter(function (h) { return h.key.toLowerCase() === \"set-cookie\"; })",
+                  "        .map(function (h) { return h.value; });",
+                  "    pm.expect(setCookies.some(function (v) { return v.indexOf(\"Authorization=\") === 0; })).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "description": "구매자 계정으로 로그인한다(폼 파라미터 userid, password). 성공하면 302 와 함께 Authorization 쿠키(JWT, 1시간 유효)를 받고, 이후 요청에는 Postman 쿠키 저장소가 이 쿠키를 자동으로 붙인다. 다른 계정으로 로그인하면 쿠키가 덮어써진다. 실패하면 401.",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "userid",
+                  "value": "{{buyerId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{buyerPassword}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          }
+        },
+        {
+          "name": "가격 제안 2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) {",
+                  "    pm.collectionVariables.set(\"offer2Id\", pm.response.json().offerId);",
+                  "    pm.test(\"제안 상태 PENDING\", function () { pm.expect(pm.response.json().status).to.eql(\"PENDING\"); });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/conversations/{{conversationId}}/offers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "conversations",
+                "{{conversationId}}",
+                "offers"
+              ]
+            },
+            "description": "거절된 뒤 새 가격을 제안한다. offer2Id 를 저장한다. 이 제안은 판매자가 수락한다.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": {{offer2Amount}},\n  \"requestId\": \"{{$guid}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. 판매자 - 가격 제안 2 수락",
+      "description": "판매자로 로그인해 가격 제안 2 를 수락한다.",
+      "item": [
+        {
+          "name": "판매자 로그인",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const missing = [\"sellerId\", \"sellerPassword\"].filter(function (n) { return !pm.variables.get(n); });",
+                  "if (missing.length) { throw new Error(\"환경 변수를 먼저 입력하세요: \" + missing.join(\", \")); }"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 302 (로그인 성공 후 메인 화면으로 리다이렉트)\", function () { pm.response.to.have.status(302); });",
+                  "pm.test(\"Authorization 쿠키 발급\", function () {",
+                  "    const setCookies = pm.response.headers.all()",
+                  "        .filter(function (h) { return h.key.toLowerCase() === \"set-cookie\"; })",
+                  "        .map(function (h) { return h.value; });",
+                  "    pm.expect(setCookies.some(function (v) { return v.indexOf(\"Authorization=\") === 0; })).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "description": "판매자 계정으로 로그인한다(폼 파라미터 userid, password). 성공하면 302 와 함께 Authorization 쿠키(JWT, 1시간 유효)를 받고, 이후 요청에는 Postman 쿠키 저장소가 이 쿠키를 자동으로 붙인다. 다른 계정으로 로그인하면 쿠키가 덮어써진다. 실패하면 401.",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "userid",
+                  "value": "{{sellerId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{sellerPassword}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          }
+        },
+        {
+          "name": "가격 제안 2 수락",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"제안 상태 ACCEPTED\", function () { pm.expect(pm.response.json().status).to.eql(\"ACCEPTED\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/offers/{{offer2Id}}/accept",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "offers",
+                "{{offer2Id}}",
+                "accept"
+              ]
+            },
+            "description": "판매자가 제안을 수락한다. 구매자는 이 제안 ID 로 합의 가격 주문을 할 수 있다."
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. 구매자 - 구매와 결제",
+      "description": "주문 A(합의 가격), B·C·D(정가)를 만들고 주문 B 를 발송 전에 취소한다.",
+      "item": [
+        {
+          "name": "구매자 로그인",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const missing = [\"buyerId\", \"buyerPassword\"].filter(function (n) { return !pm.variables.get(n); });",
+                  "if (missing.length) { throw new Error(\"환경 변수를 먼저 입력하세요: \" + missing.join(\", \")); }"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 302 (로그인 성공 후 메인 화면으로 리다이렉트)\", function () { pm.response.to.have.status(302); });",
+                  "pm.test(\"Authorization 쿠키 발급\", function () {",
+                  "    const setCookies = pm.response.headers.all()",
+                  "        .filter(function (h) { return h.key.toLowerCase() === \"set-cookie\"; })",
+                  "        .map(function (h) { return h.value; });",
+                  "    pm.expect(setCookies.some(function (v) { return v.indexOf(\"Authorization=\") === 0; })).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "description": "구매자 계정으로 로그인한다(폼 파라미터 userid, password). 성공하면 302 와 함께 Authorization 쿠키(JWT, 1시간 유효)를 받고, 이후 요청에는 Postman 쿠키 저장소가 이 쿠키를 자동으로 붙인다. 다른 계정으로 로그인하면 쿠키가 덮어써진다. 실패하면 401.",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "userid",
+                  "value": "{{buyerId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{buyerPassword}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          }
+        },
+        {
+          "name": "주문 A 생성 (합의 가격, 가격 제안 2)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) {",
+                  "    const b = pm.response.json();",
+                  "    pm.collectionVariables.set(\"orderAId\", b.orderId);",
+                  "    pm.test(\"가격 출처 AGREED\", function () { pm.expect(b.priceSource).to.eql(\"AGREED\"); });",
+                  "    pm.test(\"단가 = 가격 제안 2 금액\", function () { pm.expect(b.unitPrice).to.eql(Number(pm.collectionVariables.get(\"offer2Amount\"))); });",
+                  "    pm.test(\"거래 진행 중, 발송 대기\", function () {",
+                  "        pm.expect(b.tradeStatus).to.eql(\"IN_PROGRESS\");",
+                  "        pm.expect(b.shippingStatus).to.eql(\"WAITING_SHIPMENT\");",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders"
+              ]
+            },
+            "description": "판매자가 수락한 가격 제안 2(offerId)로 1개를 주문하고 잔액으로 결제한다. 주문 ID 는 orderAId 에 저장한다. 이 주문은 정상 수령 확인까지 진행한다.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": {{productId}},\n  \"quantity\": 1,\n  \"recipientName\": \"{{recipientName}}\",\n  \"shippingAddress\": \"{{shippingAddress}}\",\n  \"offerId\": {{offer2Id}},\n  \"requestId\": \"{{$guid}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "주문 B 생성 (정가)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) {",
+                  "    const b = pm.response.json();",
+                  "    pm.collectionVariables.set(\"orderBId\", b.orderId);",
+                  "    pm.test(\"가격 출처 LISTED\", function () { pm.expect(b.priceSource).to.eql(\"LISTED\"); });",
+                  "    pm.test(\"단가 = 상품 정가\", function () { pm.expect(b.unitPrice).to.eql(Number(pm.collectionVariables.get(\"productPrice\"))); });",
+                  "    pm.test(\"거래 진행 중, 발송 대기\", function () {",
+                  "        pm.expect(b.tradeStatus).to.eql(\"IN_PROGRESS\");",
+                  "        pm.expect(b.shippingStatus).to.eql(\"WAITING_SHIPMENT\");",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders"
+              ]
+            },
+            "description": "정가로 1개를 주문하고 잔액으로 결제한다. 주문 ID 는 orderBId 에 저장한다. 이 주문은 발송 전 취소한다.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": {{productId}},\n  \"quantity\": 1,\n  \"recipientName\": \"{{recipientName}}\",\n  \"shippingAddress\": \"{{shippingAddress}}\",\n  \"requestId\": \"{{$guid}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "주문 C 생성 (정가)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) {",
+                  "    const b = pm.response.json();",
+                  "    pm.collectionVariables.set(\"orderCId\", b.orderId);",
+                  "    pm.test(\"가격 출처 LISTED\", function () { pm.expect(b.priceSource).to.eql(\"LISTED\"); });",
+                  "    pm.test(\"단가 = 상품 정가\", function () { pm.expect(b.unitPrice).to.eql(Number(pm.collectionVariables.get(\"productPrice\"))); });",
+                  "    pm.test(\"거래 진행 중, 발송 대기\", function () {",
+                  "        pm.expect(b.tradeStatus).to.eql(\"IN_PROGRESS\");",
+                  "        pm.expect(b.shippingStatus).to.eql(\"WAITING_SHIPMENT\");",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders"
+              ]
+            },
+            "description": "정가로 1개를 주문하고 잔액으로 결제한다. 주문 ID 는 orderCId 에 저장한다. 이 주문은 환불 요청 후 판매자가 승인한다.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": {{productId}},\n  \"quantity\": 1,\n  \"recipientName\": \"{{recipientName}}\",\n  \"shippingAddress\": \"{{shippingAddress}}\",\n  \"requestId\": \"{{$guid}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "주문 D 생성 (정가)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) {",
+                  "    const b = pm.response.json();",
+                  "    pm.collectionVariables.set(\"orderDId\", b.orderId);",
+                  "    pm.test(\"가격 출처 LISTED\", function () { pm.expect(b.priceSource).to.eql(\"LISTED\"); });",
+                  "    pm.test(\"단가 = 상품 정가\", function () { pm.expect(b.unitPrice).to.eql(Number(pm.collectionVariables.get(\"productPrice\"))); });",
+                  "    pm.test(\"거래 진행 중, 발송 대기\", function () {",
+                  "        pm.expect(b.tradeStatus).to.eql(\"IN_PROGRESS\");",
+                  "        pm.expect(b.shippingStatus).to.eql(\"WAITING_SHIPMENT\");",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders"
+              ]
+            },
+            "description": "정가로 1개를 주문하고 잔액으로 결제한다. 주문 ID 는 orderDId 에 저장한다. 이 주문은 환불 요청 후 판매자가 거절한다.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": {{productId}},\n  \"quantity\": 1,\n  \"recipientName\": \"{{recipientName}}\",\n  \"shippingAddress\": \"{{shippingAddress}}\",\n  \"requestId\": \"{{$guid}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "주문 B 발송 전 취소 (구매자)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"거래 취소 CANCELLED, 취소 주체 BUYER\", function () {",
+                  "    const b = pm.response.json();",
+                  "    pm.expect(b.tradeStatus).to.eql(\"CANCELLED\");",
+                  "    pm.expect(b.cancellation.cancelledBy).to.eql(\"BUYER\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderBId}}/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{orderBId}}",
+                "cancel"
+              ]
+            },
+            "description": "발송 전에는 거래 당사자가 사유를 적어 취소할 수 있다. 결제 금액은 구매자 잔액으로 돌아간다(CANCEL_REFUND).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"{{cancelReason}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "구매 목록",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"주문 A 포함\", function () {",
+                  "    const id = String(pm.collectionVariables.get(\"orderAId\"));",
+                  "    pm.expect(pm.response.json().some(function (o) { return String(o.orderId) === id; })).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/purchases",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "purchases"
+              ]
+            },
+            "description": "구매자로서의 주문 목록."
+          }
+        },
+        {
+          "name": "주문 A 상세",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"발송 대기 WAITING_SHIPMENT\", function () { pm.expect(pm.response.json().shippingStatus).to.eql(\"WAITING_SHIPMENT\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderAId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{orderAId}}"
+              ]
+            },
+            "description": "주문 상세(상품, 금액, 배송·거래 상태, 기한, 내 잔액 변동). 발송 기한은 결제 후 5영업일이다."
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. 판매자 - 발송",
+      "description": "판매자로 로그인해 주문 A·C·D 를 발송 등록한다. 마지막 두 요청은 구매자로 바꿔 배송 완료 전 수령 확인을 시도한다.",
+      "item": [
+        {
+          "name": "판매자 로그인",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const missing = [\"sellerId\", \"sellerPassword\"].filter(function (n) { return !pm.variables.get(n); });",
+                  "if (missing.length) { throw new Error(\"환경 변수를 먼저 입력하세요: \" + missing.join(\", \")); }"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 302 (로그인 성공 후 메인 화면으로 리다이렉트)\", function () { pm.response.to.have.status(302); });",
+                  "pm.test(\"Authorization 쿠키 발급\", function () {",
+                  "    const setCookies = pm.response.headers.all()",
+                  "        .filter(function (h) { return h.key.toLowerCase() === \"set-cookie\"; })",
+                  "        .map(function (h) { return h.value; });",
+                  "    pm.expect(setCookies.some(function (v) { return v.indexOf(\"Authorization=\") === 0; })).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "description": "판매자 계정으로 로그인한다(폼 파라미터 userid, password). 성공하면 302 와 함께 Authorization 쿠키(JWT, 1시간 유효)를 받고, 이후 요청에는 Postman 쿠키 저장소가 이 쿠키를 자동으로 붙인다. 다른 계정으로 로그인하면 쿠키가 덮어써진다. 실패하면 401.",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "userid",
+                  "value": "{{sellerId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{sellerPassword}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          }
+        },
+        {
+          "name": "판매 목록",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"주문 A 포함\", function () {",
+                  "    const id = String(pm.collectionVariables.get(\"orderAId\"));",
+                  "    pm.expect(pm.response.json().some(function (o) { return String(o.orderId) === id; })).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/sales",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "sales"
+              ]
+            },
+            "description": "판매자로서의 주문 목록."
+          }
+        },
+        {
+          "name": "주문 A 발송 등록",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) {",
+                  "    pm.test(\"배송 상태 SHIPPING\", function () { pm.expect(pm.response.json().shippingStatus).to.eql(\"SHIPPING\"); });",
+                  "    pm.collectionVariables.set(\"shippedAtEpochMs\", Date.now());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderAId}}/shipment",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{orderAId}}",
+                "shipment"
+              ]
+            },
+            "description": "판매자가 주문 A 의 택배사명과 운송장 번호를 등록한다. 등록 시각부터 2분 뒤 모의 배송 완료 대상이 되고, 30초 간격 자동 처리가 DELIVERED 로 바꾼다.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"carrierName\": \"{{carrierName}}\",\n  \"trackingNumber\": \"TEST{{$timestamp}}A\",\n  \"requestId\": \"{{$guid}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "주문 C 발송 등록",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) {",
+                  "    pm.test(\"배송 상태 SHIPPING\", function () { pm.expect(pm.response.json().shippingStatus).to.eql(\"SHIPPING\"); });",
+                  "    pm.collectionVariables.set(\"shippedAtEpochMs\", Date.now());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderCId}}/shipment",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{orderCId}}",
+                "shipment"
+              ]
+            },
+            "description": "판매자가 주문 C 의 택배사명과 운송장 번호를 등록한다. 등록 시각부터 2분 뒤 모의 배송 완료 대상이 되고, 30초 간격 자동 처리가 DELIVERED 로 바꾼다.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"carrierName\": \"{{carrierName}}\",\n  \"trackingNumber\": \"TEST{{$timestamp}}C\",\n  \"requestId\": \"{{$guid}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "주문 D 발송 등록",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) {",
+                  "    pm.test(\"배송 상태 SHIPPING\", function () { pm.expect(pm.response.json().shippingStatus).to.eql(\"SHIPPING\"); });",
+                  "    pm.collectionVariables.set(\"shippedAtEpochMs\", Date.now());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderDId}}/shipment",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{orderDId}}",
+                "shipment"
+              ]
+            },
+            "description": "판매자가 주문 D 의 택배사명과 운송장 번호를 등록한다. 등록 시각부터 2분 뒤 모의 배송 완료 대상이 되고, 30초 간격 자동 처리가 DELIVERED 로 바꾼다.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"carrierName\": \"{{carrierName}}\",\n  \"trackingNumber\": \"TEST{{$timestamp}}D\",\n  \"requestId\": \"{{$guid}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "[오류] 발송된 주문 취소 시도 (판매자)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 409\", function () { pm.response.to.have.status(409); });",
+                  "pm.test(\"오류 code ORDER_ALREADY_SHIPPED\", function () { pm.expect(pm.response.json().code).to.eql(\"ORDER_ALREADY_SHIPPED\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderAId}}/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{orderAId}}",
+                "cancel"
+              ]
+            },
+            "description": "발송한 주문은 취소할 수 없다. 409 ORDER_ALREADY_SHIPPED.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"{{cancelReason}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "구매자 로그인",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const missing = [\"buyerId\", \"buyerPassword\"].filter(function (n) { return !pm.variables.get(n); });",
+                  "if (missing.length) { throw new Error(\"환경 변수를 먼저 입력하세요: \" + missing.join(\", \")); }"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 302 (로그인 성공 후 메인 화면으로 리다이렉트)\", function () { pm.response.to.have.status(302); });",
+                  "pm.test(\"Authorization 쿠키 발급\", function () {",
+                  "    const setCookies = pm.response.headers.all()",
+                  "        .filter(function (h) { return h.key.toLowerCase() === \"set-cookie\"; })",
+                  "        .map(function (h) { return h.value; });",
+                  "    pm.expect(setCookies.some(function (v) { return v.indexOf(\"Authorization=\") === 0; })).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "description": "구매자 계정으로 로그인한다(폼 파라미터 userid, password). 성공하면 302 와 함께 Authorization 쿠키(JWT, 1시간 유효)를 받고, 이후 요청에는 Postman 쿠키 저장소가 이 쿠키를 자동으로 붙인다. 다른 계정으로 로그인하면 쿠키가 덮어써진다. 실패하면 401.",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "userid",
+                  "value": "{{buyerId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{buyerPassword}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          }
+        },
+        {
+          "name": "[오류] 배송 완료 전 수령 확인",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 409\", function () { pm.response.to.have.status(409); });",
+                  "pm.test(\"오류 code ORDER_NOT_DELIVERED\", function () { pm.expect(pm.response.json().code).to.eql(\"ORDER_NOT_DELIVERED\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderAId}}/confirm-receipt",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{orderAId}}",
+                "confirm-receipt"
+              ]
+            },
+            "description": "발송 직후(배송 완료 전)에는 수령 확인을 할 수 없다. 409 ORDER_NOT_DELIVERED. 발송 후 2분이 지나 이 요청을 보내면 실제로 수령 확인이 되어 버리므로, 발송 직후에 바로 실행한다."
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. 구매자 - 배송 완료 후 (발송 2분 30초 뒤)",
+      "description": "대기 조건: 9번 폴더의 발송 등록 후 최소 2분 30초가 지나야 한다. 모의 배송 완료는 발송 등록 2분 뒤 대상이 되고, 자동 처리 스케줄러가 30초 간격으로 DELIVERED 로 바꾼다. 첫 요청(배송 완료 확인)은 남은 시간이 있으면 그만큼 기다렸다가 보낸다.",
+      "item": [
+        {
+          "name": "구매자 로그인",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const missing = [\"buyerId\", \"buyerPassword\"].filter(function (n) { return !pm.variables.get(n); });",
+                  "if (missing.length) { throw new Error(\"환경 변수를 먼저 입력하세요: \" + missing.join(\", \")); }"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 302 (로그인 성공 후 메인 화면으로 리다이렉트)\", function () { pm.response.to.have.status(302); });",
+                  "pm.test(\"Authorization 쿠키 발급\", function () {",
+                  "    const setCookies = pm.response.headers.all()",
+                  "        .filter(function (h) { return h.key.toLowerCase() === \"set-cookie\"; })",
+                  "        .map(function (h) { return h.value; });",
+                  "    pm.expect(setCookies.some(function (v) { return v.indexOf(\"Authorization=\") === 0; })).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "description": "구매자 계정으로 로그인한다(폼 파라미터 userid, password). 성공하면 302 와 함께 Authorization 쿠키(JWT, 1시간 유효)를 받고, 이후 요청에는 Postman 쿠키 저장소가 이 쿠키를 자동으로 붙인다. 다른 계정으로 로그인하면 쿠키가 덮어써진다. 실패하면 401.",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "userid",
+                  "value": "{{buyerId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{buyerPassword}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          }
+        },
+        {
+          "name": "배송 완료 확인 (주문 A)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const shippedAt = Number(pm.collectionVariables.get(\"shippedAtEpochMs\") || 0);",
+                  "const waitMs = shippedAt ? Math.max(0, shippedAt + 155000 - Date.now()) : 0;",
+                  "if (waitMs > 0) {",
+                  "    console.log(\"모의 배송 완료를 기다립니다: \" + Math.ceil(waitMs / 1000) + \"초\");",
+                  "    setTimeout(function () {}, waitMs);",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"배송 완료 DELIVERED (아니면 30초 뒤 이 요청부터 다시 실행)\", function () { pm.expect(pm.response.json().shippingStatus).to.eql(\"DELIVERED\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderAId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{orderAId}}"
+              ]
+            },
+            "description": "대기 조건: 발송 등록 후 2분 30초 이상. 이 요청의 Pre-request 스크립트가 마지막 발송 등록 시각(shippedAtEpochMs)부터 155초가 지나지 않았으면 남은 시간만큼 기다린다. DELIVERED 가 아니면 30초 뒤 다시 보낸다."
+          }
+        },
+        {
+          "name": "주문 A 수령 확인 (정상 완료)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"거래 완료 COMPLETED, 완료 원인 BUYER_CONFIRMED\", function () {",
+                  "    const b = pm.response.json();",
+                  "    pm.expect(b.tradeStatus).to.eql(\"COMPLETED\");",
+                  "    pm.expect(b.completionCause).to.eql(\"BUYER_CONFIRMED\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderAId}}/confirm-receipt",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{orderAId}}",
+                "confirm-receipt"
+              ]
+            },
+            "description": "배송 완료 후 확인 기간(48시간) 안에 정상 수령을 확인한다. 거래가 확정되고 판매 대금이 판매자 잔액으로 지급된다(SALE_PAYOUT). 확인하지 않으면 48시간 뒤 자동 완료된다(Postman 으로 기다리지 않음)."
+          }
+        },
+        {
+          "name": "주문 C 환불 요청",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) {",
+                  "    const b = pm.response.json();",
+                  "    pm.test(\"거래 보류 ON_HOLD, 환불 요청 대기 PENDING\", function () {",
+                  "        pm.expect(b.tradeStatus).to.eql(\"ON_HOLD\");",
+                  "        pm.expect(b.refundRequest.decision).to.eql(\"PENDING\");",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderCId}}/refund-request",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{orderCId}}",
+                "refund-request"
+              ]
+            },
+            "description": "배송 완료(DELIVERED) 후 확인 기간(48시간) 안에 구매자가 환불을 요청한다. 거래는 ON_HOLD 가 되고 판매자 응답을 기다린다. 이 요청은 판매자가 승인한다.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reasonCode\": \"DESCRIPTION_MISMATCH\",\n  \"detail\": \"{{refundDetail}}\",\n  \"requestId\": \"{{$guid}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "주문 D 환불 요청",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) {",
+                  "    const b = pm.response.json();",
+                  "    pm.test(\"거래 보류 ON_HOLD, 환불 요청 대기 PENDING\", function () {",
+                  "        pm.expect(b.tradeStatus).to.eql(\"ON_HOLD\");",
+                  "        pm.expect(b.refundRequest.decision).to.eql(\"PENDING\");",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderDId}}/refund-request",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{orderDId}}",
+                "refund-request"
+              ]
+            },
+            "description": "배송 완료(DELIVERED) 후 확인 기간(48시간) 안에 구매자가 환불을 요청한다. 거래는 ON_HOLD 가 되고 판매자 응답을 기다린다. 이 요청은 판매자가 거절한다.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reasonCode\": \"DESCRIPTION_MISMATCH\",\n  \"detail\": \"{{refundDetail}}\",\n  \"requestId\": \"{{$guid}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "11. 판매자 - 환불 응답",
+      "description": "판매자로 로그인해 주문 C 환불을 승인하고 주문 D 환불을 거절한다. 판매자가 48시간 안에 응답하지 않으면 자동 환불된다(Postman 으로 기다리지 않음).",
+      "item": [
+        {
+          "name": "판매자 로그인",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const missing = [\"sellerId\", \"sellerPassword\"].filter(function (n) { return !pm.variables.get(n); });",
+                  "if (missing.length) { throw new Error(\"환경 변수를 먼저 입력하세요: \" + missing.join(\", \")); }"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 302 (로그인 성공 후 메인 화면으로 리다이렉트)\", function () { pm.response.to.have.status(302); });",
+                  "pm.test(\"Authorization 쿠키 발급\", function () {",
+                  "    const setCookies = pm.response.headers.all()",
+                  "        .filter(function (h) { return h.key.toLowerCase() === \"set-cookie\"; })",
+                  "        .map(function (h) { return h.value; });",
+                  "    pm.expect(setCookies.some(function (v) { return v.indexOf(\"Authorization=\") === 0; })).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "description": "판매자 계정으로 로그인한다(폼 파라미터 userid, password). 성공하면 302 와 함께 Authorization 쿠키(JWT, 1시간 유효)를 받고, 이후 요청에는 Postman 쿠키 저장소가 이 쿠키를 자동으로 붙인다. 다른 계정으로 로그인하면 쿠키가 덮어써진다. 실패하면 401.",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "userid",
+                  "value": "{{sellerId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{sellerPassword}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          }
+        },
+        {
+          "name": "주문 C 환불 승인",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"거래 환불 REFUNDED, 결정 APPROVED\", function () {",
+                  "    const b = pm.response.json();",
+                  "    pm.expect(b.tradeStatus).to.eql(\"REFUNDED\");",
+                  "    pm.expect(b.refundRequest.decision).to.eql(\"APPROVED\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderCId}}/refund-request/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{orderCId}}",
+                "refund-request",
+                "approve"
+              ]
+            },
+            "description": "환불을 승인한다. 결제 금액이 구매자 잔액으로 돌아간다(REFUND)."
+          }
+        },
+        {
+          "name": "주문 D 환불 거절",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"거래 완료 COMPLETED, 완료 원인 REFUND_REJECTED, 결정 REJECTED\", function () {",
+                  "    const b = pm.response.json();",
+                  "    pm.expect(b.tradeStatus).to.eql(\"COMPLETED\");",
+                  "    pm.expect(b.completionCause).to.eql(\"REFUND_REJECTED\");",
+                  "    pm.expect(b.refundRequest.decision).to.eql(\"REJECTED\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderDId}}/refund-request/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{orderDId}}",
+                "refund-request",
+                "reject"
+              ]
+            },
+            "description": "환불을 거절한다. 거래가 완료되고 판매 대금이 판매자에게 지급된다(SALE_PAYOUT)."
+          }
+        },
+        {
+          "name": "판매자 잔액 조회",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"잔액 필드 존재\", function () { pm.expect(pm.response.json()).to.have.property(\"balance\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/wallet",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "wallet"
+              ]
+            },
+            "description": "로그인한 판매자의 현재 잔액을 조회한다. 지갑이 없으면 잔액 0 으로 응답한다."
+          }
+        },
+        {
+          "name": "판매자 잔액 변동 내역",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"배열 응답\", function () { pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/wallet/transactions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "wallet",
+                "transactions"
+              ]
+            },
+            "description": "로그인한 판매자의 잔액 변동 내역(CHARGE, PURCHASE, CANCEL_REFUND, REFUND, SALE_PAYOUT)을 조회한다."
+          }
+        }
+      ]
+    },
+    {
+      "name": "12. 구매자 - 최종 확인",
+      "description": "구매자로 로그인해 잔액, 변동 내역, 대화 상세, 구매 목록을 확인한다.",
+      "item": [
+        {
+          "name": "구매자 로그인",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const missing = [\"buyerId\", \"buyerPassword\"].filter(function (n) { return !pm.variables.get(n); });",
+                  "if (missing.length) { throw new Error(\"환경 변수를 먼저 입력하세요: \" + missing.join(\", \")); }"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 302 (로그인 성공 후 메인 화면으로 리다이렉트)\", function () { pm.response.to.have.status(302); });",
+                  "pm.test(\"Authorization 쿠키 발급\", function () {",
+                  "    const setCookies = pm.response.headers.all()",
+                  "        .filter(function (h) { return h.key.toLowerCase() === \"set-cookie\"; })",
+                  "        .map(function (h) { return h.value; });",
+                  "    pm.expect(setCookies.some(function (v) { return v.indexOf(\"Authorization=\") === 0; })).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "description": "구매자 계정으로 로그인한다(폼 파라미터 userid, password). 성공하면 302 와 함께 Authorization 쿠키(JWT, 1시간 유효)를 받고, 이후 요청에는 Postman 쿠키 저장소가 이 쿠키를 자동으로 붙인다. 다른 계정으로 로그인하면 쿠키가 덮어써진다. 실패하면 401.",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "userid",
+                  "value": "{{buyerId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{buyerPassword}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          }
+        },
+        {
+          "name": "구매자 잔액 조회",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"잔액 필드 존재\", function () { pm.expect(pm.response.json()).to.have.property(\"balance\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/wallet",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "wallet"
+              ]
+            },
+            "description": "로그인한 구매자의 현재 잔액을 조회한다. 지갑이 없으면 잔액 0 으로 응답한다."
+          }
+        },
+        {
+          "name": "구매자 잔액 변동 내역",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"배열 응답\", function () { pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/wallet/transactions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "wallet",
+                "transactions"
+              ]
+            },
+            "description": "로그인한 구매자의 잔액 변동 내역(CHARGE, PURCHASE, CANCEL_REFUND, REFUND, SALE_PAYOUT)을 조회한다."
+          }
+        },
+        {
+          "name": "대화 상세 (주문 요약 포함)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"주문 요약 4건 이상\", function () { pm.expect(pm.response.json().orders.length).to.be.at.least(4); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/conversations/{{conversationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "conversations",
+                "{{conversationId}}"
+              ]
+            },
+            "description": "대화 상세의 주문 요약에 주문 A~D 의 최종 상태가 보인다."
+          }
+        },
+        {
+          "name": "구매 목록 (최종)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"응답 상태 코드 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/purchases",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "purchases"
+              ]
+            },
+            "description": "구매 목록에서 주문 A(COMPLETED), B(CANCELLED), C(REFUNDED), D(COMPLETED)를 확인한다."
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "productName",
+      "value": "Postman 테스트 상품",
+      "type": "string"
+    },
+    {
+      "key": "productDescription",
+      "value": "Postman API 테스트용 상품입니다.",
+      "type": "string"
+    },
+    {
+      "key": "productCategory",
+      "value": "ELECTRONICS",
+      "type": "string",
+      "description": "CLOTHING_ACCESSORIES, LIVING, ELECTRONICS, BOOKS_HOBBY"
+    },
+    {
+      "key": "productPrice",
+      "value": "10000",
+      "type": "string"
+    },
+    {
+      "key": "productQuantity",
+      "value": "5",
+      "type": "string"
+    },
+    {
+      "key": "chargeAmount",
+      "value": "100000",
+      "type": "string"
+    },
+    {
+      "key": "offer1Amount",
+      "value": "8000",
+      "type": "string"
+    },
+    {
+      "key": "offer2Amount",
+      "value": "9000",
+      "type": "string"
+    },
+    {
+      "key": "messageContent",
+      "value": "안녕하세요. 상품 상태가 궁금합니다(Postman 테스트).",
+      "type": "string"
+    },
+    {
+      "key": "recipientName",
+      "value": "테스트 수령인",
+      "type": "string"
+    },
+    {
+      "key": "shippingAddress",
+      "value": "서울특별시 테스트구 테스트로 1",
+      "type": "string"
+    },
+    {
+      "key": "carrierName",
+      "value": "테스트택배",
+      "type": "string"
+    },
+    {
+      "key": "cancelReason",
+      "value": "구매자 변심(테스트)",
+      "type": "string"
+    },
+    {
+      "key": "refundDetail",
+      "value": "상품 설명과 실제 상품이 다릅니다(테스트).",
+      "type": "string"
+    },
+    {
+      "key": "sellerTel",
+      "value": "010-0000-0001",
+      "type": "string"
+    },
+    {
+      "key": "sellerEmail",
+      "value": "seller@example.com",
+      "type": "string"
+    },
+    {
+      "key": "buyerTel",
+      "value": "010-0000-0002",
+      "type": "string"
+    },
+    {
+      "key": "buyerEmail",
+      "value": "buyer@example.com",
+      "type": "string"
+    },
+    {
+      "key": "productId",
+      "value": "",
+      "type": "string",
+      "description": "1번 상품 등록 응답에서 저장"
+    },
+    {
+      "key": "conversationId",
+      "value": "",
+      "type": "string",
+      "description": "4번 대화 시작 응답에서 저장"
+    },
+    {
+      "key": "messageId",
+      "value": "",
+      "type": "string",
+      "description": "4번 메시지 전송 응답에서 저장"
+    },
+    {
+      "key": "offer1Id",
+      "value": "",
+      "type": "string",
+      "description": "4번 가격 제안 1 응답에서 저장"
+    },
+    {
+      "key": "offer2Id",
+      "value": "",
+      "type": "string",
+      "description": "6번 가격 제안 2 응답에서 저장"
+    },
+    {
+      "key": "orderAId",
+      "value": "",
+      "type": "string",
+      "description": "8번 주문 A 응답에서 저장"
+    },
+    {
+      "key": "orderBId",
+      "value": "",
+      "type": "string",
+      "description": "8번 주문 B 응답에서 저장"
+    },
+    {
+      "key": "orderCId",
+      "value": "",
+      "type": "string",
+      "description": "8번 주문 C 응답에서 저장"
+    },
+    {
+      "key": "orderDId",
+      "value": "",
+      "type": "string",
+      "description": "8번 주문 D 응답에서 저장"
+    },
+    {
+      "key": "buyerBalanceBefore",
+      "value": "",
+      "type": "string",
+      "description": "3번 충전 전 잔액"
+    },
+    {
+      "key": "insufficientQty",
+      "value": "",
+      "type": "string",
+      "description": "3번 잔액 부족 주문 수량(자동 계산)"
+    },
+    {
+      "key": "shippedAtEpochMs",
+      "value": "",
+      "type": "string",
+      "description": "9번 마지막 발송 등록 시각(자동 기록)"
+    }
+  ]
+}
