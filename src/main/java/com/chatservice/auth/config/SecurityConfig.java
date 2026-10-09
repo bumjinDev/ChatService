@@ -23,7 +23,10 @@ import com.chatservice.auth.filter.util.JWTUtil;
 import com.chatservice.auth.provider.UserAuthenticationProvider;
 import com.chatservice.auth.repository.UserEntityRepository;
 import com.chatservice.auth.userdetailservice.UserEntityDetailService;
+import com.chatservice.marketplace.common.security.ApiAccessDeniedHandler;
+import com.chatservice.marketplace.common.security.ApiAuthenticationEntryPoint;
 import com.chatservice.redis.handler.RedisHandler;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 
@@ -151,6 +154,40 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain chatWebSocketFilterChain(HttpSecurity http) throws Exception {
         http.securityMatcher("/chat", "/chat/**")
+            .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+            .csrf(csrf -> csrf.disable())
+            .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .addFilterAt(new JwtAuthProcessorFilter(cookieUtil, jwtUtil, redisHandler), UsernamePasswordAuthenticationFilter.class)
+            .exceptionHandling(exception ->
+                exception.authenticationEntryPoint(new JwtAuthenticationFailureHandler())
+                         .accessDeniedHandler(new JwtAccessDeniedHandler()));
+        return http.build();
+    }
+
+    /*
+     * [C2C Marketplace REST API] /api/** 전체.
+     * 공개 상품 목록·상세 조회(F-002)만 인증 없이 허용하고 나머지는 인증이 필요하다(BR-001).
+     * 거래 당사자·대화 참여자 여부는 서비스에서 검사한다. 인증 실패와 인가 거부는 JSON 으로 응답한다.
+     */
+    @Bean
+    public SecurityFilterChain apiFilterChain(HttpSecurity http, ObjectMapper objectMapper) throws Exception {
+        http.securityMatcher("/api/**")
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(HttpMethod.GET, "/api/products", "/api/products/*").permitAll()
+                .anyRequest().authenticated())
+            .csrf(csrf -> csrf.disable())
+            .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .addFilterAt(new JwtAuthProcessorFilter(cookieUtil, jwtUtil, redisHandler), UsernamePasswordAuthenticationFilter.class)
+            .exceptionHandling(exception ->
+                exception.authenticationEntryPoint(new ApiAuthenticationEntryPoint(objectMapper))
+                         .accessDeniedHandler(new ApiAccessDeniedHandler(objectMapper)));
+        return http.build();
+    }
+
+    /* [C2C Marketplace 대화 WebSocket] /ws/** 는 기존 chatWebSocketFilterChain 과 같은 구성으로 인증을 요구한다. */
+    @Bean
+    public SecurityFilterChain conversationWebSocketFilterChain(HttpSecurity http) throws Exception {
+        http.securityMatcher("/ws/**")
             .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
             .csrf(csrf -> csrf.disable())
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

@@ -2,6 +2,8 @@
 
 > 채팅방에 동시에 몰리는 사용자를, REST 단계의 permit 선점과 WebSocket 단계의 입장 확정으로 나눠 처리해서 정원 초과 입장(Race Condition)·중복 로그인·비정상 연결의 자원 누수를 구조적으로 막은 Spring Boot 기반 실시간 채팅 서버.
 
+> **2026-10 C2C Marketplace 확장:** 이 저장소는 상품별 1:1 대화·가격 제안·잔액 결제·발송·취소·환불을 갖춘 중고거래 서비스로 확장되었다. 아래 기존 방 채팅 설명은 원래 ChatService 의 내용이며, 해당 기능은 코드에 남아 있지만 실행에서는 제외되었다. 확장 내용은 [C2C Marketplace 확장](#c2c-marketplace-확장) 절을 본다.
+
 | 항목 | 내용 |
 | --- | --- |
 | 개발 인원 | 1인 단독 |
@@ -41,6 +43,7 @@
 6. [데이터베이스 설계](#데이터베이스-설계)
 7. [API 명세](#api-명세)
 8. [디렉토리 구조](#디렉토리-구조)
+9. [C2C Marketplace 확장](#c2c-marketplace-확장)
 
 ---
 
@@ -294,6 +297,147 @@ ChatService
 ```
 
 > 각 핵심 클래스의 설계 책임·실행 흐름은 `docs/클래스해설/` 의 클래스별 `.md` 문서에 정리되어 있다.
+
+---
+
+## C2C Marketplace 확장
+
+기존 ChatService 를 개인 간 중고거래 서비스로 확장한 기본 구현이다. 기준 문서는 `docs/4. 프로젝트고도화/` 의 요구사항 명세서 1.1판과 설계 명세서 2.1판이다.
+
+> 이번 구현은 **요청이 하나씩 순서대로 들어올 때**의 정상 처리, 입력 검증, 당사자 권한, 현재 상태 검사, 저장·조회, 기본 자동 처리까지다. 동시 요청·같은 요청의 재전송·처리 도중 장애에 대한 보장은 구현하지 않았고 검증하지도 않았다(아래 "후속 과제와 현재 구현의 한계").
+
+### 기본 기능
+
+| 기능 | 내용 | API |
+| --- | --- | --- |
+| F-001 상품 등록 | 카테고리 5종, 개당 가격, 1개 이상 판매 수량(최초·남은 수량) | `POST /api/products` |
+| F-002 상품 조회 | 판매 중 상품만 공개 목록·상세. 판매 종료 상품 공개 상세는 404 | `GET /api/products?category=`, `GET /api/products/{id}` |
+| F-003·004 테스트 잔액 | 충전, 본인 잔액·변동 내역(충전·구매·취소 반환·환불 반환·판매대금 지급) | `POST /api/wallet/charges`, `GET /api/wallet`, `GET /api/wallet/transactions` |
+| F-005~007 상품별 1:1 대화 | 상품·구매 희망자 조합의 대화, 메시지 저장 후 실시간 전달, 놓친 메시지 조회(`afterId`), 상품 상태·제안·본인 주문 요약 | `POST /api/products/{id}/conversations`, `GET /api/conversations`, `GET /api/conversations/{id}`, `GET·POST /api/conversations/{id}/messages`, `WS /ws/conversations?conversationId=` |
+| F-008·009 가격 제안 | 구매 희망자의 개당 가격 제안(등록 가격 미만, 대기·수락 제안이 있으면 거절), 판매자 수락·거절. 수락 가격은 해당 구매자의 여러 주문에 재사용 | `POST /api/conversations/{id}/offers`, `POST /api/offers/{id}/accept`, `POST /api/offers/{id}/reject` |
+| F-010 구매·잔액 결제 | 등록 단가 또는 합의 단가 × 수량을 서버가 계산. 잔액 차감·구매 내역·주문 생성·주문 수량만 재고 차감(0 일 때만 판매 종료)·당사자 대화 생성 | `POST /api/orders` |
+| F-011 발송 등록 | 구매 확정 다음 영업일부터 5영업일(그 다음 날 00:00 KST 전)까지 한 번 | `POST /api/orders/{id}/shipment` |
+| F-012·013 취소 | 발송 전 당사자 취소, 기한이 지난 미발송 주문 자동 취소. 결제액 전액 반환, 재고 미복구 | `POST /api/orders/{id}/cancel`, 자동 처리 |
+| F-014~016 배송·완료 | 모의 배송 완료(기본 2분), 배송 완료 후 48시간 미만 수령 확인 또는 48시간 경과 자동 완료와 판매대금 지급 | `POST /api/orders/{id}/confirm-receipt`, 자동 처리 |
+| F-017·018 환불 | "상품 설명과 실제 상태가 다름" 환불 요청과 보류, 판매자 동의(전액 환불)·거절(정상 완료·지급), 접수 후 48시간 무응답 자동 환불(CH-001) | `POST /api/orders/{id}/refund-request`, `.../approve`, `.../reject`, 자동 처리 |
+| F-019 주문 조회 | 구매·판매 목록, 당사자 전용 상세(수령인·주소, 발송·취소·환불 정보, 본인 잔액 내역) | `GET /api/orders/purchases`, `GET /api/orders/sales`, `GET /api/orders/{id}` |
+
+- 화면: 기존 방 채팅 화면 대신 마켓 화면을 새로 만들었다(아래 "화면", 판단 기록 J-23).
+- 오류 응답은 `{ "code": "PRODUCT_NOT_ON_SALE", "status": 409, "message": "..." }` 형식이며 입력 오류는 `VALIDATION_ERROR` 와 `fieldErrors` 를 함께 준다.
+- 사용을 중단한 기존 방 채팅 패키지(`createroom`, `joinroom`, `concurrency`, `scheduler`, `roomlist`, `web`, `websocketcore`, `redis.controller`, `redis.service`)는 파일을 남겨 두고 컴포넌트 스캔에서만 제외했다. `/rooms*`, `/chat`, `/api/v1/redis/*` 는 이제 404 다.
+- 새 코드는 `src/main/java/com/chatservice/marketplace/` 아래에 있다(`common`, `product`, `wallet`, `conversation`, `conversation.realtime`, `offer`, `order`, `order.scheduler`, `web`).
+
+### 화면
+
+화면은 위 API 만 호출한다. 업무 규칙과 기한 판정은 서버가 하고, 화면은 상태에 맞는 요청 버튼만 보여 준다(판단 기록 J-25).
+
+| 주소 | 화면 | 로그인 |
+| --- | --- | --- |
+| `/ChatService/#/products` | 판매 중 상품 목록, 카테고리 필터 | 불필요 |
+| `/ChatService/#/products/{id}` | 상품 상세, 판매자에게 문의, 구매(수량·등록 가격/합의 가격 선택·수령인·주소, 결제 금액과 잔액 비교) | 상세는 불필요, 문의·구매는 필요 |
+| `/ChatService/#/sell` | 상품 등록 | 필요 |
+| `/ChatService/#/wallet` | 잔액, 테스트 잔액 충전, 잔액 변동 내역 | 필요 |
+| `/ChatService/#/purchases`, `#/sales` | 구매 내역, 판매 내역 | 필요 |
+| `/ChatService/#/orders/{id}` | 주문 진행 단계, 결제·배송·취소·환불 정보, 이 주문의 내 잔액 변동, 발송 등록·취소·구매 확정·환불 요청·환불 승인/거절 | 필요 |
+| `/ChatService/conversations?conversationId={id}` | 내 대화 목록, 실시간 메시지, 가격 제안·수락·거절, 상품 상태와 이 대화의 주문 | 필요 |
+| `/ChatService/members/login`, `/members/join` | 기존 로그인·가입 화면(문구와 가입 스크립트만 바꿈) | - |
+
+- 스크립트는 `src/main/resources/static/js/market/` 의 ES 모듈, 스타일은 `css/common/theme.css` 와 `css/market/market.css` 다. 서버 값은 모두 텍스트 노드로 넣는다.
+- 시각은 브라우저 시간대와 관계없이 한국 시간으로 표시한다(J-24).
+- 회원 정보 수정 화면은 연결하지 않았다(J-28).
+
+### 구현 범위
+
+| 구분 | 내용 |
+| --- | --- |
+| 포함 | F-001~F-019, 한 주문에 한 상품의 복수 수량, 한 상품의 여러 주문과 같은 구매자의 별도 재구매, 자동 처리 4종(미발송 자동 취소·모의 배송 완료·확인 기간 만료 자동 완료·무응답 자동 환불), 같은 업무 요청의 DB 변경에 대한 기본 Spring 트랜잭션(기본 전파·격리) |
+| 정책 유지 | 취소·환불 후 재고 미복구, 합의 단가 재사용, 주문 전체 단위의 발송·취소·환불(분할 발송·부분 취소·부분 환불 없음) |
+| 제외 | 서로 다른 상품 묶음 구매, 추천, 부분 환불, 사진 증빙, 상품 수정·삭제, 판매자 역제안·재협상, 운영자 판정, 반품 배송, 실제 결제·택배 연동, 채팅 부가 기능 |
+
+### 필요한 환경변수
+
+비밀값은 코드와 설정 파일에 넣지 않고 환경변수로만 받는다.
+
+| 변수 | 용도 |
+| --- | --- |
+| `ORACLE_PASSWORD` | 애플리케이션 실행 시 `TOYCHAT` 계정 비밀번호(`application.yml`, 기존) |
+| `REDIS_PASSWORD` | 애플리케이션 실행 시 Redis 비밀번호(기존, 인증이 없으면 빈 값) |
+| `MARKETPLACE_TEST_DB_URL` | 통합 테스트용 Oracle JDBC URL. 예: `jdbc:oracle:thin:@127.0.0.1:1521/XEPDB1` |
+| `MARKETPLACE_TEST_DB_USERNAME` | 통합 테스트용 스키마 계정. 운영·개발 스키마와 다른 계정(예: `TOYCHAT_TEST`) |
+| `MARKETPLACE_TEST_DB_PASSWORD` | 통합 테스트용 스키마 비밀번호 |
+| `MARKETPLACE_TEST_REDIS_HOST` | 통합 테스트용 Redis 호스트(기본 `127.0.0.1`) |
+| `MARKETPLACE_TEST_REDIS_PORT` | 통합 테스트용 Redis 포트. 운영·개발 Redis 와 분리된 인스턴스 |
+| `MARKETPLACE_TEST_REDIS_PASSWORD` | 통합 테스트용 Redis 비밀번호(선택) |
+
+`application.yml` 의 새 설정: `marketplace.scheduler.enabled`(기본 true), `marketplace.scheduler.fixed-delay`(기본 30000ms), `marketplace.mock-delivery.duration`(기본 `PT2M`), `hibernate.jdbc.time_zone=UTC`, `hibernate.type.preferred_instant_jdbc_type=TIMESTAMP`, `spring.jackson.deserialization.accept-float-as-int=false`.
+
+### Oracle XE·Redis 준비와 DDL 적용
+
+운영·개발 스키마(`TOYCHAT`)에는 기존 `ddl_toychat.sql` 다음에 `docs/1. 프로젝트개발/2. db/ddl_marketplace.sql` 을 `TOYCHAT` 계정으로 실행한다. 새 테이블 9개만 추가하며 기존 테이블은 바꾸지 않는다(`ddl-auto: none` 유지). 되돌릴 때는 스크립트 머리의 `[DROP]` 블록을 쓴다. 실행 전에 `SELECT constraint_type FROM user_constraints WHERE table_name = 'MEMBERTBL'` 에 `P` 가 있는지 확인한다. 없으면 새 테이블의 회원 FK 가 `ORA-02270` 으로 실패하므로, ID 중복·NULL 이 없는 것을 확인한 뒤 `ALTER TABLE MEMBERTBL ADD CONSTRAINT PK_MEMBERTBL PRIMARY KEY (ID);` 로 기본키를 먼저 추가한다(판단 기록 J-30).
+
+통합 테스트는 별도 테스트 스키마와 별도 Redis 를 쓴다. 아래는 Docker 로 Oracle XE 를 띄우는 예시이며, **이번 작업 환경에서는 Docker 데몬을 쓸 수 없어 이 절차를 실행해 보지 못했다.**
+
+```bash
+# 1) Oracle XE 컨테이너 (비밀번호는 환경변수로 넘긴다)
+docker run -d --name marketplace-oracle-test -p 1521:1521 -e ORACLE_PASSWORD="$ORACLE_SYSTEM_PASSWORD" gvenzl/oracle-xe:21-slim
+
+# 2) 테스트 전용 계정 생성 (SYSTEM 으로, XEPDB1 에서)
+docker exec -i marketplace-oracle-test sqlplus -s "system/$ORACLE_SYSTEM_PASSWORD@//localhost:1521/XEPDB1" <<SQL
+CREATE USER TOYCHAT_TEST IDENTIFIED BY "$MARKETPLACE_TEST_DB_PASSWORD";
+GRANT CONNECT, RESOURCE TO TOYCHAT_TEST;
+ALTER USER TOYCHAT_TEST QUOTA UNLIMITED ON USERS;
+SQL
+
+# 3) 기존 DDL 과 신규 DDL 적용 (TOYCHAT_TEST 로)
+for f in ddl_toychat.sql ddl_marketplace.sql; do
+  docker exec -i marketplace-oracle-test sqlplus -s "TOYCHAT_TEST/$MARKETPLACE_TEST_DB_PASSWORD@//localhost:1521/XEPDB1" < "docs/1. 프로젝트개발/2. db/$f"
+done
+
+# 4) 테스트 전용 Redis (저장하지 않는 별도 포트)
+redis-server --port 6390 --save '' --appendonly no --daemonize yes
+```
+
+통합 테스트는 회원 ID 접두어 `itest` 로 만든 행만 지우고, 테스트가 Redis 에 넣은 JWT 키만 지운다.
+
+### 실행·테스트 방법
+
+```bash
+# 빌드: 컴파일, 단위 테스트(외부 자원 불필요), bootWar
+./gradlew build            # 실행 권한이 없으면 bash ./gradlew build
+
+# 통합 테스트(Oracle 테스트 스키마 + 테스트 Redis 필요). build 에는 포함하지 않는다.
+export MARKETPLACE_TEST_DB_URL=jdbc:oracle:thin:@127.0.0.1:1521/XEPDB1
+export MARKETPLACE_TEST_DB_USERNAME=TOYCHAT_TEST
+export MARKETPLACE_TEST_DB_PASSWORD=...        # 직접 입력
+export MARKETPLACE_TEST_REDIS_PORT=6390
+./gradlew integrationTest
+
+# Oracle 을 쓸 수 없을 때의 보조 실행(H2 Oracle 호환 모드). Oracle 검증 결과가 아니다.
+MARKETPLACE_TEST_REDIS_PORT=6390 ./gradlew integrationTest -PintegrationDb=h2
+
+# 애플리케이션 실행
+ORACLE_PASSWORD=... REDIS_PASSWORD=... ./gradlew bootRun
+# http://localhost:8186/ChatService/              상품 목록(메인 화면)
+# http://localhost:8186/ChatService/members/login 로그인
+# http://localhost:8186/ChatService/conversations  대화 화면
+```
+
+- 통합 테스트는 JVM 기본 시간대를 `Asia/Seoul` 로 두고 실행해 시각이 UTC 로 저장·조회되는지도 확인한다. 시각은 테스트용 Clock 으로 고정·이동하며, 자동 처리는 스케줄러를 끄고 서비스 메서드를 직접 호출해 검증한다.
+- 테스트 구성: 단위 테스트(`test`) — 영업일·48시간 계산, 대화 쓰기 가능 규칙, 스케줄러 호출 순서. 통합 테스트(`integrationTest`, `@Tag("integration")`) — 설계 9장의 기본 기능 검증 항목과 복수 수량 검증 표(후속 과제 항목 제외), API·서비스·WebSocket, 화면 JSP·모듈 제공.
+- 화면 동작은 자동 테스트에 넣지 않았다. Playwright(Chromium)로 H2 보조 실행 서버에서 등록 → 충전 → 문의·실시간 메시지 → 가격 제안·수락·거절 → 합의 가격 결제 → 발송 → 배송 완료 → 환불 요청·거절·승인 → 구매자·판매자 취소 → 읽기 전용 대화, 실시간 연결을 끊은 뒤 따라잡기, 가입·로그인 흐름을 확인했다(J-27).
+
+### 후속 과제와 현재 구현의 한계
+
+아래 항목은 **구현하지 않았거나 검증하지 않았다.** 기능이 순차 요청에서 동작한다는 것과 아래 상황을 보장한다는 것은 다르다.
+
+- **동시 요청 제어 없음:** 락, 낙관적 잠금, 격리 수준 조정을 하지 않았다. 남은 수량이 적은 상품을 여러 구매자가 동시에 결제하거나, 한 회원이 여러 결제를 동시에 보내거나, 발송과 취소·완료와 환불·판매자 응답과 자동 환불이 동시에 들어오면 재고·잔액·최종 상태가 업무 규칙과 어긋날 수 있다(F-010-AC-01·02 등).
+- **같은 요청 재전송 식별 없음:** 충전·메시지·결제는 호출마다 새 요청으로 반영된다. `requestId` 는 저장만 한다(F-003-AC-01, F-006-AC-02, F-010-AC-04). 결제 응답을 받지 못했다면 다시 보내지 말고 `GET /api/orders/purchases` 로 확인한다.
+- **장애 복구 없음:** 한 업무 요청의 DB 변경은 하나의 트랜잭션으로 묶었지만 장애 상황에서의 정합성은 검증하지 않았다. 자동 처리는 주문 한 건씩 처리하고 실패한 건은 로그만 남긴다. 재시도·보상·스케줄러 중복 실행 방지는 없다.
+- **성능:** 인덱스 설계와 조회 최적화를 하지 않았다(목록 조회는 페이지 없이 전체를 돌려준다).
+- **실시간 전달:** 저장이 커밋된 뒤 한 번만 보내며 실패하면 다시 보내지 않는다. 세션 레지스트리는 단일 인스턴스 JVM 메모리에 있다. 대화 화면은 실시간 연결이 열릴 때마다 놓친 메시지와 상태를 다시 조회하므로, 연결된 채 전달에 실패한 이벤트는 다음 재연결이나 새로고침 때 채워진다(J-29).
+- **Oracle 미검증:** 이번 작업 환경에서는 Oracle 통합 테스트를 실행하지 못했다. DDL 적용만 사용자가 로컬 Oracle XE 에서 확인했다(J-30). 특히 `Instant`↔`TIMESTAMP(6)` 매핑, CLOB, IDENTITY 채번은 Oracle 에서 확인해야 한다.
+- **지갑 첫 조회:** 지갑 행이 없는 회원의 첫 잔액·내역 조회가 동시에 들어오면 한쪽이 500 을 받는다. 화면은 자기 요청을 순서대로 보내지만 다른 탭·클라이언트와 겹치는 경우는 막지 못한다(J-26).
+- **화면:** 주문·상품 화면은 실시간으로 갱신되지 않아 상대방의 처리나 자동 처리 결과는 새로고침해야 보인다(대화 화면만 실시간). 기한까지 남은 시간은 브라우저 시계로 계산한 참고 값이다. 판매 종료 상품은 공개 상세가 없어 상품 화면으로 들어갈 수 없다(F-002).
 
 ---
 
