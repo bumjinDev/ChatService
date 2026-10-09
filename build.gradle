@@ -11,6 +11,12 @@ group = 'com.chatservice'
 version = '1.0.0-BUILD-SNAPSHOT'
 description = 'RealTimeChatProgram'
 
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
 configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
@@ -73,10 +79,47 @@ dependencies {
 
 	/* 테스트 관련 의존성 */
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	/* Oracle 테스트 스키마를 쓸 수 없는 환경에서만 쓰는 보조 실행용 DB (-PintegrationDb=h2).
+	   H2 결과는 Oracle 검증 결과가 아니다. */
+	testRuntimeOnly 'com.h2database:h2'
 }
 
+/* build 에 포함되는 단위 테스트. DB·Redis 가 필요한 통합 테스트(@Tag("integration"))는 제외한다. */
 tasks.test {
-	useJUnitPlatform()
+	useJUnitPlatform {
+		excludeTags 'integration'
+	}
+}
+
+/*
+ * 서비스·API·WebSocket 통합 테스트. 외부 DB 와 Redis 가 필요하므로 build 에 포함하지 않고 직접 실행한다.
+ *   Oracle : MARKETPLACE_TEST_DB_URL / _USERNAME / _PASSWORD, MARKETPLACE_TEST_REDIS_PORT 등을 지정한 뒤
+ *            ./gradlew integrationTest
+ *   H2 보조: ./gradlew integrationTest -PintegrationDb=h2   (Oracle 검증을 대신하지 않는다)
+ * JVM 기본 시간대를 Asia/Seoul 로 두어 Instant 저장·조회가 JVM 시간대에 좌우되지 않는지 함께 확인한다.
+ */
+tasks.register('integrationTest', Test) {
+	description = 'DB·Redis 가 필요한 C2C Marketplace 통합 테스트를 실행한다.'
+	group = 'verification'
+	testClassesDirs = sourceSets.test.output.classesDirs
+	classpath = sourceSets.test.runtimeClasspath
+	useJUnitPlatform {
+		includeTags 'integration'
+	}
+	shouldRunAfter tasks.test
+	jvmArgs '-Duser.timezone=Asia/Seoul'
+	// DDL 경로(docs/1. 프로젝트개발/...)에 한글이 있어 POSIX 로케일의 리눅스에서는 파일 경로를 해석하지 못한다.
+	if (!org.gradle.internal.os.OperatingSystem.current().isWindows() && !(System.getenv('LC_ALL') ?: '').toUpperCase().contains('UTF-8')) {
+		environment 'LC_ALL', 'C.UTF-8'
+	}
+	def profiles = (project.findProperty('integrationDb') == 'h2') ? 'integration,integration-h2' : 'integration'
+	systemProperty 'spring.profiles.active', profiles
+	testLogging {
+		events 'failed'
+		exceptionFormat 'full'
+	}
 }
 
 tasks.withType(JavaCompile) {
