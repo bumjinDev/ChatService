@@ -78,6 +78,11 @@ marketplace:
   mock-delivery:
     # 발송 등록 시각부터 모의 배송 완료까지의 기간(ISO-8601 Duration). 운영 성능 목표가 아니다.
     duration: PT2M
+  test-support:
+    # 겹침 재현 테스트용 요청 일시 중지. 테스트하는 동안에만 true로 켠다.
+    enabled: false
+    # 멈춘 요청이 재개를 기다리는 최대 시간
+    pause-timeout: PT30S
 
 logging:
   level:
