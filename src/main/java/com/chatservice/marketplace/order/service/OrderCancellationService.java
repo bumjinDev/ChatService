@@ -19,6 +19,8 @@ import com.chatservice.marketplace.order.domain.OrderEnums.CancelledBy;
 import com.chatservice.marketplace.order.domain.OrderEnums.ShippingStatus;
 import com.chatservice.marketplace.order.domain.OrderEnums.TradeStatus;
 import com.chatservice.marketplace.order.domain.PurchaseOrder;
+import com.chatservice.marketplace.testsupport.PausePoint;
+import com.chatservice.marketplace.testsupport.TestPause;
 import com.chatservice.marketplace.wallet.domain.BalanceTransactionType;
 import com.chatservice.marketplace.wallet.service.IWalletService;
 
@@ -36,17 +38,19 @@ public class OrderCancellationService implements IOrderCancellationService {
     private final IConversationService conversationService;
     private final TransactionTemplate transactionTemplate;
     private final TimeRules timeRules;
+    private final TestPause testPause;
 
     public OrderCancellationService(PurchaseOrderRepository purchaseOrderRepository,
                                     ShipmentRepository shipmentRepository, IWalletService walletService,
                                     IConversationService conversationService, TransactionTemplate transactionTemplate,
-                                    TimeRules timeRules) {
+                                    TimeRules timeRules, TestPause testPause) {
         this.purchaseOrderRepository = purchaseOrderRepository;
         this.shipmentRepository = shipmentRepository;
         this.walletService = walletService;
         this.conversationService = conversationService;
         this.transactionTemplate = transactionTemplate;
         this.timeRules = timeRules;
+        this.testPause = testPause;
     }
 
     /*
@@ -60,6 +64,8 @@ public class OrderCancellationService implements IOrderCancellationService {
         // 주문을 조회한다. 주문이 없으면 404로 거절한다.
         PurchaseOrder order = purchaseOrderRepository.findById(orderId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
+        // 겹침 재현 테스트의 중지 위치 1(주문 조회 직후). 테스트 설정이 꺼져 있거나 테스트 헤더가 없는 요청은 그대로 진행한다.
+        testPause.reach(PausePoint.ORDER_READ);
         // 요청한 회원이 이 주문의 구매자나 판매자가 아니면 403으로 거절한다.
         if (!order.isParty(memberId)) {
             throw new BusinessException(ErrorCode.NOT_TRADE_PARTY);
@@ -197,6 +203,8 @@ public class OrderCancellationService implements IOrderCancellationService {
         // 1. 반환 후 잔액의 저장 범위 확인. 상태를 바꾸기 전에 검사하므로 실패하면 아무것도 반영되지 않는다.
         //    호출 흐름: WalletService.ensureCreditable() → currentBalance() → AmountRules.fitsBalance()
         walletService.ensureCreditable(order.getBuyerId(), order.getPaidAmount());
+        // 겹침 재현 테스트의 중지 위치 2(구매자 지갑 조회 직후). 자동 취소처럼 HTTP 요청 밖에서 실행되면 그대로 진행한다.
+        testPause.reach(PausePoint.WALLET_READ);
 
         // 로그에 남길 변경 전 거래 상태
         TradeStatus before = order.getTradeStatus();
