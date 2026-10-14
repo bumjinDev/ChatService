@@ -54,6 +54,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
 	implementation 'com.oracle.database.jdbc:ojdbc8:19.8.0.0'
 
+	/* 실행한 SQL·바인드 값·커밋을 로그로 남긴다(p6spy) */
+	implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.10.0'
+
 	/* 테스트 코드 작성을 위한 Junit 의존성 추가 */
 	testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
 
