@@ -92,6 +92,9 @@ decorator:
       logging: slf4j
 
 logging:
+  file:
+    # 화면 출력과 함께 이 파일에도 로그를 쓴다. 10MB마다 새 파일로 넘기고 7일 지난 파일은 지운다(Spring Boot 기본값).
+    name: /var/log/chatservice/chatservice.log
   level:
     org:
       springframework:
