@@ -84,6 +84,13 @@ marketplace:
     # 멈춘 요청이 재개를 기다리는 최대 시간
     pause-timeout: PT30S
 
+decorator:
+  datasource:
+    p6spy:
+      # 실행한 SQL(바인드 값 포함)과 커밋·롤백을 로거 p6spy로 남긴다.
+      enable-logging: true
+      logging: slf4j
+
 logging:
   level:
     org:
