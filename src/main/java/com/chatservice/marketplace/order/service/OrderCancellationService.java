@@ -2,6 +2,7 @@ package com.chatservice.marketplace.order.service;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,7 +66,7 @@ public class OrderCancellationService implements IOrderCancellationService {
         PurchaseOrder order = purchaseOrderRepository.findById(orderId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
         // 겹침 재현 테스트의 중지 위치 1(주문 조회 직후). 테스트 설정이 꺼져 있거나 테스트 헤더가 없는 요청은 그대로 진행한다.
-        testPause.reach(PausePoint.ORDER_READ);
+        // testPause.reach(PausePoint.ORDER_READ);
         // 요청한 회원이 이 주문의 구매자나 판매자가 아니면 403으로 거절한다.
         if (!order.isParty(memberId)) {
             throw new BusinessException(ErrorCode.NOT_TRADE_PARTY);
@@ -94,7 +95,7 @@ public class OrderCancellationService implements IOrderCancellationService {
              */
         }
         // 주문 취소 : 요청자가 구매자이면 BUYER, 판매자이면 SELLER를 취소 주체로 넘겨 공통 취소 처리를 실행한다. - 요구사항 명세서에 구매자 판매자 모두 가능 명시됨
-        cancel(order, order.isBuyer(memberId) ? CancelledBy.BUYER : CancelledBy.SELLER, reason, timeRules.now());
+        cancel(order, order.isBuyer(memberId) ? CancelledBy.BUYER : CancelledBy.SELLER, reason, timeRules::now);
     }
 
     /**
@@ -174,7 +175,7 @@ public class OrderCancellationService implements IOrderCancellationService {
         }
         // 3. 공통 취소 처리. 주문을 취소 완료로 바꾸고 구매자에게 결제 금액 전액을 반환한다.
         //    호출 흐름: cancel() → WalletService.ensureCreditable() → PurchaseOrder.cancel() → WalletService.credit() → ConversationService.publishStateToTradeConversation()
-        cancel(order, CancelledBy.SYSTEM, AUTO_CANCEL_REASON, now);
+        cancel(order, CancelledBy.SYSTEM, AUTO_CANCEL_REASON, () -> now);
         return true;
     }
 
@@ -195,16 +196,17 @@ public class OrderCancellationService implements IOrderCancellationService {
      * @param order  취소할 주문. 호출하는 쪽 트랜잭션에서 조회한 영속 상태의 엔티티
      * @param by     취소 주체. 당사자 취소는 {@code BUYER} 또는 {@code SELLER}, 자동 취소는 {@code SYSTEM}
      * @param reason 취소 사유. 자동 취소는 {@link #AUTO_CANCEL_REASON}
-     * @param now    취소 시각. 주문의 종료 시각과 잔액 변동 내역의 발생 시각에 사용한다.
+     * @param nowSupplier 취소 시각을 구하는 함수. 중지 위치 2를 지난 뒤 한 번 호출하며, 구한 시각을 주문의 종료 시각과 잔액 변동 내역의 발생 시각에 사용한다.
      * @throws BusinessException     반환 후 잔액이 저장 범위를 넘으면 {@code VALIDATION_ERROR}
      * @throws IllegalStateException 주문이 진행 중·발송 대기 상태가 아니면 {@link PurchaseOrder#cancel}이 던진다.
      */
-    private void cancel(PurchaseOrder order, CancelledBy by, String reason, Instant now) {
+    private void cancel(PurchaseOrder order, CancelledBy by, String reason, Supplier<Instant> nowSupplier) {
         // 1. 반환 후 잔액의 저장 범위 확인. 상태를 바꾸기 전에 검사하므로 실패하면 아무것도 반영되지 않는다.
         //    호출 흐름: WalletService.ensureCreditable() → currentBalance() → AmountRules.fitsBalance()
         walletService.ensureCreditable(order.getBuyerId(), order.getPaidAmount());
-        // 겹침 재현 테스트의 중지 위치 2(구매자 지갑 조회 직후). 자동 취소처럼 HTTP 요청 밖에서 실행되면 그대로 진행한다.
         testPause.reach(PausePoint.WALLET_READ);
+        // 취소 시각은 잔액 확인과 중지 위치 2를 지난 뒤, 주문 상태를 바꾸기 직전에 구한다.
+        Instant now = nowSupplier.get();
 
         // 로그에 남길 변경 전 거래 상태
         TradeStatus before = order.getTradeStatus();
