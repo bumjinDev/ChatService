@@ -9,7 +9,7 @@
 
 cd "E:\devSpace\SpringBootProjects\ChatService\docs\5. 병목지점\작업산출물\작업\001_주문상태변경_동시성\세부작업\01_테스트_구매자취소와_판매자취소\실행결과_원본\실행01_테스트케이스1_주문조회직후중지_구매자취소먼저_20261015\웹서버로그파일"
 
-py -V:3.13 .\1_시각범위추출.py --input .\chatservice.log --output "E:\devSpace\SpringBootProjects\ChatService\docs\5. 병목지점\작업산출물\작업\001_주문상태변경_동시성\세부작업\01_테스트_구매자취소와_판매자취소\실행결과_가공\실행01_서버로그_시각추출.log" --start 2026-10-15T15:20:00 --end 2026-10-15T15:21:00
+py -V:3.13 .\1_시각범위추출.py --input .\chatservice.log --output "E:\devSpace\SpringBootProjects\ChatService\docs\5. 병목지점\작업산출물\작업\001_주문상태변경_동시성\세부작업\01_테스트_구매자취소와_판매자취소\실행결과_가공\실행01_테스트케이스1_주문조회직후중지_구매자취소먼저_20261015\실행01_서버로그_시각추출.log" --start 2026-10-15T15:20:00 --end 2026-10-15T15:21:00
 
 [인자]
 --input   원본 로그 파일
