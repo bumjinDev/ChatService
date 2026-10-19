@@ -20,6 +20,8 @@ import com.chatservice.marketplace.order.domain.OrderEnums.ShippingStatus;
 import com.chatservice.marketplace.order.domain.OrderEnums.TradeStatus;
 import com.chatservice.marketplace.order.domain.PurchaseOrder;
 import com.chatservice.marketplace.order.domain.Shipment;
+import com.chatservice.marketplace.testsupport.PausePoint;
+import com.chatservice.marketplace.testsupport.TestPause;
 
 @Service
 public class ShipmentService implements IShipmentService {
@@ -31,15 +33,18 @@ public class ShipmentService implements IShipmentService {
     private final TransactionTemplate transactionTemplate;
     private final TimeRules timeRules;
     private final Duration mockDeliveryDuration;
+    private final TestPause testPause;
 
     public ShipmentService(PurchaseOrderRepository purchaseOrderRepository, ShipmentRepository shipmentRepository,
                            TransactionTemplate transactionTemplate, TimeRules timeRules,
-                           @Value("${marketplace.mock-delivery.duration}") Duration mockDeliveryDuration) {
+                           @Value("${marketplace.mock-delivery.duration}") Duration mockDeliveryDuration,
+                           TestPause testPause) {
         this.purchaseOrderRepository = purchaseOrderRepository;
         this.shipmentRepository = shipmentRepository;
         this.transactionTemplate = transactionTemplate;
         this.timeRules = timeRules;
         this.mockDeliveryDuration = mockDeliveryDuration;
+        this.testPause = testPause;
     }
 
     /**
@@ -89,6 +94,8 @@ public class ShipmentService implements IShipmentService {
         //    호출 흐름: PurchaseOrderRepository.findById()
         PurchaseOrder order = purchaseOrderRepository.findById(orderId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
+        // 겹침 재현 테스트의 중지 위치(주문 조회 직후). 테스트 설정이 꺼져 있거나 테스트 헤더가 없는 요청은 그대로 진행한다.
+        testPause.reach(PausePoint.ORDER_READ);
         // 3. 판매자 확인
         //    호출 흐름: PurchaseOrder.isSeller()
         if (!order.isSeller(memberId)) {

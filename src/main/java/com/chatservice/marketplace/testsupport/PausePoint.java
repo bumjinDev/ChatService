@@ -7,7 +7,7 @@ package com.chatservice.marketplace.testsupport;
  */
 public enum PausePoint {
 
-    /** 당사자 취소에서 주문을 조회한 직후, 취소 조건을 검사하기 전. */
+    /** 주문을 조회한 직후, 상태를 검사하기 전. 당사자 취소(cancelByParty)와 발송 등록(register)에서 멈춘다. */
     ORDER_READ,
 
     /** 취소 처리에서 구매자 지갑을 조회하고 잔액 범위를 검사한 직후, 주문과 잔액을 바꾸기 전. */
