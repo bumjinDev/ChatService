@@ -1,0 +1,2 @@
+﻿case_id,pause_at,first_resume,product_name,product_description,product_category,product_price,product_quantity,charge_amount,order_quantity,recipient_name,shipping_address,carrier_name,tracking_number,cancel_reason
+테스트케이스2,ORDER_READ,B,캠핑 의자,두 번 사용했습니다. 수납 가방 포함.,LIVING,75000,1,100000,1,박서준,경기도 성남시 분당구 판교역로 235,편의점 택배,3621-0984-4170,같은 의자를 선물받아 취소합니다.
