@@ -1,2 +1,0 @@
-﻿case_id,pause_at,first_resume,product_name,product_description,product_category,product_price,product_quantity,charge_amount,order_quantity,recipient_name,shipping_address,cancel_reason_a,cancel_reason_b
-테스트케이스3,WALLET_READ,A,아이폰,"배터리 성능 86%, 흠집 없음. 박스와 케이블 포함.",ELECTRONICS,350000,1,400000,1,김하늘,서울특별시 마포구 월드컵북로 400,판매자와 합의해 취소합니다.,구매자와 채팅으로 취소에 합의했습니다.

@@ -1,0 +1,9 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
+1792138603926,163,판매자 상품 등록,201,,"4. 테스트케이스2 주문 만들기(상품 등록, 충전, 결제) 1-1",text,true,,637,593,1,1,http://wherehouse.it.kr:8186/ChatService/api/products,163,0,26
+1792138604091,43,구매자 충전,201,,"4. 테스트케이스2 주문 만들기(상품 등록, 충전, 결제) 1-1",text,true,,507,510,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet/charges,43,0,0
+1792138604134,111,구매자 결제,201,,"4. 테스트케이스2 주문 만들기(상품 등록, 충전, 결제) 1-1",text,true,,1244,609,1,1,http://wherehouse.it.kr:8186/ChatService/api/orders,111,0,0
+1792138661188,209,B-1. 판매자의 판매 목록 조회(주문 ID 얻기),200,,5. 테스트케이스2 테스트(요청 A·B 취소와 재개 제어) 1-2,text,true,,608,389,3,3,http://wherehouse.it.kr:8186/ChatService/api/orders/sales,209,0,130
+1792138661188,217,A-1. 구매자의 구매 목록 조회(주문 ID 얻기),200,,5. 테스트케이스2 테스트(요청 A·B 취소와 재개 제어) 1-1,text,true,,608,391,3,3,http://wherehouse.it.kr:8186/ChatService/api/orders/purchases,209,0,130
+1792138661406,292,A-2. 요청 A: 구매자의 주문 취소,200,,5. 테스트케이스2 테스트(요청 A·B 취소와 재개 제어) 1-1,text,true,,1518,550,3,3,http://wherehouse.it.kr:8186/ChatService/api/orders/26/cancel,292,0,0
+1792138661398,520,B-2. 요청 B: 판매자의 주문 취소,200,,5. 테스트케이스2 테스트(요청 A·B 취소와 재개 제어) 1-2,text,true,,1268,568,2,2,http://wherehouse.it.kr:8186/ChatService/api/orders/26/cancel,520,0,0
+1792138661188,905,"멈춤 확인, 먼저 커밋할 요청 재개, 응답 확인 뒤 나머지 요청 재개",200,OK,5. 테스트케이스2 테스트(요청 A·B 취소와 재개 제어) 1-3,text,true,,284,0,1,1,null,0,0,0

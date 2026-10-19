@@ -66,7 +66,7 @@ public class OrderCancellationService implements IOrderCancellationService {
         PurchaseOrder order = purchaseOrderRepository.findById(orderId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
         // 겹침 재현 테스트의 중지 위치 1(주문 조회 직후). 테스트 설정이 꺼져 있거나 테스트 헤더가 없는 요청은 그대로 진행한다.
-        // testPause.reach(PausePoint.ORDER_READ);
+        testPause.reach(PausePoint.ORDER_READ);
         // 요청한 회원이 이 주문의 구매자나 판매자가 아니면 403으로 거절한다.
         if (!order.isParty(memberId)) {
             throw new BusinessException(ErrorCode.NOT_TRADE_PARTY);

@@ -29,7 +29,7 @@ import jakarta.servlet.http.HttpServletRequest;
  * 멈춘 요청은 트랜잭션과 DB 연결을 잡은 채로 기다린다. 그래서 {@code marketplace.test-support.pause-timeout}(기본 30초) 안에
  * 재개되지 않으면 예외를 던져 그 요청을 실패로 끝낸다.
  */
-// 스프링 빈으로 등록한다. OrderCancellationService와 TestSupportController가 생성자로 주입받는다.
+// 스프링 빈으로 등록한다. OrderCancellationService, ShipmentService, TestSupportController가 생성자로 주입받는다.
 @Component
 public class TestPause {
 
@@ -91,7 +91,7 @@ public class TestPause {
             // 6. 재개 신호가 올 때까지 이 요청의 스레드가 기다린다. 기다리는 동안 트랜잭션과 DB 연결은 열린 채로 있다.
             //    timeout 안에 신호가 오지 않으면 await()가 false를 돌려준다.
             if (!resumeSignal.await(timeout.toMillis(), TimeUnit.MILLISECONDS)) {
-                // 대기 시간을 넘기면 예외를 던진다. 취소 메서드의 트랜잭션은 롤백되고 요청은 오류로 끝난다.
+                // 대기 시간을 넘기면 예외를 던진다. 멈춘 요청의 트랜잭션은 롤백되고 요청은 오류로 끝난다.
                 throw new IllegalStateException("테스트 일시 중지 대기 시간을 넘겼습니다. name=" + name + ", point=" + point);
             }
         } catch (InterruptedException e) {
@@ -104,7 +104,7 @@ public class TestPause {
             waiting.remove(name, resumeSignal);
         }
         logger.info("[테스트 일시 중지] 재개 name={}, point={}", name, point);
-        // 8. 여기서 반환되면 취소 처리가 reach() 다음 줄부터 이어진다.
+        // 8. 여기서 반환되면 reach()를 호출한 서비스 메서드가 다음 줄부터 처리를 이어 간다.
     }
 
     /**
