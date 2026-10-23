@@ -1,0 +1,12 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
+1792733513833,18,처리 기준 시각 고정(사전 준비 시각),200,,"4. 테스트케이스3 주문 만들기(시각 고정, 상품 등록, 충전, 결제, 고정 해제) 1-1",text,true,,220,240,1,1,http://wherehouse.it.kr:8186/ChatService/test-support/clock,18,0,9
+1792733513853,29,판매자 상품 등록,201,,"4. 테스트케이스3 주문 만들기(시각 고정, 상품 등록, 충전, 결제, 고정 해제) 1-1",text,true,,619,582,1,1,http://wherehouse.it.kr:8186/ChatService/api/products,29,0,0
+1792733513909,27,구매자 충전,201,,"4. 테스트케이스3 주문 만들기(시각 고정, 상품 등록, 충전, 결제, 고정 해제) 1-1",text,true,,500,510,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet/charges,27,0,0
+1792733513936,52,구매자 결제,201,,"4. 테스트케이스3 주문 만들기(시각 고정, 상품 등록, 충전, 결제, 고정 해제) 1-1",text,true,,1221,611,1,1,http://wherehouse.it.kr:8186/ChatService/api/orders,52,0,0
+1792733513992,9,처리 기준 시각 고정 해제,200,,"4. 테스트케이스3 주문 만들기(시각 고정, 상품 등록, 충전, 결제, 고정 해제) 1-1",text,true,,228,240,1,1,http://wherehouse.it.kr:8186/ChatService/test-support/clock,9,0,0
+1792733724846,22,A-1. 처리 기준 시각 고정(발송 기한 0.5초 전),200,,"5. 테스트케이스3 테스트(시각 고정, 요청 A 발송 등록·요청 B 미발송 자동 취소와 재개 제어, 고정 해제) 1-1",text,true,,224,481,3,3,http://wherehouse.it.kr:8186/ChatService/test-support/clock,21,0,10
+1792733724901,24,A-2. 판매자의 판매 목록 조회(주문 ID 얻기),200,,"5. 테스트케이스3 테스트(시각 고정, 요청 A 발송 등록·요청 B 미발송 자동 취소와 재개 제어, 고정 해제) 1-1",text,true,,611,389,3,3,http://wherehouse.it.kr:8186/ChatService/api/orders/sales,24,0,0
+1792733724928,376,A-3. 요청 A: 판매자의 발송 등록,201,,"5. 테스트케이스3 테스트(시각 고정, 요청 A 발송 등록·요청 B 미발송 자동 취소와 재개 제어, 고정 해제) 1-1",text,true,,1236,621,3,3,http://wherehouse.it.kr:8186/ChatService/api/orders/66/shipment,376,0,0
+1792733724846,679,B-1. 요청 B: 미발송 자동 취소 실행(now: 발송 기한 5초 뒤),200,,"5. 테스트케이스3 테스트(시각 고정, 요청 A 발송 등록·요청 B 미발송 자동 취소와 재개 제어, 고정 해제) 1-2",text,true,,187,333,2,2,http://wherehouse.it.kr:8186/ChatService/test-support/jobs/unshipped-cancel?now=2026-10-12T15:00:05Z,679,0,13
+1792733724846,859,"멈춤 확인, 먼저 커밋할 요청 재개, 응답 확인 뒤 나머지 요청 재개",200,OK,"5. 테스트케이스3 테스트(시각 고정, 요청 A 발송 등록·요청 B 미발송 자동 취소와 재개 제어, 고정 해제) 1-3",text,true,,334,0,1,1,null,0,0,0
+1792733725706,21,처리 기준 시각 고정 해제(재개 제어 뒤),200,,"5. 테스트케이스3 테스트(시각 고정, 요청 A 발송 등록·요청 B 미발송 자동 취소와 재개 제어, 고정 해제) 1-3",text,true,,228,240,1,1,http://wherehouse.it.kr:8186/ChatService/test-support/clock,21,0,11

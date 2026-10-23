@@ -25,7 +25,7 @@
           </elementProp>
           <elementProp name="outDir" elementType="Argument">
             <stringProp name="Argument.name">outDir</stringProp>
-            <stringProp name="Argument.value">E:\devSpace\SpringBootProjects\ChatService\docs\5. 병목지점\작업산출물\작업\001_주문상태변경_동시성\세부작업\03_테스트_발송등록과_미발송자동취소\실행결과_원본\실행01_테스트케이스2_지갑조회직후중지_자동취소먼저_20261022</stringProp>
+            <stringProp name="Argument.value">E:\devSpace\SpringBootProjects\ChatService\docs\5. 병목지점\작업산출물\작업\001_주문상태변경_동시성\세부작업\03_테스트_발송등록과_미발송자동취소\실행결과_원본\실행03_테스트케이스3_지갑조회직후중지_발송등록먼저_20261023</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
             <stringProp name="Argument.desc">이번 실행의 결과를 남길 실행 폴더 전체 경로. 실행마다 그 실행의 폴더로 바꾼다</stringProp>
           </elementProp>
@@ -94,7 +94,7 @@
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV 데이터 셋 설정(회원 가입 결과 CSV를 한 줄씩 읽기, 끝나면 멈춤)">
+        <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV 데이터 셋 설정(회원 가입 결과 CSV를 한 줄씩 읽기, 끝나면 멈춤)" enabled="true">
           <stringProp name="filename">${joinResultFile}</stringProp>
           <stringProp name="fileEncoding">UTF-8</stringProp>
           <stringProp name="variableNames">case_id,seller_id,seller_pw,seller_join_code,buyer_id,buyer_pw,buyer_join_code</stringProp>
@@ -106,7 +106,7 @@
           <stringProp name="shareMode">shareMode.thread</stringProp>
         </CSVDataSet>
         <hashTree/>
-        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="폼 헤더">
+        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="폼 헤더" enabled="true">
           <collectionProp name="HeaderManager.headers">
             <elementProp name="" elementType="Header">
               <stringProp name="Header.name">Content-Type</stringProp>
@@ -115,7 +115,7 @@
           </collectionProp>
         </HeaderManager>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="판매자 로그인">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="판매자 로그인" enabled="true">
           <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
           <stringProp name="HTTPSampler.path">/ChatService/login</stringProp>
           <stringProp name="HTTPSampler.method">POST</stringProp>
@@ -162,7 +162,7 @@
           </RegexExtractor>
           <hashTree/>
         </hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="구매자 로그인">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="구매자 로그인" enabled="true">
           <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
           <stringProp name="HTTPSampler.path">/ChatService/login</stringProp>
           <stringProp name="HTTPSampler.method">POST</stringProp>
@@ -233,7 +233,7 @@ f.setText(&apos;\uFEFFseller_id,seller_token,buyer_id,buyer_token\n&apos; + row.
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV 데이터 셋 설정(테스트케이스2 테스트 데이터 CSV 읽기)">
+        <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV 데이터 셋 설정(테스트케이스2 테스트 데이터 CSV 읽기)" enabled="true">
           <stringProp name="filename">${dataDir}\03_테스트_발송등록과_미발송자동취소_테스트케이스2_지갑조회직후중지_자동취소먼저.csv</stringProp>
           <stringProp name="fileEncoding">UTF-8</stringProp>
           <stringProp name="variableNames">case_id,pause_at_a,pause_at_b,first_resume,product_name,product_description,product_category,product_price,product_quantity,charge_amount,order_quantity,recipient_name,shipping_address,carrier_name,tracking_number,prepare_instant,test_instant,unshipped_cancel_now,delivery_complete_now</stringProp>
@@ -245,7 +245,7 @@ f.setText(&apos;\uFEFFseller_id,seller_token,buyer_id,buyer_token\n&apos; + row.
           <stringProp name="shareMode">shareMode.thread</stringProp>
         </CSVDataSet>
         <hashTree/>
-        <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV 데이터 셋 설정(테스트케이스2 로그인 토큰 파일 읽기)">
+        <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV 데이터 셋 설정(테스트케이스2 로그인 토큰 파일 읽기)" enabled="true">
           <stringProp name="filename">${dataDir}\03_테스트_발송등록과_미발송자동취소_테스트케이스2_로그인토큰.csv</stringProp>
           <stringProp name="fileEncoding">UTF-8</stringProp>
           <stringProp name="variableNames">seller_id,seller_token,buyer_id,buyer_token</stringProp>
@@ -257,7 +257,7 @@ f.setText(&apos;\uFEFFseller_id,seller_token,buyer_id,buyer_token\n&apos; + row.
           <stringProp name="shareMode">shareMode.thread</stringProp>
         </CSVDataSet>
         <hashTree/>
-        <ResultCollector guiclass="SimpleDataWriter" testclass="ResultCollector" testname="결과 파일 저장(실행 폴더의 결과.jtl)">
+        <ResultCollector guiclass="SimpleDataWriter" testclass="ResultCollector" testname="결과 파일 저장(실행 폴더의 결과.jtl)" enabled="true">
           <boolProp name="ResultCollector.error_logging">false</boolProp>
           <objProp>
             <name>saveConfig</name>
@@ -294,7 +294,7 @@ f.setText(&apos;\uFEFFseller_id,seller_token,buyer_id,buyer_token\n&apos; + row.
           <stringProp name="filename">${outDir}\결과.jtl</stringProp>
         </ResultCollector>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="처리 기준 시각 고정(사전 준비 시각)">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="처리 기준 시각 고정(사전 준비 시각)" enabled="true">
           <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
           <stringProp name="HTTPSampler.path">/ChatService/test-support/clock</stringProp>
           <stringProp name="HTTPSampler.method">PUT</stringProp>
@@ -311,7 +311,7 @@ f.setText(&apos;\uFEFFseller_id,seller_token,buyer_id,buyer_token\n&apos; + row.
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="JSON 헤더">
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="JSON 헤더" enabled="true">
             <collectionProp name="HeaderManager.headers">
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">Content-Type</stringProp>
@@ -320,7 +320,7 @@ f.setText(&apos;\uFEFFseller_id,seller_token,buyer_id,buyer_token\n&apos; + row.
             </collectionProp>
           </HeaderManager>
           <hashTree/>
-          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="응답 코드 200">
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="응답 코드 200" enabled="true">
             <collectionProp name="Asserion.test_strings">
               <stringProp name="49586">200</stringProp>
             </collectionProp>
@@ -330,7 +330,7 @@ f.setText(&apos;\uFEFFseller_id,seller_token,buyer_id,buyer_token\n&apos; + row.
             <intProp name="Assertion.test_type">8</intProp>
           </ResponseAssertion>
           <hashTree/>
-          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="고정 확인(응답 본문에 fixed true와 고정한 시각)">
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="고정 확인(응답 본문에 fixed true와 고정한 시각)" enabled="true">
             <collectionProp name="Asserion.test_strings">
               <stringProp name="-300088072">&quot;fixed&quot;:true</stringProp>
               <stringProp name="631837420">&quot;instant&quot;:&quot;${prepare_instant}&quot;</stringProp>
@@ -342,7 +342,7 @@ f.setText(&apos;\uFEFFseller_id,seller_token,buyer_id,buyer_token\n&apos; + row.
           </ResponseAssertion>
           <hashTree/>
         </hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="판매자 상품 등록">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="판매자 상품 등록" enabled="true">
           <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
           <stringProp name="HTTPSampler.path">/ChatService/api/products</stringProp>
           <stringProp name="HTTPSampler.method">POST</stringProp>
@@ -359,7 +359,7 @@ f.setText(&apos;\uFEFFseller_id,seller_token,buyer_id,buyer_token\n&apos; + row.
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="JSON 헤더와 판매자 로그인 쿠키">
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="JSON 헤더와 판매자 로그인 쿠키" enabled="true">
             <collectionProp name="HeaderManager.headers">
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">Content-Type</stringProp>
@@ -372,7 +372,7 @@ f.setText(&apos;\uFEFFseller_id,seller_token,buyer_id,buyer_token\n&apos; + row.
             </collectionProp>
           </HeaderManager>
           <hashTree/>
-          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="응답 코드 201">
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="응답 코드 201" enabled="true">
             <collectionProp name="Asserion.test_strings">
               <stringProp name="49587">201</stringProp>
             </collectionProp>
@@ -382,7 +382,7 @@ f.setText(&apos;\uFEFFseller_id,seller_token,buyer_id,buyer_token\n&apos; + row.
             <intProp name="Assertion.test_type">8</intProp>
           </ResponseAssertion>
           <hashTree/>
-          <JSONPostProcessor guiclass="JSONPostProcessorGui" testclass="JSONPostProcessor" testname="상품 ID 꺼내기(응답의 productId를 변수 productId에)">
+          <JSONPostProcessor guiclass="JSONPostProcessorGui" testclass="JSONPostProcessor" testname="상품 ID 꺼내기(응답의 productId를 변수 productId에)" enabled="true">
             <stringProp name="JSONPostProcessor.referenceNames">productId</stringProp>
             <stringProp name="JSONPostProcessor.jsonPathExprs">$.productId</stringProp>
             <stringProp name="JSONPostProcessor.match_numbers">1</stringProp>
@@ -390,7 +390,7 @@ f.setText(&apos;\uFEFFseller_id,seller_token,buyer_id,buyer_token\n&apos; + row.
           </JSONPostProcessor>
           <hashTree/>
         </hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="구매자 충전">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="구매자 충전" enabled="true">
           <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
           <stringProp name="HTTPSampler.path">/ChatService/api/wallet/charges</stringProp>
           <stringProp name="HTTPSampler.method">POST</stringProp>
@@ -407,7 +407,7 @@ f.setText(&apos;\uFEFFseller_id,seller_token,buyer_id,buyer_token\n&apos; + row.
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="JSON 헤더와 구매자 로그인 쿠키">
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="JSON 헤더와 구매자 로그인 쿠키" enabled="true">
             <collectionProp name="HeaderManager.headers">
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">Content-Type</stringProp>
@@ -420,7 +420,7 @@ f.setText(&apos;\uFEFFseller_id,seller_token,buyer_id,buyer_token\n&apos; + row.
             </collectionProp>
           </HeaderManager>
           <hashTree/>
-          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="응답 코드 201">
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="응답 코드 201" enabled="true">
             <collectionProp name="Asserion.test_strings">
               <stringProp name="49587">201</stringProp>
             </collectionProp>
@@ -431,7 +431,7 @@ f.setText(&apos;\uFEFFseller_id,seller_token,buyer_id,buyer_token\n&apos; + row.
           </ResponseAssertion>
           <hashTree/>
         </hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="구매자 결제">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="구매자 결제" enabled="true">
           <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
           <stringProp name="HTTPSampler.path">/ChatService/api/orders</stringProp>
           <stringProp name="HTTPSampler.method">POST</stringProp>
@@ -448,7 +448,7 @@ f.setText(&apos;\uFEFFseller_id,seller_token,buyer_id,buyer_token\n&apos; + row.
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="JSON 헤더와 구매자 로그인 쿠키">
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="JSON 헤더와 구매자 로그인 쿠키" enabled="true">
             <collectionProp name="HeaderManager.headers">
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">Content-Type</stringProp>
@@ -461,7 +461,7 @@ f.setText(&apos;\uFEFFseller_id,seller_token,buyer_id,buyer_token\n&apos; + row.
             </collectionProp>
           </HeaderManager>
           <hashTree/>
-          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="응답 코드 201">
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="응답 코드 201" enabled="true">
             <collectionProp name="Asserion.test_strings">
               <stringProp name="49587">201</stringProp>
             </collectionProp>
@@ -471,7 +471,7 @@ f.setText(&apos;\uFEFFseller_id,seller_token,buyer_id,buyer_token\n&apos; + row.
             <intProp name="Assertion.test_type">8</intProp>
           </ResponseAssertion>
           <hashTree/>
-          <ResultSaver guiclass="ResultSaverGui" testclass="ResultSaver" testname="응답 본문 저장(실행 폴더의 결제응답)">
+          <ResultSaver guiclass="ResultSaverGui" testclass="ResultSaver" testname="응답 본문 저장(실행 폴더의 결제응답)" enabled="true">
             <stringProp name="FileSaver.filename">${outDir}\결제응답</stringProp>
             <boolProp name="FileSaver.errorsonly">false</boolProp>
             <boolProp name="FileSaver.successonly">false</boolProp>
@@ -480,7 +480,7 @@ f.setText(&apos;\uFEFFseller_id,seller_token,buyer_id,buyer_token\n&apos; + row.
           </ResultSaver>
           <hashTree/>
         </hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="처리 기준 시각 고정 해제">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="처리 기준 시각 고정 해제" enabled="true">
           <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
           <stringProp name="HTTPSampler.path">/ChatService/test-support/clock</stringProp>
           <stringProp name="HTTPSampler.method">DELETE</stringProp>
@@ -491,7 +491,7 @@ f.setText(&apos;\uFEFFseller_id,seller_token,buyer_id,buyer_token\n&apos; + row.
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree>
-          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="응답 코드 200">
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="응답 코드 200" enabled="true">
             <collectionProp name="Asserion.test_strings">
               <stringProp name="49586">200</stringProp>
             </collectionProp>
@@ -501,7 +501,7 @@ f.setText(&apos;\uFEFFseller_id,seller_token,buyer_id,buyer_token\n&apos; + row.
             <intProp name="Assertion.test_type">8</intProp>
           </ResponseAssertion>
           <hashTree/>
-          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="해제 확인(응답 본문에 fixed false)">
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="해제 확인(응답 본문에 fixed false)" enabled="true">
             <collectionProp name="Asserion.test_strings">
               <stringProp name="-726239495">&quot;fixed&quot;:false</stringProp>
             </collectionProp>
@@ -513,7 +513,7 @@ f.setText(&apos;\uFEFFseller_id,seller_token,buyer_id,buyer_token\n&apos; + row.
           <hashTree/>
         </hashTree>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="3. 테스트케이스2 테스트(시각 고정, 요청 A 발송 등록·요청 B 미발송 자동 취소와 재개 제어, 고정 해제)">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="3. 테스트케이스2 테스트(시각 고정, 요청 A 발송 등록·요청 B 미발송 자동 취소와 재개 제어, 고정 해제)" enabled="true">
         <intProp name="ThreadGroup.num_threads">3</intProp>
         <intProp name="ThreadGroup.ramp_time">0</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -524,7 +524,7 @@ f.setText(&apos;\uFEFFseller_id,seller_token,buyer_id,buyer_token\n&apos; + row.
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV 데이터 셋 설정(테스트케이스2 테스트 데이터 CSV 읽기)">
+        <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV 데이터 셋 설정(테스트케이스2 테스트 데이터 CSV 읽기)" enabled="true">
           <stringProp name="filename">${dataDir}\03_테스트_발송등록과_미발송자동취소_테스트케이스2_지갑조회직후중지_자동취소먼저.csv</stringProp>
           <stringProp name="fileEncoding">UTF-8</stringProp>
           <stringProp name="variableNames">case_id,pause_at_a,pause_at_b,first_resume,product_name,product_description,product_category,product_price,product_quantity,charge_amount,order_quantity,recipient_name,shipping_address,carrier_name,tracking_number,prepare_instant,test_instant,unshipped_cancel_now,delivery_complete_now</stringProp>
@@ -536,7 +536,7 @@ f.setText(&apos;\uFEFFseller_id,seller_token,buyer_id,buyer_token\n&apos; + row.
           <stringProp name="shareMode">shareMode.thread</stringProp>
         </CSVDataSet>
         <hashTree/>
-        <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV 데이터 셋 설정(테스트케이스2 로그인 토큰 파일 읽기)">
+        <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV 데이터 셋 설정(테스트케이스2 로그인 토큰 파일 읽기)" enabled="true">
           <stringProp name="filename">${dataDir}\03_테스트_발송등록과_미발송자동취소_테스트케이스2_로그인토큰.csv</stringProp>
           <stringProp name="fileEncoding">UTF-8</stringProp>
           <stringProp name="variableNames">seller_id,seller_token,buyer_id,buyer_token</stringProp>
@@ -548,7 +548,7 @@ f.setText(&apos;\uFEFFseller_id,seller_token,buyer_id,buyer_token\n&apos; + row.
           <stringProp name="shareMode">shareMode.thread</stringProp>
         </CSVDataSet>
         <hashTree/>
-        <ResultCollector guiclass="SimpleDataWriter" testclass="ResultCollector" testname="결과 파일 저장(실행 폴더의 결과.jtl)">
+        <ResultCollector guiclass="SimpleDataWriter" testclass="ResultCollector" testname="결과 파일 저장(실행 폴더의 결과.jtl)" enabled="true">
           <boolProp name="ResultCollector.error_logging">false</boolProp>
           <objProp>
             <name>saveConfig</name>
@@ -585,13 +585,13 @@ f.setText(&apos;\uFEFFseller_id,seller_token,buyer_id,buyer_token\n&apos; + row.
           <stringProp name="filename">${outDir}\결과.jtl</stringProp>
         </ResultCollector>
         <hashTree/>
-        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="스레드 1: 요청 A(판매자 발송 등록)">
+        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="스레드 1: 요청 A(판매자 발송 등록)" enabled="true">
           <stringProp name="IfController.condition">${__jexl3(${__threadNum} == 1)}</stringProp>
           <boolProp name="IfController.evaluateAll">false</boolProp>
           <boolProp name="IfController.useExpression">true</boolProp>
         </IfController>
         <hashTree>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="로그인 쿠키">
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="로그인 쿠키" enabled="true">
             <collectionProp name="HeaderManager.headers">
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">Cookie</stringProp>
@@ -600,7 +600,7 @@ f.setText(&apos;\uFEFFseller_id,seller_token,buyer_id,buyer_token\n&apos; + row.
             </collectionProp>
           </HeaderManager>
           <hashTree/>
-          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="A-1. 처리 기준 시각 고정(발송 기한 0.5초 전)">
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="A-1. 처리 기준 시각 고정(발송 기한 0.5초 전)" enabled="true">
             <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
             <stringProp name="HTTPSampler.path">/ChatService/test-support/clock</stringProp>
             <stringProp name="HTTPSampler.method">PUT</stringProp>
@@ -617,7 +617,7 @@ f.setText(&apos;\uFEFFseller_id,seller_token,buyer_id,buyer_token\n&apos; + row.
             </elementProp>
           </HTTPSamplerProxy>
           <hashTree>
-            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="JSON 헤더">
+            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="JSON 헤더" enabled="true">
               <collectionProp name="HeaderManager.headers">
                 <elementProp name="" elementType="Header">
                   <stringProp name="Header.name">Content-Type</stringProp>
@@ -626,7 +626,7 @@ f.setText(&apos;\uFEFFseller_id,seller_token,buyer_id,buyer_token\n&apos; + row.
               </collectionProp>
             </HeaderManager>
             <hashTree/>
-            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="응답 코드 200">
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="응답 코드 200" enabled="true">
               <collectionProp name="Asserion.test_strings">
                 <stringProp name="49586">200</stringProp>
               </collectionProp>
@@ -636,7 +636,7 @@ f.setText(&apos;\uFEFFseller_id,seller_token,buyer_id,buyer_token\n&apos; + row.
               <intProp name="Assertion.test_type">8</intProp>
             </ResponseAssertion>
             <hashTree/>
-            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="고정 확인(응답 본문에 fixed true와 고정한 시각)">
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="고정 확인(응답 본문에 fixed true와 고정한 시각)" enabled="true">
               <collectionProp name="Asserion.test_strings">
                 <stringProp name="-300088072">&quot;fixed&quot;:true</stringProp>
                 <stringProp name="-749157637">&quot;instant&quot;:&quot;${test_instant}&quot;</stringProp>
@@ -647,7 +647,7 @@ f.setText(&apos;\uFEFFseller_id,seller_token,buyer_id,buyer_token\n&apos; + row.
               <intProp name="Assertion.test_type">16</intProp>
             </ResponseAssertion>
             <hashTree/>
-            <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="고정에 실패하면 이 스레드를 멈춤(요청 A를 보내지 않음)">
+            <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="고정에 실패하면 이 스레드를 멈춤(요청 A를 보내지 않음)" enabled="true">
               <stringProp name="scriptLanguage">groovy</stringProp>
               <stringProp name="parameters"></stringProp>
               <stringProp name="filename"></stringProp>
@@ -661,7 +661,7 @@ if (!prev.isSuccessful()) {
             </JSR223PostProcessor>
             <hashTree/>
           </hashTree>
-          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="A-2. 판매자의 판매 목록 조회(주문 ID 얻기)">
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="A-2. 판매자의 판매 목록 조회(주문 ID 얻기)" enabled="true">
             <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
             <stringProp name="HTTPSampler.path">/ChatService/api/orders/sales</stringProp>
             <stringProp name="HTTPSampler.method">GET</stringProp>
@@ -672,7 +672,7 @@ if (!prev.isSuccessful()) {
             </elementProp>
           </HTTPSamplerProxy>
           <hashTree>
-            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="응답 코드 200">
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="응답 코드 200" enabled="true">
               <collectionProp name="Asserion.test_strings">
                 <stringProp name="49586">200</stringProp>
               </collectionProp>
@@ -682,7 +682,7 @@ if (!prev.isSuccessful()) {
               <intProp name="Assertion.test_type">8</intProp>
             </ResponseAssertion>
             <hashTree/>
-            <JSONPostProcessor guiclass="JSONPostProcessorGui" testclass="JSONPostProcessor" testname="주문 ID 꺼내기(첫 주문의 orderId를 변수 orderId에)">
+            <JSONPostProcessor guiclass="JSONPostProcessorGui" testclass="JSONPostProcessor" testname="주문 ID 꺼내기(첫 주문의 orderId를 변수 orderId에)" enabled="true">
               <stringProp name="JSONPostProcessor.referenceNames">orderId</stringProp>
               <stringProp name="JSONPostProcessor.jsonPathExprs">$[0].orderId</stringProp>
               <stringProp name="JSONPostProcessor.match_numbers">1</stringProp>
@@ -690,7 +690,7 @@ if (!prev.isSuccessful()) {
             </JSONPostProcessor>
             <hashTree/>
           </hashTree>
-          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="A-3. 요청 A: 판매자의 발송 등록">
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="A-3. 요청 A: 판매자의 발송 등록" enabled="true">
             <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
             <stringProp name="HTTPSampler.path">/ChatService/api/orders/${orderId}/shipment</stringProp>
             <stringProp name="HTTPSampler.method">POST</stringProp>
@@ -707,7 +707,7 @@ if (!prev.isSuccessful()) {
             </elementProp>
           </HTTPSamplerProxy>
           <hashTree>
-            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="JSON 헤더와 일시 중지 헤더">
+            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="JSON 헤더와 일시 중지 헤더" enabled="true">
               <collectionProp name="HeaderManager.headers">
                 <elementProp name="" elementType="Header">
                   <stringProp name="Header.name">Content-Type</stringProp>
@@ -724,7 +724,7 @@ if (!prev.isSuccessful()) {
               </collectionProp>
             </HeaderManager>
             <hashTree/>
-            <ResultSaver guiclass="ResultSaverGui" testclass="ResultSaver" testname="응답 본문 저장(실행 폴더의 A_발송등록응답)">
+            <ResultSaver guiclass="ResultSaverGui" testclass="ResultSaver" testname="응답 본문 저장(실행 폴더의 A_발송등록응답)" enabled="true">
               <stringProp name="FileSaver.filename">${outDir}\A_발송등록응답</stringProp>
               <boolProp name="FileSaver.errorsonly">false</boolProp>
               <boolProp name="FileSaver.successonly">false</boolProp>
@@ -732,7 +732,7 @@ if (!prev.isSuccessful()) {
               <boolProp name="FileSaver.skipsuffix">false</boolProp>
             </ResultSaver>
             <hashTree/>
-            <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="응답 완료 표시(재개 제어에 알림)">
+            <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="응답 완료 표시(재개 제어에 알림)" enabled="true">
               <stringProp name="scriptLanguage">groovy</stringProp>
               <stringProp name="parameters"></stringProp>
               <stringProp name="filename"></stringProp>
@@ -744,13 +744,13 @@ props.put(&apos;done_A&apos;, &apos;true&apos;)
             <hashTree/>
           </hashTree>
         </hashTree>
-        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="스레드 2: 요청 B(미발송 자동 취소)">
+        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="스레드 2: 요청 B(미발송 자동 취소)" enabled="true">
           <stringProp name="IfController.condition">${__jexl3(${__threadNum} == 2)}</stringProp>
           <boolProp name="IfController.evaluateAll">false</boolProp>
           <boolProp name="IfController.useExpression">true</boolProp>
         </IfController>
         <hashTree>
-          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="B-1. 요청 B: 미발송 자동 취소 실행(now: 발송 기한 5초 뒤)">
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="B-1. 요청 B: 미발송 자동 취소 실행(now: 발송 기한 5초 뒤)" enabled="true">
             <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
             <stringProp name="HTTPSampler.path">/ChatService/test-support/jobs/unshipped-cancel?now=${unshipped_cancel_now}</stringProp>
             <stringProp name="HTTPSampler.method">POST</stringProp>
@@ -761,7 +761,7 @@ props.put(&apos;done_A&apos;, &apos;true&apos;)
             </elementProp>
           </HTTPSamplerProxy>
           <hashTree>
-            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="일시 중지 헤더">
+            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="일시 중지 헤더" enabled="true">
               <collectionProp name="HeaderManager.headers">
                 <elementProp name="" elementType="Header">
                   <stringProp name="Header.name">X-Test-Request-Name</stringProp>
@@ -774,7 +774,7 @@ props.put(&apos;done_A&apos;, &apos;true&apos;)
               </collectionProp>
             </HeaderManager>
             <hashTree/>
-            <ResultSaver guiclass="ResultSaverGui" testclass="ResultSaver" testname="응답 본문 저장(실행 폴더의 B_미발송자동취소응답)">
+            <ResultSaver guiclass="ResultSaverGui" testclass="ResultSaver" testname="응답 본문 저장(실행 폴더의 B_미발송자동취소응답)" enabled="true">
               <stringProp name="FileSaver.filename">${outDir}\B_미발송자동취소응답</stringProp>
               <boolProp name="FileSaver.errorsonly">false</boolProp>
               <boolProp name="FileSaver.successonly">false</boolProp>
@@ -782,7 +782,7 @@ props.put(&apos;done_A&apos;, &apos;true&apos;)
               <boolProp name="FileSaver.skipsuffix">false</boolProp>
             </ResultSaver>
             <hashTree/>
-            <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="응답 완료 표시(재개 제어에 알림)">
+            <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="응답 완료 표시(재개 제어에 알림)" enabled="true">
               <stringProp name="scriptLanguage">groovy</stringProp>
               <stringProp name="parameters"></stringProp>
               <stringProp name="filename"></stringProp>
@@ -794,13 +794,13 @@ props.put(&apos;done_B&apos;, &apos;true&apos;)
             <hashTree/>
           </hashTree>
         </hashTree>
-        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="스레드 3: 재개 제어">
+        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="스레드 3: 재개 제어" enabled="true">
           <stringProp name="IfController.condition">${__jexl3(${__threadNum} == 3)}</stringProp>
           <boolProp name="IfController.evaluateAll">false</boolProp>
           <boolProp name="IfController.useExpression">true</boolProp>
         </IfController>
         <hashTree>
-          <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="멈춤 확인, 먼저 커밋할 요청 재개, 응답 확인 뒤 나머지 요청 재개">
+          <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="멈춤 확인, 먼저 커밋할 요청 재개, 응답 확인 뒤 나머지 요청 재개" enabled="true">
             <stringProp name="scriptLanguage">groovy</stringProp>
             <stringProp name="parameters"></stringProp>
             <stringProp name="filename"></stringProp>
@@ -958,7 +958,7 @@ try {
 }</stringProp>
           </JSR223Sampler>
           <hashTree/>
-          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="처리 기준 시각 고정 해제(재개 제어 뒤)">
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="처리 기준 시각 고정 해제(재개 제어 뒤)" enabled="true">
             <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
             <stringProp name="HTTPSampler.path">/ChatService/test-support/clock</stringProp>
             <stringProp name="HTTPSampler.method">DELETE</stringProp>
@@ -969,7 +969,7 @@ try {
             </elementProp>
           </HTTPSamplerProxy>
           <hashTree>
-            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="응답 코드 200">
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="응답 코드 200" enabled="true">
               <collectionProp name="Asserion.test_strings">
                 <stringProp name="49586">200</stringProp>
               </collectionProp>
@@ -979,7 +979,7 @@ try {
               <intProp name="Assertion.test_type">8</intProp>
             </ResponseAssertion>
             <hashTree/>
-            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="해제 확인(응답 본문에 fixed false)">
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="해제 확인(응답 본문에 fixed false)" enabled="true">
               <collectionProp name="Asserion.test_strings">
                 <stringProp name="-726239495">&quot;fixed&quot;:false</stringProp>
               </collectionProp>
@@ -1283,7 +1283,7 @@ try {
           <hashTree/>
         </hashTree>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="5. 테스트케이스3 테스트(시각 고정, 요청 A 발송 등록·요청 B 미발송 자동 취소와 재개 제어, 고정 해제)" enabled="true">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="5. 테스트케이스3 테스트(시각 고정, 요청 A 발송 등록·요청 B 미발송 자동 취소와 재개 제어, 고정 해제)">
         <intProp name="ThreadGroup.num_threads">3</intProp>
         <intProp name="ThreadGroup.ramp_time">0</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
