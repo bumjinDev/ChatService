@@ -86,4 +86,13 @@ public class ProductService implements IProductService {
         logger.info("[재고 차감] productId={}, remaining {} -> {}, status={}",
                 product.getProductId(), before, product.getRemainingQuantity(), product.getStatus());
     }
+
+    @Override
+    @Transactional
+    public void restoreStock(Product product, long quantity) {
+        long before = product.getRemainingQuantity();
+        product.restoreStock(quantity);
+        logger.info("[재고 복구] productId={}, remaining {} -> {}, status={}",
+                product.getProductId(), before, product.getRemainingQuantity(), product.getStatus());
+    }
 }
