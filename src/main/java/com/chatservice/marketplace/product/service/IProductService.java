@@ -25,4 +25,7 @@ public interface IProductService {
 
     /** 결제 성공 시 주문 수량만 차감하고 남은 수량이 0 이면 판매 종료한다(F-010). 호출하는 쪽의 트랜잭션에서 실행된다. */
     void deductStock(Product product, long quantity, Instant now);
+
+    /** 발송 전 취소 시 주문 수량만큼 남은 수량을 되돌리고, 판매 종료였으면 판매 중으로 되돌린다(F-012, F-013). 호출하는 쪽의 트랜잭션에서 실행된다. */
+    void restoreStock(Product product, long quantity);
 }

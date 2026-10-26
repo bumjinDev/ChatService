@@ -20,6 +20,8 @@ import com.chatservice.marketplace.order.domain.OrderEnums.CancelledBy;
 import com.chatservice.marketplace.order.domain.OrderEnums.ShippingStatus;
 import com.chatservice.marketplace.order.domain.OrderEnums.TradeStatus;
 import com.chatservice.marketplace.order.domain.PurchaseOrder;
+import com.chatservice.marketplace.product.domain.Product;
+import com.chatservice.marketplace.product.service.IProductService;
 import com.chatservice.marketplace.testsupport.PausePoint;
 import com.chatservice.marketplace.testsupport.TestPause;
 import com.chatservice.marketplace.wallet.domain.BalanceTransactionType;
@@ -37,18 +39,20 @@ public class OrderCancellationService implements IOrderCancellationService {
     private final ShipmentRepository shipmentRepository;
     private final IWalletService walletService;
     private final IConversationService conversationService;
+    private final IProductService productService;
     private final TransactionTemplate transactionTemplate;
     private final TimeRules timeRules;
     private final TestPause testPause;
 
     public OrderCancellationService(PurchaseOrderRepository purchaseOrderRepository,
                                     ShipmentRepository shipmentRepository, IWalletService walletService,
-                                    IConversationService conversationService, TransactionTemplate transactionTemplate,
-                                    TimeRules timeRules, TestPause testPause) {
+                                    IConversationService conversationService, IProductService productService,
+                                    TransactionTemplate transactionTemplate, TimeRules timeRules, TestPause testPause) {
         this.purchaseOrderRepository = purchaseOrderRepository;
         this.shipmentRepository = shipmentRepository;
         this.walletService = walletService;
         this.conversationService = conversationService;
+        this.productService = productService;
         this.transactionTemplate = transactionTemplate;
         this.timeRules = timeRules;
         this.testPause = testPause;
@@ -173,23 +177,23 @@ public class OrderCancellationService implements IOrderCancellationService {
                 || shipmentRepository.existsByOrderId(orderId)) {
             return false;
         }
-        // 3. 공통 취소 처리. 주문을 취소 완료로 바꾸고 구매자에게 결제 금액 전액을 반환한다.
-        //    호출 흐름: cancel() → WalletService.ensureCreditable() → PurchaseOrder.cancel() → WalletService.credit() → ConversationService.publishStateToTradeConversation()
+        // 3. 공통 취소 처리. 주문을 취소 완료로 바꾸고 상품의 남은 수량을 되돌리며 구매자에게 결제 금액 전액을 반환한다.
+        //    호출 흐름: cancel() → WalletService.ensureCreditable() → PurchaseOrder.cancel() → ProductService.restoreStock() → WalletService.credit() → ConversationService.publishStateToProductConversations()
         cancel(order, CancelledBy.SYSTEM, AUTO_CANCEL_REASON, () -> now);
         return true;
     }
 
     /**
-     * 주문을 취소 완료(TradeStatus.CANCELLED)로 바꾸고 구매자에게 결제 금액 전액을 반환한다.
+     * 주문을 취소 완료(TradeStatus.CANCELLED)로 바꾸고 상품의 남은 수량을 되돌리며 구매자에게 결제 금액 전액을 반환한다.
      *
      * 당사자 취소({@link #cancelByParty})와 미발송 자동 취소({@link #cancelIfStillExpired})가 함께 사용하는 공통 처리다.
      *
      * 처리 흐름:
      *   1. 구매자 잔액에 결제 금액을 더해도 저장 범위를 넘지 않는지 확인한다. 넘으면 아무것도 바꾸지 않고 예외를 던진다.
      *   2. 주문을 취소 완료(CANCELLED)로 바꾸고 취소 주체, 사유, 종료 시각을 기록한다.
-     *   3. 구매자 잔액에 결제 금액 전액을 더하고 {@code CANCEL_REFUND} 내역을 기록한다.
-     *   4. 당사자 대화에 대화 상태 이벤트 전송을 등록한다. 실제 전송은 커밋 뒤에 실행된다.
-     * 상품의 남은 수량과 판매 상태는 바꾸지 않는다. 취소 뒤에도 재고를 복구하지 않는 정책이다.
+     *   3. 주문 수량만큼 상품의 남은 수량을 되돌린다. 판매 종료였으면 판매 중으로 되돌린다. 환불은 재고를 복구하지 않는다.
+     *   4. 구매자 잔액에 결제 금액 전액을 더하고 {@code CANCEL_REFUND} 내역을 기록한다.
+     *   5. 상품의 모든 대화에 대화 상태 이벤트 전송을 등록한다. 복구로 다른 대화의 쓰기 가능 여부도 바뀔 수 있기 때문이다. 실제 전송은 커밋 뒤에 실행된다.
      *
      * 호출하는 쪽의 트랜잭션 안에서 실행한다. 주문 상태 검사는 호출하는 쪽이 먼저 한다.
      *
@@ -215,15 +219,20 @@ public class OrderCancellationService implements IOrderCancellationService {
         //    호출 흐름: PurchaseOrder.cancel() → requireState()
         order.cancel(by, reason, now);
 
-        // 3. 구매자 잔액에 결제 금액 전액을 더하고 CANCEL_REFUND 내역을 기록한다.
+        // 3. 주문 수량만큼 상품의 남은 수량을 되돌린다. 판매 종료였으면 판매 중으로 돌아간다. UPDATE는 flush 때 dirty checking으로 실행된다.
+        //    호출 흐름: ProductService.getProduct() → ProductService.restoreStock() → Product.restoreStock()
+        Product product = productService.getProduct(order.getProductId());
+        productService.restoreStock(product, order.getQuantity());
+
+        // 4. 구매자 잔액에 결제 금액 전액을 더하고 CANCEL_REFUND 내역을 기록한다.
         //    호출 흐름: WalletService.credit() → getOrOpen() → Wallet.apply() → Wallet.increase() → BalanceTransaction.record()
         walletService.credit(order.getBuyerId(), order.getPaidAmount(), BalanceTransactionType.CANCEL_REFUND,
                 order.getOrderId(), now);
         logger.info("[주문 취소] orderId={}, memberId={}, cancelledBy={}, tradeStatus {} -> {}",
                 order.getOrderId(), order.getBuyerId(), by, before, order.getTradeStatus());
 
-        // 4. 당사자 대화의 상태 이벤트 전송 등록. 실제 전송은 커밋이 끝난 뒤 실행된다.
-        //    호출 흐름: ConversationService.publishStateToTradeConversation() → stateEvent() → writability() → RealtimePublisher.publish()
-        conversationService.publishStateToTradeConversation(order.getProductId(), order.getBuyerId());
+        // 5. 상품의 모든 대화에 상태 이벤트 전송 등록. 실제 전송은 커밋이 끝난 뒤 실행된다.
+        //    호출 흐름: ConversationService.publishStateToProductConversations() → stateEvent() → writability() → RealtimePublisher.publishToProductConversations()
+        conversationService.publishStateToProductConversations(product);
     }
 }
