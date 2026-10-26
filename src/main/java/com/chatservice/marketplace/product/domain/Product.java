@@ -18,8 +18,8 @@ import lombok.NoArgsConstructor;
 /**
  * 판매 등록 건(PRODUCT).
  *
- * 상품 정보·최초 수량은 등록 후 바꾸지 않는다(상품 수정·재입고는 범위 밖). 남은 수량은 결제 성공 시에만 줄어들고,
- * 취소·환불이 있어도 다시 늘리지 않는다(BR-002). 다른 엔티티와는 식별자 값으로만 연결한다(설계 4.1).
+ * 상품 정보·최초 수량은 등록 후 바꾸지 않는다(상품 수정·재입고는 범위 밖). 남은 수량은 결제 성공 시 주문 수량만큼 줄어들고,
+ * 발송 전 취소 시 주문 수량만큼 다시 늘어난다. 환불은 남은 수량을 바꾸지 않는다(BR-002). 다른 엔티티와는 식별자 값으로만 연결한다(설계 4.1).
  */
 @Entity
 @Table(name = "PRODUCT")
@@ -100,6 +100,17 @@ public class Product {
         if (remainingQuantity == 0) {
             status = ProductStatus.SOLD;
             soldAt = now;
+        }
+    }
+
+    /**
+     * 발송 전 취소 시 주문 수량만큼 남은 수량을 되돌린다. 판매 종료 상태였으면 판매 중으로 되돌리고 판매 종료 시각을 지운다.
+     */
+    public void restoreStock(long quantity) {
+        remainingQuantity += quantity;
+        if (status == ProductStatus.SOLD) {
+            status = ProductStatus.ON_SALE;
+            soldAt = null;
         }
     }
 }

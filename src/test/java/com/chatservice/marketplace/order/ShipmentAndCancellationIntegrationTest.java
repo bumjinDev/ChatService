@@ -114,7 +114,7 @@ class ShipmentAndCancellationIntegrationTest extends IntegrationTestSupport {
     }
 
     @Test
-    void F012_AC01_발송_대기_주문을_구매자가_취소하면_전액_반환되고_재고와_상품_상태는_그대로다() throws Exception {
+    void F012_AC01_발송_대기_주문을_구매자가_취소하면_전액_반환되고_재고가_복구되어_판매_중으로_돌아간다() throws Exception {
         long orderId = mondayOrder(30_000, 1, 1);
         long productId = jdbcTemplate.queryForObject("SELECT PRODUCT_ID FROM PURCHASE_ORDER WHERE ORDER_ID = ?", Long.class, orderId);
         assertThat(balanceOf(buyer)).isZero();
@@ -133,9 +133,9 @@ class ShipmentAndCancellationIntegrationTest extends IntegrationTestSupport {
 
         assertThat(balanceOf(buyer)).isEqualTo(30_000);
         assertThat(balanceOf(seller)).isZero();
-        // 차감한 재고는 복구하지 않고 판매 종료 상태도 유지한다(BR-002).
-        assertThat(remainingQuantity(productId)).isZero();
-        assertThat(productStatus(productId)).isEqualTo("SOLD");
+        // 주문 수량만큼 남은 수량을 되돌리고, 판매 종료였던 상품은 판매 중으로 돌아간다.
+        assertThat(remainingQuantity(productId)).isEqualTo(1);
+        assertThat(productStatus(productId)).isEqualTo("ON_SALE");
     }
 
     @Test
@@ -215,7 +215,7 @@ class ShipmentAndCancellationIntegrationTest extends IntegrationTestSupport {
     }
 
     @Test
-    void BR002_복수_수량_주문을_취소하면_그_주문의_결제액만_반환되고_재고와_다른_주문은_바뀌지_않는다() throws Exception {
+    void BR002_복수_수량_주문을_취소하면_그_주문의_결제액만_반환되고_그_주문의_수량만_복구되며_다른_주문은_바뀌지_않는다() throws Exception {
         seller = member("seller");
         buyer = member("buyer");
         TestMember other = member("other");
@@ -228,18 +228,18 @@ class ShipmentAndCancellationIntegrationTest extends IntegrationTestSupport {
 
         cancel(buyer, cancelled);
         assertThat(balanceOf(buyer)).isEqualTo(30_000);
-        assertThat(remainingQuantity(productId)).isZero();
-        assertThat(productStatus(productId)).isEqualTo("SOLD");
+        assertThat(remainingQuantity(productId)).isEqualTo(3);
+        assertThat(productStatus(productId)).isEqualTo("ON_SALE");
         assertThat(tradeStatus(kept)).isEqualTo("IN_PROGRESS");
         assertThat(balanceOf(other)).isZero();
 
-        // 재고가 남은 상품의 주문을 자동 취소해도 남은 수량은 그대로다.
+        // 미발송 자동 취소도 주문 수량만큼 남은 수량을 되돌린다.
         long secondProduct = registerProduct(seller, 10_000, 4);
         charge(buyer, 20_000);
         long autoCancelled = placeOrder(buyer, secondProduct, 2, null).get("orderId").asLong();
         cancellationService.cancelExpiredUnshipped(kst("2026-10-13T00:00:00"));
         assertThat(tradeStatus(autoCancelled)).isEqualTo("CANCELLED");
-        assertThat(remainingQuantity(secondProduct)).isEqualTo(2);
+        assertThat(remainingQuantity(secondProduct)).isEqualTo(4);
         assertThat(productStatus(secondProduct)).isEqualTo("ON_SALE");
         assertThat(balanceOf(buyer)).isEqualTo(50_000);
     }
