@@ -51,8 +51,8 @@ function productCard(product) {
         h("div", { class: "product-card__name" }, product.name),
         h("div", { class: "product-card__price" }, formatWon(product.price)),
         h("div", { class: "product-card__meta" },
-            h("span", null, "남은 수량 " + formatNumber(product.remainingQuantity) + "개"),
-            h("span", null, "구매 가능 " + formatNumber(product.availableQuantity) + "개"),
+            // 두 수량을 한 항목으로 두어 카드 아래 줄이 항목 두 개로 유지되게 한다. 좁은 카드에서는 닉네임이 다음 줄로 내려간다.
+            h("span", null, "남은 " + formatNumber(product.remainingQuantity) + "개 · 구매 가능 " + formatNumber(product.availableQuantity) + "개"),
             h("span", null, product.sellerNickname)),
         h("div", { class: "text-muted text-small" }, formatDateTime(product.createdAt) + " 등록"));
 }
