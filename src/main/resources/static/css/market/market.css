@@ -443,3 +443,5 @@ a.thread-head__title[href]:hover { text-decoration: underline; }
 /* 좁은 화면에서는 오른쪽 정보 열 대신 대화 머리 아래 요약을 보여 준다. */
 .thread-info-inline { display: none; padding: 10px 18px; border-bottom: 1px solid var(--border-soft); background: var(--surface); }
 @media (max-width: 1180px) { .thread-info-inline { display: block; } }
+/* 한 줄 요약의 예약 줄. 정보 열이 숨겨진 창에서 예약 상태를 보고 해제할 수 있게 한다. */
+.thread-info-inline__reservation { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border-soft); }

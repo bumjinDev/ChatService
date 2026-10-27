@@ -21,6 +21,12 @@ public interface PurchaseOrderRepository extends JpaRepository<PurchaseOrder, Lo
 
     List<PurchaseOrder> findBySellerIdOrderByConfirmedAtDescOrderIdDesc(String sellerId);
 
+    /* 합의 상태 계산: 한 가격 제안으로 만든 주문 전체 */
+    List<PurchaseOrder> findByOfferId(Long offerId);
+
+    /* 합의 가격 결제의 OFFER_ALREADY_USED 검사: 한 가격 제안으로 만든 주문 가운데 거래 상태가 tradeStatus 가 아닌 주문이 있는지 */
+    boolean existsByOfferIdAndTradeStatusNot(Long offerId, TradeStatus tradeStatus);
+
     /**
      * 발송 기한이 지난 주문의 ID 목록을 조회한다.
      *

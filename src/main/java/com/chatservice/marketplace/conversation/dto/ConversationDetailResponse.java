@@ -5,8 +5,10 @@ import java.util.List;
 
 import com.chatservice.marketplace.common.PartyRole;
 import com.chatservice.marketplace.conversation.domain.ConversationWritability.ReadOnlyReason;
+import com.chatservice.marketplace.offer.domain.AgreementStatus;
 import com.chatservice.marketplace.offer.domain.OfferStatus;
 import com.chatservice.marketplace.offer.domain.PriceOffer;
+import com.chatservice.marketplace.order.domain.OrderEnums.PriceSource;
 import com.chatservice.marketplace.order.domain.OrderEnums.ShippingStatus;
 import com.chatservice.marketplace.order.domain.OrderEnums.TradeStatus;
 import com.chatservice.marketplace.order.domain.PurchaseOrder;
@@ -46,20 +48,24 @@ public record ConversationDetailResponse(
     public record Party(String nickname) {
     }
 
-    public record OfferItem(Long offerId, long amount, OfferStatus status, Instant createdAt, Instant respondedAt) {
+    /** quantity 는 제안 수량이다. agreementStatus 는 수락된 제안의 합의 상태이며, 응답 대기 제안과 거절된 제안에서는 null 이다. */
+    public record OfferItem(Long offerId, long amount, long quantity, OfferStatus status, AgreementStatus agreementStatus,
+                            Instant createdAt, Instant respondedAt) {
 
-        public static OfferItem of(PriceOffer offer) {
-            return new OfferItem(offer.getOfferId(), offer.getAmount(), offer.getStatus(), offer.getCreatedAt(),
-                    offer.getRespondedAt());
+        public static OfferItem of(PriceOffer offer, AgreementStatus agreementStatus) {
+            return new OfferItem(offer.getOfferId(), offer.getAmount(), offer.getQuantity(), offer.getStatus(),
+                    agreementStatus, offer.getCreatedAt(), offer.getRespondedAt());
         }
     }
 
-    public record OrderSummary(Long orderId, long quantity, long unitPrice, long paidAmount, TradeStatus tradeStatus,
-                               ShippingStatus shippingStatus) {
+    /** priceSource 는 적용 단가의 출처이고, offerId 는 합의 가격 주문일 때 쓴 제안 ID 이며 등록 가격 주문이면 null 이다. */
+    public record OrderSummary(Long orderId, long quantity, long unitPrice, long paidAmount, PriceSource priceSource,
+                               Long offerId, TradeStatus tradeStatus, ShippingStatus shippingStatus) {
 
         public static OrderSummary of(PurchaseOrder order) {
             return new OrderSummary(order.getOrderId(), order.getQuantity(), order.getUnitPrice(),
-                    order.getPaidAmount(), order.getTradeStatus(), order.getShippingStatus());
+                    order.getPaidAmount(), order.getPriceSource(), order.getOfferId(), order.getTradeStatus(),
+                    order.getShippingStatus());
         }
     }
 }

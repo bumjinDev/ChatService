@@ -22,6 +22,7 @@ import com.chatservice.marketplace.order.domain.OrderEnums.TradeStatus;
 import com.chatservice.marketplace.order.domain.PurchaseOrder;
 import com.chatservice.marketplace.product.domain.Product;
 import com.chatservice.marketplace.product.service.IProductService;
+import com.chatservice.marketplace.reservation.service.IReservationService;
 import com.chatservice.marketplace.testsupport.PausePoint;
 import com.chatservice.marketplace.testsupport.TestPause;
 import com.chatservice.marketplace.wallet.domain.BalanceTransactionType;
@@ -40,6 +41,7 @@ public class OrderCancellationService implements IOrderCancellationService {
     private final IWalletService walletService;
     private final IConversationService conversationService;
     private final IProductService productService;
+    private final IReservationService reservationService;
     private final TransactionTemplate transactionTemplate;
     private final TimeRules timeRules;
     private final TestPause testPause;
@@ -47,12 +49,14 @@ public class OrderCancellationService implements IOrderCancellationService {
     public OrderCancellationService(PurchaseOrderRepository purchaseOrderRepository,
                                     ShipmentRepository shipmentRepository, IWalletService walletService,
                                     IConversationService conversationService, IProductService productService,
+                                    IReservationService reservationService,
                                     TransactionTemplate transactionTemplate, TimeRules timeRules, TestPause testPause) {
         this.purchaseOrderRepository = purchaseOrderRepository;
         this.shipmentRepository = shipmentRepository;
         this.walletService = walletService;
         this.conversationService = conversationService;
         this.productService = productService;
+        this.reservationService = reservationService;
         this.transactionTemplate = transactionTemplate;
         this.timeRules = timeRules;
         this.testPause = testPause;
@@ -178,7 +182,7 @@ public class OrderCancellationService implements IOrderCancellationService {
             return false;
         }
         // 3. 공통 취소 처리. 주문을 취소 완료로 바꾸고 상품의 남은 수량을 되돌리며 구매자에게 결제 금액 전액을 반환한다.
-        //    호출 흐름: cancel() → WalletService.ensureCreditable() → PurchaseOrder.cancel() → ProductService.restoreStock() → WalletService.credit() → ConversationService.publishStateToProductConversations()
+        //    호출 흐름: cancel() → WalletService.ensureCreditable() → PurchaseOrder.cancel() → ProductService.restoreStock() → ReservationService.reserveAgainOnCancel() → WalletService.credit() → ConversationService.publishStateToProductConversations()
         cancel(order, CancelledBy.SYSTEM, AUTO_CANCEL_REASON, () -> now);
         return true;
     }
@@ -192,6 +196,7 @@ public class OrderCancellationService implements IOrderCancellationService {
      *   1. 구매자 잔액에 결제 금액을 더해도 저장 범위를 넘지 않는지 확인한다. 넘으면 아무것도 바꾸지 않고 예외를 던진다.
      *   2. 주문을 취소 완료(CANCELLED)로 바꾸고 취소 주체, 사유, 종료 시각을 기록한다.
      *   3. 주문 수량만큼 상품의 남은 수량을 되돌린다. 판매 종료였으면 판매 중으로 되돌린다. 환불은 재고를 복구하지 않는다.
+     *      이 주문으로 결제 종료된 예약이 있으면(합의 가격 주문) 같은 내용의 새 예약 행을 활성으로 만든다. 만료 시각은 취소 시각부터 예약 기간 뒤다.
      *   4. 구매자 잔액에 결제 금액 전액을 더하고 {@code CANCEL_REFUND} 내역을 기록한다.
      *   5. 상품의 모든 대화에 대화 상태 이벤트 전송을 등록한다. 복구로 다른 대화의 쓰기 가능 여부도 바뀔 수 있기 때문이다. 실제 전송은 커밋 뒤에 실행된다.
      *
@@ -223,6 +228,9 @@ public class OrderCancellationService implements IOrderCancellationService {
         //    호출 흐름: ProductService.getProduct() → ProductService.restoreStock() → Product.restoreStock()
         Product product = productService.getProduct(order.getProductId());
         productService.restoreStock(product, order.getQuantity());
+        //    합의 가격 주문이면 그 결제로 끝난 예약은 그대로 두고, 같은 상품·대화·구매 희망자·판매자·수량·제안 ID 로 새 예약 행을 만든다.
+        //    호출 흐름: ReservationService.reserveAgainOnCancel() → ReservationRepository.findByFulfilledOrderIdAndStatus() → ReservationRepository.save()
+        reservationService.reserveAgainOnCancel(order.getOrderId(), now);
 
         // 4. 구매자 잔액에 결제 금액 전액을 더하고 CANCEL_REFUND 내역을 기록한다.
         //    호출 흐름: WalletService.credit() → getOrOpen() → Wallet.apply() → Wallet.increase() → BalanceTransaction.record()
