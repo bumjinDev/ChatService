@@ -20,6 +20,8 @@ import com.chatservice.marketplace.order.domain.PurchaseOrder;
 import com.chatservice.marketplace.order.dto.PlaceOrderRequest;
 import com.chatservice.marketplace.product.domain.Product;
 import com.chatservice.marketplace.product.service.IProductService;
+import com.chatservice.marketplace.reservation.service.IReservationQueryService;
+import com.chatservice.marketplace.reservation.service.IReservationService;
 import com.chatservice.marketplace.wallet.service.IWalletService;
 
 @Service
@@ -32,25 +34,32 @@ public class OrderService implements IOrderService {
     private final IOfferService offerService;
     private final IWalletService walletService;
     private final IConversationService conversationService;
+    private final IReservationService reservationService;
+    private final IReservationQueryService reservationQueryService;
     private final TimeRules timeRules;
 
     public OrderService(PurchaseOrderRepository purchaseOrderRepository, IProductService productService,
                         IOfferService offerService, IWalletService walletService,
-                        IConversationService conversationService, TimeRules timeRules) {
+                        IConversationService conversationService, IReservationService reservationService,
+                        IReservationQueryService reservationQueryService, TimeRules timeRules) {
         this.purchaseOrderRepository = purchaseOrderRepository;
         this.productService = productService;
         this.offerService = offerService;
         this.walletService = walletService;
         this.conversationService = conversationService;
+        this.reservationService = reservationService;
+        this.reservationQueryService = reservationQueryService;
         this.timeRules = timeRules;
     }
 
     /*
-     * 처리 순서(설계 6.10)
+     * 처리 순서(설계 6.10, 예약 기능 설계안 5.5)
      *  1) 상품(404) → 본인 상품(403) → 판매 중(409) → 남은 수량 이상 요청(409 INSUFFICIENT_STOCK)
+     *     → 남은 수량 안이지만 다른 회원의 활성 예약 때문에 구매 가능 수량을 넘는 요청(409 PRODUCT_RESERVED)
      *  2) 적용 단가: offerId 가 없으면 등록 가격(LISTED), 있으면 본인에게 수락된 같은 상품의 제안 금액(AGREED)
      *  3) 총 결제액 = 단가 × 수량. 저장·연산 범위를 넘으면 400. 잔액이 부족하면 409
-     *  4) 주문 생성 → 잔액 차감과 PURCHASE 내역(주문 참조) → 주문 수량만 재고 차감(0 이면 SOLD) → 당사자 대화가 없으면 생성
+     *  4) 주문 생성 → 잔액 차감과 PURCHASE 내역(주문 참조) → 주문 수량만 재고 차감(0 이면 SOLD)
+     *     → 결제한 회원에게 걸린 활성 예약을 결제 종료(FULFILLED) → 당사자 대화가 없으면 생성
      *  5) 상품의 모든 대화에 CONVERSATION_STATE 전달(커밋 후)
      * 4) 의 변경은 한 트랜잭션으로 반영한다. 모든 검사는 변경 전에 끝나므로 실패한 요청은 주문·차감·재고를 바꾸지 않는다.
      * 동시 결제에서 재고·잔액을 넘지 않는 보장과 같은 결제 재시도의 중복 방지는 후속 과제다.
@@ -103,6 +112,11 @@ public class OrderService implements IOrderService {
         if (quantity > product.getRemainingQuantity()) {
             throw new BusinessException(ErrorCode.INSUFFICIENT_STOCK);
         }
+        // 남은 수량 안이지만 다른 회원에게 걸린 활성 예약 때문에 구매 가능 수량을 넘는 구매는 거절한다.
+        // 결제하는 회원 본인에게 걸린 예약은 빼지 않으므로 예약된 회원은 예약 수량까지 결제할 수 있다.
+        if (quantity > reservationQueryService.availableQuantity(product, buyerId)) {
+            throw new BusinessException(ErrorCode.PRODUCT_RESERVED);
+        }
 
         /* 거래 안되는 기준을 전부 통과 후에 실제로 거래를 시작하는 위치 */
 
@@ -152,6 +166,8 @@ public class OrderService implements IOrderService {
          */
         // 주문 수량만큼 재고 차감. 남은 수량이 0 이 되면 판매 종료로 바뀐다
         productService.deductStock(product, quantity, now);
+        // 결제한 회원에게 걸린 활성 예약(만료 전)은 이 결제로 끝난다. 예약 수량보다 적게 결제해도 끝난다
+        reservationService.fulfillOnPayment(product, buyerId, order.getOrderId(), now);
         // 이 상품에 대한 구매자의 대화가 없으면 시스템이 만든다
         conversationService.ensureTradeConversation(product, buyerId, now);
 

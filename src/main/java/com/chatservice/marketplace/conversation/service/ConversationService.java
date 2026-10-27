@@ -30,6 +30,8 @@ import com.chatservice.marketplace.order.PurchaseOrderRepository;
 import com.chatservice.marketplace.order.domain.PurchaseOrder;
 import com.chatservice.marketplace.product.domain.Product;
 import com.chatservice.marketplace.product.service.IProductService;
+import com.chatservice.marketplace.reservation.dto.ReservationResponse;
+import com.chatservice.marketplace.reservation.service.IReservationQueryService;
 
 @Service
 public class ConversationService implements IConversationService {
@@ -40,6 +42,7 @@ public class ConversationService implements IConversationService {
     private final PriceOfferRepository priceOfferRepository;
     private final PurchaseOrderRepository purchaseOrderRepository;
     private final IProductService productService;
+    private final IReservationQueryService reservationQueryService;
     private final MemberDirectory memberDirectory;
     private final RealtimePublisher realtimePublisher;
     private final TimeRules timeRules;
@@ -48,6 +51,7 @@ public class ConversationService implements IConversationService {
                                PriceOfferRepository priceOfferRepository,
                                PurchaseOrderRepository purchaseOrderRepository,
                                IProductService productService,
+                               IReservationQueryService reservationQueryService,
                                MemberDirectory memberDirectory,
                                RealtimePublisher realtimePublisher,
                                TimeRules timeRules) {
@@ -55,6 +59,7 @@ public class ConversationService implements IConversationService {
         this.priceOfferRepository = priceOfferRepository;
         this.purchaseOrderRepository = purchaseOrderRepository;
         this.productService = productService;
+        this.reservationQueryService = reservationQueryService;
         this.memberDirectory = memberDirectory;
         this.realtimePublisher = realtimePublisher;
         this.timeRules = timeRules;
@@ -186,12 +191,14 @@ public class ConversationService implements IConversationService {
      *
      * @param conversation 대상 대화
      * @param product      대화의 상품
-     * @return 상품 상태, 남은 수량, 쓰기 가능 여부, 읽기 전용 사유를 담은 이벤트
+     * @return 상품 상태, 남은 수량, 이 대화의 구매 희망자 기준 구매 가능 수량, 쓰기 가능 여부, 읽기 전용 사유를 담은 이벤트
      */
     private ConversationStateEvent stateEvent(Conversation conversation, Product product) {
         ConversationWritability writability = writability(conversation, product);
         return ConversationStateEvent.of(conversation.getConversationId(), product.getStatus().name(),
-                product.getRemainingQuantity(), writability.writable(),
+                product.getRemainingQuantity(),
+                reservationQueryService.availableQuantity(product, conversation.getBuyerId()),
+                writability.writable(),
                 writability.readOnlyReason() == null ? null : writability.readOnlyReason().name());
     }
 
@@ -218,12 +225,16 @@ public class ConversationService implements IConversationService {
                 conversation.getProductId(), conversation.getBuyerId(), conversation.getSellerId());
     }
 
+    /*
+     * 구매 가능 수량은 조회한 회원 기준이다. 구매 희망자에게는 자기 예약을 빼지 않은 값이, 판매자에게는 다른 회원의 예약을 모두 뺀 값이 간다.
+     * reservation 은 이 대화의 상품·구매 희망자로 저장된 예약 가운데 가장 최근 것 하나이고, 끝난 예약도 상태와 함께 담는다.
+     */
     private ConversationDetailResponse buildDetail(Conversation conversation, Product product, String memberId) {
         Map<String, String> nicknames = memberDirectory.nicknames(Set.of(conversation.getBuyerId(), conversation.getSellerId()));
         ConversationWritability writability = writability(conversation, product);
         return new ConversationDetailResponse(
                 conversation.getConversationId(),
-                ConversationDetailResponse.ProductInfo.of(product),
+                ConversationDetailResponse.ProductInfo.of(product, reservationQueryService.availableQuantity(product, memberId)),
                 new ConversationDetailResponse.Party(nicknames.get(conversation.getBuyerId())),
                 new ConversationDetailResponse.Party(nicknames.get(conversation.getSellerId())),
                 conversation.isBuyer(memberId) ? PartyRole.BUYER : PartyRole.SELLER,
@@ -231,6 +242,8 @@ public class ConversationService implements IConversationService {
                 writability.readOnlyReason(),
                 priceOfferRepository.findByConversationIdOrderByCreatedAtAscOfferIdAsc(conversation.getConversationId())
                         .stream().map(ConversationDetailResponse.OfferItem::of).toList(),
-                partyOrders(conversation).stream().map(ConversationDetailResponse.OrderSummary::of).toList());
+                partyOrders(conversation).stream().map(ConversationDetailResponse.OrderSummary::of).toList(),
+                reservationQueryService.latestFor(product.getProductId(), conversation.getBuyerId())
+                        .map(ReservationResponse::of).orElse(null));
     }
 }

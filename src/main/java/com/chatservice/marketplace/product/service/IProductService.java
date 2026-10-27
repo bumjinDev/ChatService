@@ -14,11 +14,11 @@ public interface IProductService {
     /** F-001 상품 등록. */
     ProductDetailResponse register(String sellerId, ProductRegisterRequest request);
 
-    /** F-002 공개 목록. category 가 null 이면 전체. */
-    List<ProductSummaryResponse> listOnSale(ProductCategory category);
+    /** F-002 공개 목록. category 가 null 이면 전체. viewerId 는 구매 가능 수량을 계산할 조회 회원 ID 이고, 로그인하지 않은 조회는 null. */
+    List<ProductSummaryResponse> listOnSale(ProductCategory category, String viewerId);
 
-    /** F-002 공개 상세. 없거나 판매 종료된 상품은 PRODUCT_NOT_FOUND. */
-    ProductDetailResponse getPublicDetail(Long productId);
+    /** F-002 공개 상세. 없거나 판매 종료된 상품은 PRODUCT_NOT_FOUND. viewerId 는 목록과 같다. */
+    ProductDetailResponse getPublicDetail(Long productId, String viewerId);
 
     /** 다른 기능이 상품을 판매 상태와 관계없이 읽을 때 쓴다. 없으면 PRODUCT_NOT_FOUND. */
     Product getProduct(Long productId);

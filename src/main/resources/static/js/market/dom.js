@@ -106,8 +106,9 @@ export function nextId(prefix) {
  * 제목과 안내 문구를 화면 읽기 프로그램에 연결한다.
  * 이 화면의 확인 창은 모두 되돌릴 수 없는 요청(결제, 등록, 취소, 확정, 환불, 제안 응답)을 묻으므로 처음 초점은 항상 취소 버튼에 둔다.
  * danger 는 확인 버튼을 빨간색으로 보여 줄지 여부만 정한다.
+ * content 는 안내 문구와 버튼 사이에 넣는 입력 요소(선택)다. 확인한 뒤에는 호출한 쪽이 그 요소의 값을 읽는다.
  */
-export function confirmDialog({ title, message, confirmLabel = "확인", cancelLabel = "취소", danger = false }) {
+export function confirmDialog({ title, message, content, confirmLabel = "확인", cancelLabel = "취소", danger = false }) {
     return new Promise((resolve) => {
         const titleId = nextId("dialog-title");
         const messageId = nextId("dialog-message");
@@ -116,7 +117,8 @@ export function confirmDialog({ title, message, confirmLabel = "확인", cancelL
         const dialog = h("dialog", { class: "modal", attrs: { "aria-labelledby": titleId, "aria-describedby": message ? messageId : null } },
             h("div", { class: "modal__body" },
                 h("h2", { class: "modal__title", id: titleId }, title),
-                message ? h("p", { class: "modal__message", id: messageId }, message) : null),
+                message ? h("p", { class: "modal__message", id: messageId }, message) : null,
+                content || null),
             h("div", { class: "modal__actions" }, cancelButton, confirmButton));
         let result = false;
         confirmButton.addEventListener("click", () => { result = true; dialog.close(); });
