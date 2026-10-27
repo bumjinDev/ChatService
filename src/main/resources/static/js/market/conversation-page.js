@@ -394,12 +394,15 @@ function renderInfo() {
             h("h2", { class: "panel__title", style: "margin: 0;" }, "이 대화의 주문"),
             orderList)));
 
-    dom.inlineInfo.replaceChildren(h("div", { class: "row row--between" },
-        h("span", { class: "text-small text-muted" }, reserved ? "합의 가격 " + formatWon(reserved.amount) : "등록 가격 " + formatWon(product.price)),
-        h("div", { class: "row" },
-            orders.length > 0 ? h("a", { class: "btn btn--ghost btn--sm", href: links.order(orders[0].orderId) }, "주문 보기") : null,
-            cta ? h("a", { class: "btn btn--primary btn--sm", href: cta.href }, "구매하기") : null)),
-        inlineReservation());
+    // 예약이 없으면 inlineReservation() 이 null 을 돌려준다. replaceChildren 은 null 을 문자열 「null」로 넣으므로 배열에서 뺀 뒤 넘긴다.
+    dom.inlineInfo.replaceChildren(...[
+        h("div", { class: "row row--between" },
+            h("span", { class: "text-small text-muted" }, reserved ? "합의 가격 " + formatWon(reserved.amount) : "등록 가격 " + formatWon(product.price)),
+            h("div", { class: "row" },
+                orders.length > 0 ? h("a", { class: "btn btn--ghost btn--sm", href: links.order(orders[0].orderId) }, "주문 보기") : null,
+                cta ? h("a", { class: "btn btn--primary btn--sm", href: cta.href }, "구매하기") : null)),
+        inlineReservation()
+    ].filter(Boolean));
 }
 
 /*
@@ -622,7 +625,7 @@ function offerButton(text, style, offer, action) {
             title: accepting ? "가격 제안을 수락할까요?" : "가격 제안을 거절할까요?",
             message: accepting
                 ? offerTerms(offer) + "가 이 구매 희망자의 합의 내용이 되고, " + quantity + "가 이 구매 희망자에게 예약됩니다. "
-                    + "예약 기간이 지나면 자동으로 해제됩니다. 수락한 뒤에는 철회할 수 없습니다."
+                    + "예약 기간이 지나면 자동으로 해제됩니다. 수락을 취소하는 기능은 없고, 예약을 해제하면 이 합의로는 결제할 수 없습니다."
                 : "거절한 뒤에도 구매 희망자는 새 가격을 제안할 수 있습니다.",
             confirmLabel: accepting ? "수락" : "거절",
             danger: !accepting

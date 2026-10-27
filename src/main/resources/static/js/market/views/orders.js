@@ -386,7 +386,8 @@ function cancelFold(order, rerender) {
     const form = h("form", { class: "form", attrs: { novalidate: true } },
         formError(),
         field("취소 사유", reason, { name: "reason" }),
-        h("p", { class: "field__hint" }, "발송 전에만 취소할 수 있으며, 취소하면 결제 금액 전액이 구매자에게 돌아갑니다. 판매된 수량은 다시 판매 수량으로 돌아가지 않습니다."),
+        h("p", { class: "field__hint" }, "발송 전에만 취소할 수 있습니다. 취소하면 결제 금액 전액이 구매자에게 돌아가고, 주문 수량은 상품의 남은 수량으로 돌아갑니다. "
+            + "합의 가격으로 결제한 주문이면 같은 수량이 구매 희망자에게 다시 예약됩니다."),
         submit);
     form.addEventListener("submit", (event) => {
         event.preventDefault();
