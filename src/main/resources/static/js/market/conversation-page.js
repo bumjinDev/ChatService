@@ -251,8 +251,9 @@ function renderState() {
         dom.title.removeAttribute("href");
     }
     // 구매 희망자에게는 다른 회원의 예약을 뺀 구매 가능 수량을 함께 보인다. 판매자에게 오는 값은 더 걸 수 있는 예약 수량이라 여기에는 보이지 않는다.
+    // replaceChildren 은 h() 와 달리 null 을 문자열 「null」로 넣으므로, 판매자에게 보이지 않는 항목은 배열에서 뺀 뒤 넘긴다.
     const isBuyer = detail.myRole === "BUYER";
-    dom.sub.replaceChildren(
+    dom.sub.replaceChildren(...[
         badge(label("productStatus", product.status), tone("productStatus", product.status)),
         h("span", null, formatWon(product.price)),
         h("span", null, "·"),
@@ -260,7 +261,8 @@ function renderState() {
         isBuyer ? h("span", null, "·") : null,
         isBuyer ? h("span", null, "구매 가능 " + formatNumber(product.availableQuantity) + "개") : null,
         h("span", null, "·"),
-        h("span", null, (isBuyer ? "판매자 " : "구매 희망자 ") + counterpartNickname()));
+        h("span", null, (isBuyer ? "판매자 " : "구매 희망자 ") + counterpartNickname())
+    ].filter(Boolean));
 
     dom.input.disabled = !detail.writable;
     dom.send.disabled = !detail.writable || state.sending;
@@ -396,7 +398,27 @@ function renderInfo() {
         h("span", { class: "text-small text-muted" }, reserved ? "합의 가격 " + formatWon(reserved.amount) : "등록 가격 " + formatWon(product.price)),
         h("div", { class: "row" },
             orders.length > 0 ? h("a", { class: "btn btn--ghost btn--sm", href: links.order(orders[0].orderId) }, "주문 보기") : null,
-            cta ? h("a", { class: "btn btn--primary btn--sm", href: cta.href }, "구매하기") : null)));
+            cta ? h("a", { class: "btn btn--primary btn--sm", href: cta.href }, "구매하기") : null)),
+        inlineReservation());
+}
+
+/*
+ * 창 너비 1180px 이하에서는 오른쪽 정보 열이 숨겨지므로, 머리 아래 한 줄 요약에 예약 상태와 「예약 해제」 버튼을 한 줄 더 보인다.
+ * 예약이 없으면 줄을 만들지 않는다.
+ */
+function inlineReservation() {
+    const reservation = state.detail.reservation;
+    if (!reservation) {
+        return null;
+    }
+    const active = reservation.status === "ACTIVE";
+    return h("div", { class: "row row--between thread-info-inline__reservation" },
+        h("span", { class: "row text-small" },
+            h("span", { class: "text-muted" }, "예약"),
+            badge(label("reservationStatus", reservation.status), tone("reservationStatus", reservation.status)),
+            h("span", null, formatNumber(reservation.quantity) + "개 · 만료 " + formatDateTime(reservation.expiresAt)
+                + (active ? " (" + timeLeft(reservation.expiresAt) + ")" : ""))),
+        active ? releaseButton(reservation, true) : null);
 }
 
 /* ------------------------------------------------------------------ 예약 */
@@ -442,9 +464,10 @@ function reservationCard() {
     return h("div", { class: "stack-sm" }, nodes);
 }
 
-function releaseButton(reservation) {
+/* 호출마다 새 버튼을 만든다. compact 이면 한 줄 요약에 맞는 작은 버튼이다. */
+function releaseButton(reservation, compact = false) {
     const isSeller = state.detail.myRole === "SELLER";
-    const button = h("button", { class: "btn btn--ghost btn--block", type: "button" }, "예약 해제");
+    const button = h("button", { class: ["btn", "btn--ghost", compact ? "btn--sm" : "btn--block"], type: "button" }, "예약 해제");
     button.addEventListener("click", () => withBusy(button, async () => {
         const ok = await confirmDialog({
             title: "예약을 해제할까요?",
