@@ -7,7 +7,7 @@
  */
 import { api, ApiError, CONTEXT_PATH, requestIdHolder } from "./api.js";
 import { h, badge, emptyState, toast, toastError, confirmDialog, withBusy, numberValue } from "./dom.js";
-import { formatWon, formatNumber, formatDateTime, formatDay, dayKey, formatTime, timeLeft, label, tone } from "./format.js";
+import { formatWon, formatNumber, formatDateTime, formatDay, dayKey, formatTime, timeLeft, label, tone, multiplyAmount } from "./format.js";
 import { session, links, renderHeader, setActiveNav, refreshBalance, setNickname } from "./shell.js";
 
 const MAX_RECONNECT = 5;
@@ -104,7 +104,7 @@ function infoGuide() {
         h("h2", { class: "panel__title" }, "대화 안내"),
         h("div", { class: "stack-sm text-small text-muted" },
             h("p", null, "상품마다 구매 희망자와 판매자가 1:1로 대화합니다."),
-            h("p", null, "구매 희망자는 대화에서 개당 가격을 제안할 수 있고, 판매자가 수락하면 상품 화면에서 그 가격으로 구매할 수 있습니다."),
+            h("p", null, "구매 희망자는 대화에서 개당 가격과 수량을 제안할 수 있고, 판매자가 수락하면 제안 수량이 예약되며 상품 화면에서 그 가격으로 구매할 수 있습니다."),
             h("p", null, "판매가 끝나면 진행 중인 거래가 있는 대화만 계속 쓸 수 있고, 나머지는 읽기 전용이 됩니다.")));
 }
 
@@ -124,11 +124,13 @@ function buildThread() {
     dom.send = h("button", { class: "btn btn--primary", type: "button" }, "전송");
     dom.counter = h("span", null, "0 / 1000");
 
-    // 가격 제안 입력은 한 번만 만들고 상태에 따라 보이기만 바꾼다. 다시 만들면 입력 중인 금액이 지워진다.
+    // 가격 제안 입력은 한 번만 만들고 상태에 따라 보이기만 바꾼다. 다시 만들면 입력 중인 금액과 수량이 지워진다.
     dom.offerNotice = h("p", { class: "notice", hidden: true });
     dom.offerAmount = h("input", { class: "input", type: "number", min: "1", step: "1", inputMode: "numeric", placeholder: "개당 제안 금액(원)", attrs: { "aria-label": "개당 제안 금액" } });
+    // 수량의 상한은 대화 상세의 구매 가능 수량이며 입력 편의를 위한 값이다. 허용 여부는 서버의 제안 검사로 정해진다.
+    dom.offerQuantity = h("input", { class: "input", type: "number", min: "1", step: "1", value: "1", inputMode: "numeric", placeholder: "수량", style: "max-width: 96px;", attrs: { "aria-label": "제안 수량" } });
     dom.offerButton = h("button", { class: "btn btn--soft", type: "button" }, "가격 제안");
-    dom.offerForm = h("div", { class: "composer__offer" }, dom.offerAmount, dom.offerButton);
+    dom.offerForm = h("div", { class: "composer__offer" }, dom.offerAmount, dom.offerQuantity, dom.offerButton);
     dom.offerRow = h("div", { class: "stack-sm", hidden: true }, dom.offerNotice, dom.offerForm);
     const offerRequestId = requestIdHolder();
     dom.offerButton.addEventListener("click", () => submitOffer(offerRequestId));
@@ -218,8 +220,25 @@ function applyStateEvent(event) {
     renderState();
 }
 
+/* 수락된 제안 가운데 합의 상태가 statuses 에 드는 가장 최근 것. 수락된 제안은 합의가 만료·해제된 뒤 새로 생길 수 있다. */
+function agreementOffer(statuses) {
+    const offers = (state.detail.offers || []).filter((offer) => offer.status === "ACCEPTED" && statuses.includes(offer.agreementStatus));
+    return offers.length > 0 ? offers[offers.length - 1] : null;
+}
+
+/* 합의가 예약 중인 제안. 합의 가격 구매 연결과 버튼은 이 제안이 있을 때만 보인다. */
+function reservedOffer() {
+    return agreementOffer(["RESERVED"]);
+}
+
+/* 새 제안을 막는 제안: 응답 대기 제안, 또는 합의가 예약 중이거나 결제됨인 수락 제안(F-008). */
 function openOffer() {
-    return (state.detail.offers || []).find((offer) => offer.status === "PENDING" || offer.status === "ACCEPTED") || null;
+    return (state.detail.offers || []).find((offer) => offer.status === "PENDING") || agreementOffer(["RESERVED", "ORDERED"]);
+}
+
+/* 「개당 8,000원 × 3개」 */
+function offerTerms(offer) {
+    return "개당 " + formatWon(offer.amount) + " × " + formatNumber(offer.quantity) + "개";
 }
 
 function renderState() {
@@ -251,7 +270,7 @@ function renderState() {
         hideNotice();
     }
 
-    // 가격 제안 입력: 구매 희망자이고, 쓰기 가능하고, 판매 중이며, 응답 대기·수락된 제안이 없을 때만 보인다(F-008).
+    // 가격 제안 입력: 구매 희망자이고, 쓰기 가능하고, 판매 중이며, 응답 대기 제안과 예약 중·결제됨인 합의가 없을 때만 보인다(F-008).
     const open = openOffer();
     const offerArea = detail.myRole === "BUYER" && product.status === "ON_SALE" && detail.writable;
     dom.offerRow.hidden = !offerArea;
@@ -261,13 +280,18 @@ function renderState() {
     dom.offerNotice.hidden = !open;
     dom.offerForm.hidden = !!open;
     dom.offerButton.disabled = state.offering;
+    dom.offerQuantity.max = String(Math.max(product.availableQuantity, 1));
     if (open && open.status === "PENDING") {
         dom.offerNotice.className = "notice notice--info";
-        dom.offerNotice.replaceChildren("개당 " + formatWon(open.amount) + " 제안에 대한 판매자의 응답을 기다리고 있습니다.");
-    } else if (open && open.status === "ACCEPTED") {
+        dom.offerNotice.replaceChildren(offerTerms(open) + " 제안에 대한 판매자의 응답을 기다리고 있습니다.");
+    } else if (open && open.agreementStatus === "RESERVED") {
         dom.offerNotice.className = "notice notice--success";
-        dom.offerNotice.replaceChildren("합의 가격 개당 " + formatWon(open.amount) + "이 정해졌습니다. ",
+        dom.offerNotice.replaceChildren("합의 가격 " + offerTerms(open) + "가 정해졌습니다. ",
             h("a", { href: links.product(product.productId) + "?offer=" + open.offerId }, "이 가격으로 구매하기"));
+    } else if (open && open.agreementStatus === "ORDERED") {
+        dom.offerNotice.className = "notice notice--info";
+        dom.offerNotice.replaceChildren("합의 가격 " + offerTerms(open) + "로 결제한 주문이 진행 중입니다. "
+            + "그 주문이 정상 완료되거나 환불되면 새 가격을 제안할 수 있습니다.");
     }
 }
 
@@ -281,16 +305,17 @@ async function submitOffer(requestId) {
     try {
         await api("/conversations/" + state.conversationId + "/offers", {
             method: "POST",
-            body: { amount: raw === "" ? null : Number(raw), requestId: requestId.value }
+            body: { amount: raw === "" ? null : Number(raw), quantity: numberValue(dom.offerQuantity), requestId: requestId.value }
         });
         requestId.settle(null);
         dom.offerAmount.value = "";
+        dom.offerQuantity.value = "1";
         toast("가격을 제안했습니다.", "success");
         await refreshDetail();
     } catch (error) {
         requestId.settle(error);
-        const fieldMessage = error instanceof ApiError && error.fieldErrors && error.fieldErrors.amount;
-        toast(fieldMessage || error.message, "error");
+        const fieldErrors = (error instanceof ApiError && error.fieldErrors) || {};
+        toast(fieldErrors.amount || fieldErrors.quantity || error.message, "error");
         if (error instanceof ApiError && error.status === 409) {
             await refreshDetail();
         }
@@ -318,12 +343,14 @@ function renderInfo() {
     const detail = state.detail;
     const product = detail.product;
     const isBuyer = detail.myRole === "BUYER";
-    const accepted = (detail.offers || []).find((offer) => offer.status === "ACCEPTED");
+    // 합의 가격 구매 버튼은 합의가 예약 중일 때만 보인다. 정보의 「합의 가격」 행은 합의가 예약 중이거나 결제됨일 때 보인다.
+    const reserved = reservedOffer();
+    const agreement = agreementOffer(["RESERVED", "ORDERED"]);
 
     let cta = null;
     if (isBuyer && product.status === "ON_SALE") {
-        cta = accepted
-            ? h("a", { class: "btn btn--primary btn--block", href: links.product(product.productId) + "?offer=" + accepted.offerId }, "합의 가격 " + formatWon(accepted.amount) + "으로 구매")
+        cta = reserved
+            ? h("a", { class: "btn btn--primary btn--block", href: links.product(product.productId) + "?offer=" + reserved.offerId }, "합의 가격 " + formatWon(reserved.amount) + "으로 구매")
             : h("a", { class: "btn btn--primary btn--block", href: links.product(product.productId) }, "구매하기");
     }
 
@@ -352,12 +379,13 @@ function renderInfo() {
                 h("dt", null, "남은 수량"), h("dd", null, formatNumber(product.remainingQuantity) + "개"),
                 isBuyer ? h("dt", null, "구매 가능 수량") : null,
                 isBuyer ? h("dd", null, formatNumber(product.availableQuantity) + "개") : null,
-                accepted ? h("dt", null, "합의 가격") : null,
-                accepted ? h("dd", null, formatWon(accepted.amount)) : null,
+                agreement ? h("dt", null, "합의 가격") : null,
+                agreement ? h("dd", null, offerTerms(agreement) + " ",
+                    badge(label("agreementStatus", agreement.agreementStatus), tone("agreementStatus", agreement.agreementStatus))) : null,
                 h("dt", null, "판매자"), h("dd", null, detail.seller.nickname),
                 h("dt", null, "구매 희망자"), h("dd", null, detail.buyer.nickname)),
             cta,
-            isBuyer ? null : h("p", { class: "text-muted text-small" }, "구매 희망자의 가격 제안은 대화에서 수락하거나 거절할 수 있습니다. 수락한 가격은 이 구매 희망자에게만 적용됩니다."),
+            isBuyer ? null : h("p", { class: "text-muted text-small" }, "구매 희망자의 가격 제안은 대화에서 수락하거나 거절할 수 있습니다. 수락한 가격은 이 구매 희망자에게만 적용됩니다. 수락하면 제안 수량이 이 구매 희망자에게 예약됩니다."),
             h("hr", { class: "divider", style: "margin: 4px 0;" }),
             reservationCard(),
             h("hr", { class: "divider", style: "margin: 4px 0;" }),
@@ -365,7 +393,7 @@ function renderInfo() {
             orderList)));
 
     dom.inlineInfo.replaceChildren(h("div", { class: "row row--between" },
-        h("span", { class: "text-small text-muted" }, accepted ? "합의 가격 " + formatWon(accepted.amount) : "등록 가격 " + formatWon(product.price)),
+        h("span", { class: "text-small text-muted" }, reserved ? "합의 가격 " + formatWon(reserved.amount) : "등록 가격 " + formatWon(product.price)),
         h("div", { class: "row" },
             orders.length > 0 ? h("a", { class: "btn btn--ghost btn--sm", href: links.order(orders[0].orderId) }, "주문 보기") : null,
             cta ? h("a", { class: "btn btn--primary btn--sm", href: cta.href }, "구매하기") : null)));
@@ -374,12 +402,12 @@ function renderInfo() {
 /* ------------------------------------------------------------------ 예약 */
 
 /*
- * 대화 상세의 reservation(이 상품·구매 희망자의 가장 최근 예약 하나)을 보여 준다. 활성이면 판매자와 구매 희망자 모두 해제할 수 있고,
- * 판매자는 활성 예약이 없고 상품이 판매 중일 때 예약을 걸 수 있다. 버튼 노출은 화면 편의를 위한 판단이며 허용 여부는 서버가 정한다.
+ * 대화 상세의 reservation(이 상품·구매 희망자의 가장 최근 예약 하나)을 보여 준다. 활성이면 판매자와 구매 희망자 모두 해제할 수 있다.
+ * 예약은 판매자가 가격 제안을 수락할 때 제안 수량만큼 걸리므로 예약을 거는 버튼은 없다.
+ * 버튼 노출은 화면 편의를 위한 판단이며 허용 여부는 서버의 검사로 정해진다.
  */
 function reservationCard() {
     const detail = state.detail;
-    const product = detail.product;
     const reservation = detail.reservation;
     const isSeller = detail.myRole === "SELLER";
     const active = !!reservation && reservation.status === "ACTIVE";
@@ -401,52 +429,17 @@ function reservationCard() {
         }
         nodes.push(h("dl", { class: "kv kv--compact" }, rows));
     } else {
-        nodes.push(h("p", { class: "text-muted text-small" }, isSeller ? "이 구매 희망자에게 건 예약이 없습니다." : "판매자가 건 예약이 없습니다."));
+        nodes.push(h("p", { class: "text-muted text-small" }, isSeller
+            ? "구매 희망자의 가격 제안을 수락하면 제안 수량이 예약됩니다."
+            : "판매자가 가격 제안을 수락하면 제안 수량이 예약됩니다."));
     }
     if (active) {
         nodes.push(h("p", { class: "text-muted text-small" }, isSeller
             ? "예약 중에는 이 구매 희망자만 예약 수량을 살 수 있습니다. 만료 시각이 지나면 자동으로 해제됩니다."
-            : "만료 시각까지 예약 수량을 등록 가격이나 합의 가격으로 살 수 있습니다. 결제하면 예약이 끝납니다."));
+            : "만료 시각까지 합의 가격으로 예약 수량을 결제할 수 있습니다. 결제하면 예약이 끝납니다."));
         nodes.push(releaseButton(reservation));
-    } else if (isSeller && product.status === "ON_SALE") {
-        nodes.push(reserveButton());
     }
     return h("div", { class: "stack-sm" }, nodes);
-}
-
-/* 예약 수량 입력. 상한은 대화 상세의 구매 가능 수량(판매자에게는 다른 회원의 예약을 뺀 값)이고, 정수·범위 판단은 서버가 한다. */
-function reservationQuantityField() {
-    const product = state.detail.product;
-    const input = h("input", { class: "input", type: "number", min: "1", step: "1", value: "1", inputMode: "numeric", max: String(product.availableQuantity), attrs: { "aria-label": "예약 수량" } });
-    const field = h("div", { class: "field" },
-        h("label", null, "예약 수량"),
-        input,
-        h("p", { class: "field__hint" }, "지금 예약할 수 있는 수량은 " + formatNumber(product.availableQuantity) + "개입니다."));
-    return { input, field };
-}
-
-function reserveButton() {
-    const button = h("button", { class: "btn btn--primary btn--block", type: "button" }, "예약 걸기");
-    button.addEventListener("click", () => withBusy(button, async () => {
-        const { input, field } = reservationQuantityField();
-        const ok = await confirmDialog({
-            title: "이 구매 희망자에게 예약을 걸까요?",
-            message: "예약 중에는 이 구매 희망자만 예약 수량을 살 수 있습니다. 판매자와 구매 희망자가 언제든 해제할 수 있고, 만료 시각이 지나면 자동으로 해제됩니다.",
-            content: field,
-            confirmLabel: "예약 걸기"
-        });
-        if (!ok) {
-            return;
-        }
-        try {
-            await api("/conversations/" + state.conversationId + "/reservations", { method: "POST", body: { quantity: numberValue(input) } });
-            toast("예약을 걸었습니다.", "success");
-        } catch (error) {
-            toastError(error);
-        }
-        await refreshDetail();
-    }));
-    return button;
 }
 
 function releaseButton(reservation) {
@@ -456,8 +449,8 @@ function releaseButton(reservation) {
         const ok = await confirmDialog({
             title: "예약을 해제할까요?",
             message: isSeller
-                ? "해제하면 다른 회원도 이 수량을 살 수 있습니다. 다시 보장하려면 예약을 새로 걸어야 합니다."
-                : "해제하면 예약 수량의 보장이 없어지고 다른 회원도 이 수량을 살 수 있습니다.",
+                ? "해제하면 다른 회원도 이 수량을 살 수 있습니다. 해제된 합의로는 결제할 수 없습니다. 구매 희망자가 새 제안을 보내고 판매자가 수락하면 다시 예약됩니다."
+                : "해제하면 예약 수량의 보장이 없어지고 다른 회원도 이 수량을 살 수 있습니다. 해제된 합의로는 결제할 수 없습니다.",
             confirmLabel: "예약 해제",
             danger: true
         });
@@ -535,7 +528,7 @@ function renderTimeline(forceBottom) {
     if (entries.length === 0) {
         timeline.replaceChildren(h("div", { class: "convo-empty" },
             h("p", null, state.detail.myRole === "BUYER"
-                ? "판매자에게 궁금한 점을 물어보거나 개당 가격을 제안해 보세요."
+                ? "판매자에게 궁금한 점을 물어보거나 개당 가격과 수량을 제안해 보세요."
                 : "구매 희망자의 메시지가 아직 없습니다.")));
         return;
     }
@@ -570,8 +563,9 @@ function offerNode(offer, kind) {
         const accepted = offer.status === "ACCEPTED";
         return h("div", { class: "offer-card offer-card--response" },
             h("span", { class: "offer-card__label" }, "제안 응답"),
-            h("span", null, "판매자가 개당 " + formatWon(offer.amount) + " 제안을 " + (accepted ? "수락했습니다." : "거절했습니다.")),
-            accepted && detail.myRole === "BUYER" && detail.product.status === "ON_SALE"
+            h("span", null, "판매자가 " + offerTerms(offer) + " 제안을 " + (accepted ? "수락했습니다." : "거절했습니다.")),
+            // 합의 가격으로 구매하는 연결은 합의가 예약 중일 때만 보인다.
+            offer.agreementStatus === "RESERVED" && detail.myRole === "BUYER" && detail.product.status === "ON_SALE"
                 ? h("a", { class: "text-small", href: links.product(detail.product.productId) + "?offer=" + offer.offerId }, "합의 가격으로 구매하기")
                 : null,
             h("span", { class: "offer-card__meta" }, formatTime(offer.respondedAt)));
@@ -581,11 +575,15 @@ function offerNode(offer, kind) {
     const closed = offer.status === "PENDING" && detail.product.status !== "ON_SALE";
     return h("div", { class: "offer-card" },
         h("span", { class: "offer-card__label" }, "가격 제안"),
-        h("span", { class: "offer-card__amount" }, "개당 " + formatWon(offer.amount)),
+        h("span", { class: "offer-card__amount" }, offerTerms(offer) + " = " + formatWon(multiplyAmount(offer.amount, offer.quantity))),
         h("div", { class: "badges", style: "justify-content: center;" },
             closed
                 ? badge("판매 종료로 응답 불가", "outline")
                 : badge(label("offerStatus", offer.status), tone("offerStatus", offer.status)),
+            // 수락된 제안에는 합의 상태(예약 중, 결제됨, 만료, 해제)를 함께 보인다.
+            offer.status === "ACCEPTED" && offer.agreementStatus
+                ? badge(label("agreementStatus", offer.agreementStatus), tone("agreementStatus", offer.agreementStatus))
+                : null,
             h("span", { class: "offer-card__meta" }, detail.buyer.nickname + " · " + formatTime(offer.createdAt))),
         canRespond ? h("div", { class: "actions" },
             offerButton("수락", "btn--primary", offer, "accept"),
@@ -596,37 +594,23 @@ function offerButton(text, style, offer, action) {
     const button = h("button", { class: ["btn", "btn--sm", style], type: "button" }, text);
     button.addEventListener("click", () => withBusy(button, async () => {
         const accepting = action === "accept";
-        // 수락 확인 창의 「예약도 함께」. 선택하면 수락 요청 하나로 수락과 예약이 한 번에 된다. 활성 예약이 이미 있으면 보이지 않는다.
-        let reserveCheck = null;
-        let quantityField = null;
-        let content = null;
-        if (accepting && !(state.detail.reservation && state.detail.reservation.status === "ACTIVE")) {
-            reserveCheck = h("input", { type: "checkbox" });
-            quantityField = reservationQuantityField();
-            quantityField.input.disabled = true;
-            reserveCheck.addEventListener("change", () => { quantityField.input.disabled = !reserveCheck.checked; });
-            content = h("div", { class: "stack-sm" },
-                h("label", { class: "row" }, reserveCheck, h("span", null, "이 구매 희망자에게 예약도 걸기")),
-                quantityField.field,
-                h("p", { class: "text-muted text-small" }, "선택하면 수락과 예약이 한 번에 됩니다. 예약 중에는 이 구매 희망자만 그 수량을 살 수 있습니다."));
-        }
+        const quantity = formatNumber(offer.quantity) + "개";
         const ok = await confirmDialog({
             title: accepting ? "가격 제안을 수락할까요?" : "가격 제안을 거절할까요?",
             message: accepting
-                ? "개당 " + formatWon(offer.amount) + "이 이 구매 희망자의 합의 가격이 됩니다. 수락한 뒤에는 철회하거나 다시 협상할 수 없습니다."
+                ? offerTerms(offer) + "가 이 구매 희망자의 합의 내용이 되고, " + quantity + "가 이 구매 희망자에게 예약됩니다. "
+                    + "예약 기간이 지나면 자동으로 해제됩니다. 수락한 뒤에는 철회할 수 없습니다."
                 : "거절한 뒤에도 구매 희망자는 새 가격을 제안할 수 있습니다.",
-            content,
             confirmLabel: accepting ? "수락" : "거절",
             danger: !accepting
         });
         if (!ok) {
             return;
         }
-        // 「예약도 함께」를 선택했을 때만 본문을 보낸다. 본문이 없으면 서버는 지금처럼 수락만 한다.
-        const body = reserveCheck && reserveCheck.checked ? { reserve: true, quantity: numberValue(quantityField.input) } : undefined;
+        // 수락과 거절은 본문 없이 보낸다. 수락하면 서버가 같은 트랜잭션에서 제안 수량만큼 예약을 건다.
         try {
-            await api("/offers/" + offer.offerId + "/" + action, { method: "POST", body });
-            toast(accepting ? (body ? "제안을 수락하고 예약을 걸었습니다." : "제안을 수락했습니다.") : "제안을 거절했습니다.", "success");
+            await api("/offers/" + offer.offerId + "/" + action, { method: "POST" });
+            toast(accepting ? "제안을 수락했습니다. 제안 수량이 예약되었습니다." : "제안을 거절했습니다.", "success");
         } catch (error) {
             toastError(error);
         }
@@ -729,7 +713,7 @@ async function onMessage(event) {
             announce(data.senderNickname + ": " + data.content);
             break;
         case "OFFER":
-            announce("가격 제안 개당 " + formatWon(data.amount) + " · " + label("offerStatus", data.status));
+            announce("가격 제안 " + offerTerms(data) + " · " + label("offerStatus", data.status));
             await refreshDetail();
             break;
         case "CONVERSATION_STATE":

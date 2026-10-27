@@ -67,7 +67,7 @@ public enum ErrorCode {
     INVALID_OFFER_SELECTION(HttpStatus.CONFLICT, "선택한 합의 가격을 사용할 수 없습니다."),
     /** 대화에 응답 대기(PENDING) 제안이 이미 있는데 새로 제안했다. */
     OFFER_PENDING_EXISTS(HttpStatus.CONFLICT, "응답을 기다리는 가격 제안이 이미 있습니다."),
-    /** 대화에 수락(ACCEPTED)된 제안이 있는데 새로 제안했다. 수락 뒤 재협상은 없다. */
+    /** 대화에 합의가 예약 중이거나 결제됨인 수락(ACCEPTED) 제안이 있는데 새로 제안했다. 합의가 만료되거나 해제되면 새로 제안할 수 있다. */
     OFFER_ALREADY_ACCEPTED(HttpStatus.CONFLICT, "이미 수락된 가격 제안이 있어 다시 제안할 수 없습니다."),
     /** 이미 수락하거나 거절한 제안에 다시 응답했다. */
     OFFER_ALREADY_RESPONDED(HttpStatus.CONFLICT, "이미 응답한 가격 제안입니다."),
@@ -99,12 +99,22 @@ public enum ErrorCode {
     TRADE_ALREADY_FINALIZED(HttpStatus.CONFLICT, "이미 종료된 거래입니다."),
     /** 결제 수량이 남은 수량 안이지만 다른 회원에게 걸린 활성 예약 때문에 구매 가능 수량을 넘는다. */
     PRODUCT_RESERVED(HttpStatus.CONFLICT, "다른 회원에게 예약된 수량은 구매할 수 없습니다."),
-    /** 같은 구매 희망자에게 활성 예약이 있는데 다시 예약을 걸었다. 수량을 바꾸려면 해제한 뒤 다시 건다. */
+    /** 같은 구매 희망자에게 활성 예약이 있는데 가격 제안 수락으로 다시 예약을 걸려 했다. */
     RESERVATION_ALREADY_ACTIVE(HttpStatus.CONFLICT, "이 구매 희망자에게 걸린 예약이 이미 있습니다."),
-    /** 예약 수량이 상한(남은 수량 − 다른 회원에게 걸린 활성 예약 수량의 합계)을 넘는다. */
+    /** 수락할 제안의 수량이 예약 상한(남은 수량 − 다른 회원에게 걸린 활성 예약 수량의 합계)을 넘는다. 수락도 반영되지 않는다. */
     RESERVATION_QUANTITY_EXCEEDED(HttpStatus.CONFLICT, "예약할 수 있는 수량보다 많이 예약할 수 없습니다."),
     /** 해제, 기간 만료, 결제 종료로 이미 끝난 예약을 해제하려 했다. */
-    RESERVATION_NOT_ACTIVE(HttpStatus.CONFLICT, "이미 끝난 예약입니다.");
+    RESERVATION_NOT_ACTIVE(HttpStatus.CONFLICT, "이미 끝난 예약입니다."),
+    /** 제안 수량이 구매 희망자 기준 구매 가능 수량(남은 수량 − 다른 회원에게 걸린 활성 예약 수량의 합계)보다 많다. */
+    OFFER_QUANTITY_EXCEEDED(HttpStatus.CONFLICT, "구매 가능 수량보다 많이 제안할 수 없습니다."),
+    /** 합의가 예약 중인 구매 희망자가 가격 제안 없이 등록 가격으로 결제하려 했다. */
+    AGREED_OFFER_REQUIRED(HttpStatus.CONFLICT, "예약 중에는 합의한 가격 제안으로 결제해야 합니다."),
+    /** 결제에 선택한 제안으로 만든 주문 가운데 취소되지 않은 주문이 이미 있다. */
+    OFFER_ALREADY_USED(HttpStatus.CONFLICT, "이미 결제에 쓴 가격 제안입니다."),
+    /** 결제에 선택한 제안의 예약이 만료되거나 해제되어, 활성이고 만료 시각 전인 예약이 없다. */
+    OFFER_RESERVATION_ENDED(HttpStatus.CONFLICT, "예약이 끝나 합의 가격으로 결제할 수 없습니다."),
+    /** 합의 가격 결제의 수량이 제안 수량과 다르다. */
+    OFFER_QUANTITY_MISMATCH(HttpStatus.CONFLICT, "합의한 수량과 같은 수량만 결제할 수 있습니다.");
 
     /** 응답에 사용할 HTTP 상태 코드 */
     private final HttpStatus status;

@@ -17,10 +17,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
- * 판매자가 대화의 구매 희망자에게 건 예약(RESERVATION).
+ * 판매자가 구매 희망자의 가격 제안을 수락할 때 제안 수량만큼 걸리는 예약(RESERVATION). OFFER_ID 가 그 제안을 가리킨다.
  *
  * 예약은 재고를 차감하지 않는다. 활성이고 만료 시각 전인 예약의 수량만큼 다른 회원의 구매 가능 수량이 줄어들고,
- * 예약된 구매 희망자는 등록 가격이나 합의 가격으로 결제할 수 있다. 결제하면 결제한 수량과 관계없이 예약이 끝난다.
+ * 예약 중에는 예약된 구매 희망자가 합의 가격으로 제안 수량을 결제한다. 결제하면 예약이 끝난다.
+ * 합의 가격 주문이 발송 전에 취소되면 끝난 행은 그대로 두고 같은 내용의 새 행을 만든다.
  * 끝난 예약은 지우지 않고 {@link ReservationStatus}로 구분해 남긴다. 다른 엔티티와는 식별자 값으로만 연결한다.
  *
  * 상태 변경 메서드({@link #release}, {@link #expire}, {@link #fulfill})는 엔티티 필드만 바꾼다. DB 반영은 flush 때
@@ -52,6 +53,10 @@ public class Reservation {
     @Column(name = "SELLER_ID", nullable = false)
     private String sellerId;
 
+    /** 이 예약을 만든 가격 제안 ID. 합의 상태를 계산할 때 예약 행을 제안과 연결한다. 판매자의 예약 걸기로 만들어진 기존 행은 null 이다. */
+    @Column(name = "OFFER_ID")
+    private Long offerId;
+
     @Column(name = "QUANTITY", nullable = false)
     private long quantity;
 
@@ -80,12 +85,13 @@ public class Reservation {
     private Long fulfilledOrderId;
 
     public static Reservation reserve(Long productId, Long conversationId, String buyerId, String sellerId,
-                                      long quantity, Instant reservedAt, Instant expiresAt) {
+                                      Long offerId, long quantity, Instant reservedAt, Instant expiresAt) {
         Reservation reservation = new Reservation();
         reservation.productId = productId;
         reservation.conversationId = conversationId;
         reservation.buyerId = buyerId;
         reservation.sellerId = sellerId;
+        reservation.offerId = offerId;
         reservation.quantity = quantity;
         reservation.status = ReservationStatus.ACTIVE;
         reservation.reservedAt = reservedAt;

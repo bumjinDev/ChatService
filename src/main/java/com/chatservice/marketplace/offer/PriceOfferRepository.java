@@ -13,4 +13,7 @@ public interface PriceOfferRepository extends JpaRepository<PriceOffer, Long> {
     List<PriceOffer> findByConversationIdOrderByCreatedAtAscOfferIdAsc(Long conversationId);
 
     boolean existsByConversationIdAndStatus(Long conversationId, OfferStatus status);
+
+    /* 새 제안의 허용 판단: 대화의 수락된 제안마다 합의 상태를 구한다 */
+    List<PriceOffer> findByConversationIdAndStatus(Long conversationId, OfferStatus status);
 }

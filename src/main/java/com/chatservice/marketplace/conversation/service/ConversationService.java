@@ -26,6 +26,7 @@ import com.chatservice.marketplace.conversation.dto.ConversationSummaryResponse;
 import com.chatservice.marketplace.conversation.realtime.RealtimePublisher;
 import com.chatservice.marketplace.conversation.realtime.event.ConversationStateEvent;
 import com.chatservice.marketplace.offer.PriceOfferRepository;
+import com.chatservice.marketplace.offer.service.IAgreementQueryService;
 import com.chatservice.marketplace.order.PurchaseOrderRepository;
 import com.chatservice.marketplace.order.domain.PurchaseOrder;
 import com.chatservice.marketplace.product.domain.Product;
@@ -43,6 +44,7 @@ public class ConversationService implements IConversationService {
     private final PurchaseOrderRepository purchaseOrderRepository;
     private final IProductService productService;
     private final IReservationQueryService reservationQueryService;
+    private final IAgreementQueryService agreementQueryService;
     private final MemberDirectory memberDirectory;
     private final RealtimePublisher realtimePublisher;
     private final TimeRules timeRules;
@@ -52,6 +54,7 @@ public class ConversationService implements IConversationService {
                                PurchaseOrderRepository purchaseOrderRepository,
                                IProductService productService,
                                IReservationQueryService reservationQueryService,
+                               IAgreementQueryService agreementQueryService,
                                MemberDirectory memberDirectory,
                                RealtimePublisher realtimePublisher,
                                TimeRules timeRules) {
@@ -60,6 +63,7 @@ public class ConversationService implements IConversationService {
         this.purchaseOrderRepository = purchaseOrderRepository;
         this.productService = productService;
         this.reservationQueryService = reservationQueryService;
+        this.agreementQueryService = agreementQueryService;
         this.memberDirectory = memberDirectory;
         this.realtimePublisher = realtimePublisher;
         this.timeRules = timeRules;
@@ -228,6 +232,7 @@ public class ConversationService implements IConversationService {
     /*
      * 구매 가능 수량은 조회한 회원 기준이다. 구매 희망자에게는 자기 예약을 빼지 않은 값이, 판매자에게는 다른 회원의 예약을 모두 뺀 값이 간다.
      * reservation 은 이 대화의 상품·구매 희망자로 저장된 예약 가운데 가장 최근 것 하나이고, 끝난 예약도 상태와 함께 담는다.
+     * 제안 항목마다 합의 상태를 담는다. 응답 대기 제안과 거절된 제안은 null 이다.
      */
     private ConversationDetailResponse buildDetail(Conversation conversation, Product product, String memberId) {
         Map<String, String> nicknames = memberDirectory.nicknames(Set.of(conversation.getBuyerId(), conversation.getSellerId()));
@@ -241,7 +246,9 @@ public class ConversationService implements IConversationService {
                 writability.writable(),
                 writability.readOnlyReason(),
                 priceOfferRepository.findByConversationIdOrderByCreatedAtAscOfferIdAsc(conversation.getConversationId())
-                        .stream().map(ConversationDetailResponse.OfferItem::of).toList(),
+                        .stream()
+                        .map(offer -> ConversationDetailResponse.OfferItem.of(offer, agreementQueryService.statusOf(offer)))
+                        .toList(),
                 partyOrders(conversation).stream().map(ConversationDetailResponse.OrderSummary::of).toList(),
                 reservationQueryService.latestFor(product.getProductId(), conversation.getBuyerId())
                         .map(ReservationResponse::of).orElse(null));

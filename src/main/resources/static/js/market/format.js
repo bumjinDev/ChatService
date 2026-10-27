@@ -98,6 +98,8 @@ const LABELS = {
     category: Object.fromEntries(CATEGORIES),
     productStatus: { ON_SALE: "판매 중", SOLD: "판매 종료" },
     offerStatus: { PENDING: "응답 대기", ACCEPTED: "수락됨", REJECTED: "거절됨" },
+    // 수락된 제안과 그 예약(합의)의 상태. 응답 대기·거절 제안에는 없다.
+    agreementStatus: { RESERVED: "예약 중", ORDERED: "결제됨", EXPIRED: "만료", RELEASED: "해제" },
     tradeStatus: { IN_PROGRESS: "거래 진행 중", ON_HOLD: "환불 요청 처리 중", COMPLETED: "거래 완료", REFUNDED: "환불 완료", CANCELLED: "주문 취소" },
     shippingStatus: { WAITING_SHIPMENT: "발송 대기", SHIPPING: "배송 중", DELIVERED: "배송 완료" },
     priceSource: { LISTED: "등록 가격", AGREED: "합의 가격" },
@@ -119,6 +121,7 @@ const LABELS = {
 const TONES = {
     productStatus: { ON_SALE: "success", SOLD: "outline" },
     offerStatus: { PENDING: "warn", ACCEPTED: "success", REJECTED: "outline" },
+    agreementStatus: { RESERVED: "accent", ORDERED: "success", EXPIRED: "outline", RELEASED: "outline" },
     reservationStatus: { ACTIVE: "accent", RELEASED: "outline", EXPIRED: "outline", FULFILLED: "success" },
     tradeStatus: { IN_PROGRESS: "accent", ON_HOLD: "warn", COMPLETED: "success", REFUNDED: "danger", CANCELLED: "outline" },
     shippingStatus: { WAITING_SHIPMENT: "warn", SHIPPING: "accent", DELIVERED: "success" },

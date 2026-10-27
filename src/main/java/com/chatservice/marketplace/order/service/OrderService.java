@@ -13,9 +13,11 @@ import com.chatservice.marketplace.common.error.ErrorCode;
 import com.chatservice.marketplace.common.time.TimeRules;
 import com.chatservice.marketplace.conversation.service.IConversationService;
 import com.chatservice.marketplace.offer.domain.PriceOffer;
+import com.chatservice.marketplace.offer.service.IAgreementQueryService;
 import com.chatservice.marketplace.offer.service.IOfferService;
 import com.chatservice.marketplace.order.PurchaseOrderRepository;
 import com.chatservice.marketplace.order.domain.OrderEnums.PriceSource;
+import com.chatservice.marketplace.order.domain.OrderEnums.TradeStatus;
 import com.chatservice.marketplace.order.domain.PurchaseOrder;
 import com.chatservice.marketplace.order.dto.PlaceOrderRequest;
 import com.chatservice.marketplace.product.domain.Product;
@@ -36,12 +38,14 @@ public class OrderService implements IOrderService {
     private final IConversationService conversationService;
     private final IReservationService reservationService;
     private final IReservationQueryService reservationQueryService;
+    private final IAgreementQueryService agreementQueryService;
     private final TimeRules timeRules;
 
     public OrderService(PurchaseOrderRepository purchaseOrderRepository, IProductService productService,
                         IOfferService offerService, IWalletService walletService,
                         IConversationService conversationService, IReservationService reservationService,
-                        IReservationQueryService reservationQueryService, TimeRules timeRules) {
+                        IReservationQueryService reservationQueryService, IAgreementQueryService agreementQueryService,
+                        TimeRules timeRules) {
         this.purchaseOrderRepository = purchaseOrderRepository;
         this.productService = productService;
         this.offerService = offerService;
@@ -49,14 +53,18 @@ public class OrderService implements IOrderService {
         this.conversationService = conversationService;
         this.reservationService = reservationService;
         this.reservationQueryService = reservationQueryService;
+        this.agreementQueryService = agreementQueryService;
         this.timeRules = timeRules;
     }
 
     /*
-     * 처리 순서(설계 6.10, 예약 기능 설계안 5.5)
+     * 처리 순서(설계 6.10, 예약 기능 설계안 5.5, 가격 제안 수량 설계안 5.4)
      *  1) 상품(404) → 본인 상품(403) → 판매 중(409) → 남은 수량 이상 요청(409 INSUFFICIENT_STOCK)
      *     → 남은 수량 안이지만 다른 회원의 활성 예약 때문에 구매 가능 수량을 넘는 요청(409 PRODUCT_RESERVED)
-     *  2) 적용 단가: offerId 가 없으면 등록 가격(LISTED), 있으면 본인에게 수락된 같은 상품의 제안 금액(AGREED)
+     *  2) 적용 단가
+     *     - offerId 가 없으면 등록 가격(LISTED). 이 상품에서 결제하는 회원에게 활성이고 만료 전인 예약이 있으면(합의가 예약 중) 409 AGREED_OFFER_REQUIRED
+     *     - offerId 가 있으면 본인에게 수락된 같은 상품의 제안 금액(AGREED). 그 제안으로 만든 취소되지 않은 주문이 있으면 409 OFFER_ALREADY_USED
+     *       → 그 제안의 예약 가운데 활성이고 만료 전인 것이 없으면 409 OFFER_RESERVATION_ENDED → 결제 수량이 제안 수량과 다르면 409 OFFER_QUANTITY_MISMATCH
      *  3) 총 결제액 = 단가 × 수량. 저장·연산 범위를 넘으면 400. 잔액이 부족하면 409
      *  4) 주문 생성 → 잔액 차감과 PURCHASE 내역(주문 참조) → 주문 수량만 재고 차감(0 이면 SOLD)
      *     → 결제한 회원에게 걸린 활성 예약을 결제 종료(FULFILLED) → 당사자 대화가 없으면 생성
@@ -78,7 +86,12 @@ public class OrderService implements IOrderService {
      *           - {@code SELF_TRADE_NOT_ALLOWED}: 본인 상품을 구매하려 한다
      *           - {@code PRODUCT_NOT_ON_SALE}: 판매 종료된 상품이다
      *           - {@code INSUFFICIENT_STOCK}: 구매 수량이 남은 수량보다 많다
+     *           - {@code PRODUCT_RESERVED}: 구매 수량이 다른 회원의 예약을 뺀 구매 가능 수량보다 많다
+     *           - {@code AGREED_OFFER_REQUIRED}: 합의가 예약 중인데 제안 없이 등록 가격으로 결제하려 한다
      *           - {@code INVALID_OFFER_SELECTION}: 선택한 제안이 이 상품·구매자에게 수락된 제안이 아니다
+     *           - {@code OFFER_ALREADY_USED}: 선택한 제안으로 만든 취소되지 않은 주문이 이미 있다
+     *           - {@code OFFER_RESERVATION_ENDED}: 선택한 제안의 예약이 만료되거나 해제되었다
+     *           - {@code OFFER_QUANTITY_MISMATCH}: 구매 수량이 선택한 제안의 수량과 다르다
      *           - {@code VALIDATION_ERROR}: 총 결제액이 저장 가능한 범위를 넘는다
      *           - {@code INSUFFICIENT_BALANCE}: 잔액이 총 결제액보다 적다
      */
@@ -127,7 +140,10 @@ public class OrderService implements IOrderService {
 
         /* 제안된 가격이 아니라 정가를 선택 */
         if (request.offerId() == null) {
-
+            // 합의가 예약 중인 구매 희망자는 등록 가격으로 결제할 수 없고 합의 가격으로 먼저 결제한다
+            if (agreementQueryService.hasActiveReservation(product.getProductId(), buyerId)) {
+                throw new BusinessException(ErrorCode.AGREED_OFFER_REQUIRED);
+            }
             unitPrice = product.getPrice();
             priceSource = PriceSource.LISTED;
         }
@@ -135,6 +151,18 @@ public class OrderService implements IOrderService {
         else {
             // 이 상품·구매자에게 수락된 제안인지 검증한 뒤 합의 가격을 적용한다
             PriceOffer offer = offerService.acceptedOfferFor(request.offerId(), product.getProductId(), buyerId);   // 해당 상품에 대한 판매자와 구매자 간 제안 내역(수락된 제안 내역만 가져오기)을 가져온다.
+            // 합의는 한 번 결제할 수 있다. 그 제안으로 만든 주문이 취소되었으면 다시 결제할 수 있다
+            if (purchaseOrderRepository.existsByOfferIdAndTradeStatusNot(offer.getOfferId(), TradeStatus.CANCELLED)) {
+                throw new BusinessException(ErrorCode.OFFER_ALREADY_USED);
+            }
+            // 결제 전 예약이 만료되거나 해제되었으면, 또는 취소로 만들어진 새 예약이 만료되거나 해제되었으면 합의 가격으로 결제할 수 없다
+            if (!agreementQueryService.hasActiveReservationForOffer(offer.getOfferId())) {
+                throw new BusinessException(ErrorCode.OFFER_RESERVATION_ENDED);
+            }
+            // 합의 가격은 제안 수량과 같은 수량에만 적용한다. 한 주문 안에서 두 가격을 섞지 않는다
+            if (quantity != offer.getQuantity()) {
+                throw new BusinessException(ErrorCode.OFFER_QUANTITY_MISMATCH);
+            }
             unitPrice = offer.getAmount();         // 수락 제안한 금액
             priceSource = PriceSource.AGREED;      // 수락이라는 상태 값으로 로드.(PriceSource 은 EUME 객체로 LISTED 와 AGREED 두 가지 값만 가짐)
             offerId = offer.getOfferId();          // 수락 제안한 고유 식별 번호.
