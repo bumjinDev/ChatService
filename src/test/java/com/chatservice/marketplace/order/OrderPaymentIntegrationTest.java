@@ -1,24 +1,32 @@
 package com.chatservice.marketplace.order;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.chatservice.marketplace.common.time.TimeRules;
+import com.chatservice.marketplace.order.service.IShipmentService;
 import com.chatservice.marketplace.support.IntegrationTestSupport;
 import com.chatservice.marketplace.support.TestMember;
 import com.fasterxml.jackson.databind.JsonNode;
 
 /**
- * F-010 구매·잔액 결제와 합의 가격 적용(F-009-AC-01·02), 복수 수량 결제(F-010-AC-03·05~08), 금액 범위(BR-003).
+ * F-010 구매·잔액 결제와 합의 가격 적용(F-009-AC-01·02), 복수 수량 결제(F-010-AC-03·05~08), 금액 범위(BR-003),
+ * 합의 가격 결제의 수량·횟수 검사(가격 제안 수량 설계안 8.4).
  * F-010-AC-01·02·04(동시 결제, 같은 결제 재시도)는 후속 과제이며 여기서 검증하지 않는다.
  */
 class OrderPaymentIntegrationTest extends IntegrationTestSupport {
+
+    @Autowired
+    private IShipmentService shipmentService;
 
     private static Instant kst(String localDateTime) {
         return LocalDateTime.parse(localDateTime).atZone(TimeRules.BUSINESS_ZONE).toInstant();
@@ -68,14 +76,20 @@ class OrderPaymentIntegrationTest extends IntegrationTestSupport {
     }
 
     @Test
-    void F010_AC03_합의_가격이_있어도_선택하지_않으면_등록_단가로_계산한다() throws Exception {
+    void F010_AC03_예약_중_등록_가격_결제는_409_AGREED_OFFER_REQUIRED이고_합의_가격으로_결제한_뒤의_등록_가격_결제는_등록_단가로_계산한다() throws Exception {
         TestMember seller = member("seller");
         TestMember buyer = member("buyer");
         long productId = registerProduct(seller, 50_000, 5);
         long conversationId = startConversation(buyer, productId);
-        respond(seller, propose(buyer, conversationId, 40_000), true);
-        charge(buyer, 100_000);
+        long offerId = propose(buyer, conversationId, 40_000);
+        respond(seller, offerId, true);
+        charge(buyer, 140_000);
 
+        JsonNode required = json(postJson("/api/orders", buyer, orderBody(productId, 2, null)).andExpect(status().isConflict()));
+        assertThat(required.get("code").asText()).isEqualTo("AGREED_OFFER_REQUIRED");
+        assertUnchanged(buyer, 140_000, productId, 5, 0);
+
+        placeOrder(buyer, productId, 1, offerId);
         JsonNode order = placeOrder(buyer, productId, 2, null);
         assertThat(order.get("unitPrice").asLong()).isEqualTo(50_000);
         assertThat(order.get("paidAmount").asLong()).isEqualTo(100_000);
@@ -229,33 +243,77 @@ class OrderPaymentIntegrationTest extends IntegrationTestSupport {
     }
 
     @Test
-    void F010_AC08_합의_단가_8000원을_같은_구매자의_별도_주문에_다시_쓴다() throws Exception {
+    void F010_합의_가격은_제안_수량과_같은_수량을_한_번만_결제할_수_있고_취소_뒤에는_다시_결제할_수_있다() throws Exception {
         TestMember seller = member("seller");
         TestMember buyer = member("buyer");
-        long productId = registerProduct(seller, 10_000, 5);
+        // 첫 결제 뒤에도 남은 수량이 제안 수량 3 이상이어야 두 번째 결제가 재고 검사보다 뒤의 OFFER_ALREADY_USED 검사까지 간다.
+        long productId = registerProduct(seller, 10_000, 10);
         long conversationId = startConversation(buyer, productId);
-        long offerId = propose(buyer, conversationId, 8_000);
+        long offerId = propose(buyer, conversationId, 8_000, 3);
         respond(seller, offerId, true);
         charge(buyer, 30_000);
 
-        JsonNode firstOrder = placeOrder(buyer, productId, 2, offerId);
-        JsonNode secondOrder = placeOrder(buyer, productId, 1, offerId);
+        JsonNode mismatch = json(postJson("/api/orders", buyer, orderBody(productId, 2, offerId)).andExpect(status().isConflict()));
+        assertThat(mismatch.get("code").asText()).isEqualTo("OFFER_QUANTITY_MISMATCH");
+        assertUnchanged(buyer, 30_000, productId, 10, 0);
 
-        assertThat(firstOrder.get("paidAmount").asLong()).isEqualTo(16_000);
-        assertThat(secondOrder.get("paidAmount").asLong()).isEqualTo(8_000);
+        JsonNode firstOrder = placeOrder(buyer, productId, 3, offerId);
+        assertThat(firstOrder.get("paidAmount").asLong()).isEqualTo(24_000);
+        assertThat(firstOrder.get("unitPrice").asLong()).isEqualTo(8_000);
         assertThat(firstOrder.get("offerId").asLong()).isEqualTo(offerId);
+        assertThat(balanceOf(buyer)).isEqualTo(6_000);
+        assertThat(remainingQuantity(productId)).isEqualTo(7);
+
+        JsonNode used = json(postJson("/api/orders", buyer, orderBody(productId, 3, offerId)).andExpect(status().isConflict()));
+        assertThat(used.get("code").asText()).isEqualTo("OFFER_ALREADY_USED");
+        assertThat(orderCount(productId)).isEqualTo(1);
+
+        // 첫 주문을 발송 전에 취소하면 같은 제안으로 다시 3개를 결제할 수 있다.
+        cancel(buyer, firstOrder.get("orderId").asLong());
+        JsonNode secondOrder = placeOrder(buyer, productId, 3, offerId);
+        assertThat(secondOrder.get("paidAmount").asLong()).isEqualTo(24_000);
         assertThat(secondOrder.get("offerId").asLong()).isEqualTo(offerId);
-        assertThat(firstOrder.get("orderId").asLong()).isNotEqualTo(secondOrder.get("orderId").asLong());
+        assertThat(secondOrder.get("orderId").asLong()).isNotEqualTo(firstOrder.get("orderId").asLong());
         assertThat(offerStatus(offerId)).isEqualTo("ACCEPTED");
         assertThat(balanceOf(buyer)).isEqualTo(6_000);
-        assertThat(remainingQuantity(productId)).isEqualTo(2);
+        assertThat(remainingQuantity(productId)).isEqualTo(7);
 
         JsonNode orders = json(getJson("/api/conversations/" + conversationId, buyer)).get("orders");
         assertThat(orders).hasSize(2);
         assertThat(orders.get(0).get("orderId").asLong()).isEqualTo(secondOrder.get("orderId").asLong());
+        assertThat(orders.get(0).get("priceSource").asText()).isEqualTo("AGREED");
+        assertThat(orders.get(0).get("offerId").asLong()).isEqualTo(offerId);
         assertThat(orders.get(1).get("orderId").asLong()).isEqualTo(firstOrder.get("orderId").asLong());
-        assertThat(orders.get(1).get("quantity").asLong()).isEqualTo(2);
+        assertThat(orders.get(1).get("tradeStatus").asText()).isEqualTo("CANCELLED");
+        assertThat(orders.get(1).get("quantity").asLong()).isEqualTo(3);
         assertThat(orders.get(1).get("unitPrice").asLong()).isEqualTo(8_000);
+    }
+
+    @Test
+    void F010_환불된_주문의_제안으로_다시_결제하면_409_OFFER_ALREADY_USED이다() throws Exception {
+        TestMember seller = member("seller");
+        TestMember buyer = member("buyer");
+        long productId = registerProduct(seller, 10_000, 5);
+        long offerId = propose(buyer, startConversation(buyer, productId), 8_000, 2);
+        respond(seller, offerId, true);
+        charge(buyer, 50_000);
+        long orderId = placeOrder(buyer, productId, 2, offerId).get("orderId").asLong();
+
+        ship(seller, orderId);
+        Instant deliveredAt = clock.instant().plus(Duration.ofMinutes(2));
+        clock.setInstant(deliveredAt);
+        assertThat(shipmentService.completeDueDeliveries(deliveredAt)).isEqualTo(1);
+        postJson("/api/orders/" + orderId + "/refund-request", buyer,
+                Map.of("reasonCode", "DESCRIPTION_MISMATCH", "detail", "설명과 달리 화면에 흠집이 있습니다."))
+                .andExpect(status().isCreated());
+        postJson("/api/orders/" + orderId + "/refund-request/approve", seller, null).andExpect(status().isOk());
+        assertThat(tradeStatus(orderId)).isEqualTo("REFUNDED");
+        long balanceAfterRefund = balanceOf(buyer);
+
+        JsonNode used = json(postJson("/api/orders", buyer, orderBody(productId, 2, offerId)).andExpect(status().isConflict()));
+        assertThat(used.get("code").asText()).isEqualTo("OFFER_ALREADY_USED");
+        assertThat(orderCount(productId)).isEqualTo(1);
+        assertThat(balanceOf(buyer)).isEqualTo(balanceAfterRefund);
     }
 
     @Test
@@ -267,10 +325,13 @@ class OrderPaymentIntegrationTest extends IntegrationTestSupport {
         long productId = registerProduct(seller, 50_000, 1);
         long pendingOffer = propose(pendingBuyer, startConversation(pendingBuyer, productId), 40_000);
         long acceptedOffer = propose(acceptedBuyer, startConversation(acceptedBuyer, productId), 45_000);
-        respond(seller, acceptedOffer, true);
+        long reservationId = json(postJson("/api/offers/" + acceptedOffer + "/accept", seller, null).andExpect(status().isOk()))
+                .get("reservation").get("reservationId").asLong();
         charge(acceptedBuyer, 45_000);
         charge(lastBuyer, 50_000);
 
+        // 수락이 하나뿐인 수량을 예약하므로, 판매자가 예약을 해제한 뒤에 다른 구매자가 마지막 수량을 산다.
+        mockMvc.perform(delete("/api/reservations/" + reservationId).cookie(seller.cookie())).andExpect(status().isOk());
         placeOrder(lastBuyer, productId, 1, null);
 
         JsonNode respondError = json(postJson("/api/offers/" + pendingOffer + "/accept", seller, null)
@@ -291,7 +352,7 @@ class OrderPaymentIntegrationTest extends IntegrationTestSupport {
         TestMember buyer = member("buyer");
         TestMember other = member("other");
         long productId = registerProduct(seller, 50_000, 3);
-        long offerId = propose(buyer, startConversation(buyer, productId), 40_000);
+        long offerId = propose(buyer, startConversation(buyer, productId), 40_000, 2);
         charge(other, 50_000);
         placeOrder(other, productId, 1, null);
 

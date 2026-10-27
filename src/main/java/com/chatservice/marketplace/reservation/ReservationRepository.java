@@ -26,6 +26,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     /* 공개 목록의 구매 가능 수량 계산: 여러 상품의 특정 상태 예약을 한 번에 조회한다 */
     List<Reservation> findByProductIdInAndStatus(Collection<Long> productIds, ReservationStatus status);
 
+    /* 합의 상태 계산: 한 가격 제안으로 만든 예약 전체. 취소 뒤 새로 만든 행도 같은 제안 ID 를 가진다. */
+    List<Reservation> findByOfferId(Long offerId);
+
+    /* 취소 뒤 새 예약: 취소하는 주문으로 결제 종료된 예약. 보통 하나이고, 경합으로 둘 이상일 수 있다. */
+    List<Reservation> findByFulfilledOrderIdAndStatus(Long fulfilledOrderId, ReservationStatus status);
+
     /**
      * 만료 시각이 지난 예약의 ID 목록을 조회한다.
      *

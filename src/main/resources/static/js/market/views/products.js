@@ -57,16 +57,17 @@ function productCard(product) {
         h("div", { class: "text-muted text-small" }, formatDateTime(product.createdAt) + " 등록"));
 }
 
-/* 이 상품에 대한 내 대화(구매 희망자로 참여)와 그 대화의 수락된 제안, 가장 최근 예약을 찾는다. */
+/* 이 상품에 대한 내 대화(구매 희망자로 참여)와 그 대화에서 합의가 예약 중인 수락 제안, 가장 최근 예약을 찾는다. */
 async function findBuyerConversation(productId) {
     const conversations = await api("/conversations");
     const summary = conversations.find((c) => c.product.productId === productId && c.myRole === "BUYER");
     if (!summary) {
-        return { conversation: null, acceptedOffer: null, reservation: null };
+        return { conversation: null, reservedOffer: null, reservation: null };
     }
     const detail = await api("/conversations/" + summary.conversationId);
-    const acceptedOffer = (detail.offers || []).find((offer) => offer.status === "ACCEPTED") || null;
-    return { conversation: detail, acceptedOffer, reservation: detail.reservation || null };
+    const reservedOffer = (detail.offers || [])
+        .find((offer) => offer.status === "ACCEPTED" && offer.agreementStatus === "RESERVED") || null;
+    return { conversation: detail, reservedOffer, reservation: detail.reservation || null };
 }
 
 export async function productDetailView(mount, ctx) {
@@ -91,7 +92,7 @@ export async function productDetailView(mount, ctx) {
     }
 
     const isMine = session.loggedIn && session.nickname && product.sellerNickname === session.nickname;
-    let buyerContext = { conversation: null, acceptedOffer: null };
+    let buyerContext = { conversation: null, reservedOffer: null, reservation: null };
     if (session.loggedIn && !isMine) {
         try {
             [buyerContext] = await Promise.all([findBuyerConversation(productId), refreshBalance()]);
@@ -165,9 +166,9 @@ function purchasePanel(product, isMine, buyerContext, ctx) {
     return h("section", { class: "panel panel--accent stack-md" },
         h("h2", { class: "panel__title" }, "구매하기"),
         reservationNotice(product, buyerContext.reservation),
-        orderForm(product, buyerContext.acceptedOffer, ctx),
+        orderForm(product, buyerContext.reservedOffer, ctx),
         h("hr", { class: "divider" }),
-        h("p", { class: "text-muted text-small" }, "가격을 흥정하려면 판매자와 대화에서 개당 가격을 제안하세요. 판매자가 수락하면 여기서 합의 가격을 선택할 수 있습니다."),
+        h("p", { class: "text-muted text-small" }, "가격을 흥정하려면 판매자와 대화에서 개당 가격과 수량을 제안하세요. 판매자가 수락하면 제안 수량이 예약되고 여기서 합의 가격을 선택할 수 있습니다."),
         chatButton);
 }
 
@@ -187,41 +188,56 @@ function reservationNotice(product, reservation) {
     return null;
 }
 
-function orderForm(product, acceptedOffer, ctx) {
+/*
+ * 결제 칸. 합의가 예약 중인 제안이 있으면 그 합의 가격과 제안 수량으로만 결제한다. 등록 가격은 고를 수 없고 수량도 입력하지 않는다.
+ * 그런 제안이 없으면 등록 가격만 보이고 수량을 입력한다. 화면의 선택지는 편의이며 허용 여부는 서버의 결제 검사로 정해진다.
+ */
+function orderForm(product, reservedOffer, ctx) {
     const requestId = requestIdHolder();
-    const preferOffer = acceptedOffer && String(acceptedOffer.offerId) === ctx.query.get("offer");
+    const agreed = !!reservedOffer;
 
-    const listedRadio = h("input", { type: "radio", name: "price", value: "LISTED", checked: !preferOffer });
+    const listedRadio = h("input", { type: "radio", name: "price", value: "LISTED", checked: !agreed, disabled: agreed });
     const priceChoice = h("div", { class: "choice", dataset: { fieldWrap: "offerId" } },
         h("label", { class: "choice__item" }, listedRadio,
             h("span", { class: "choice__label" }, "등록 가격"),
             h("span", { class: "choice__value" }, formatWon(product.price))));
-    let offerRadio = null;
-    if (acceptedOffer) {
-        offerRadio = h("input", { type: "radio", name: "price", value: "AGREED", checked: !!preferOffer });
-        priceChoice.appendChild(h("label", { class: "choice__item" }, offerRadio,
-            h("span", { class: "choice__label" }, "합의 가격 (수락된 제안)"),
-            h("span", { class: "choice__value" }, formatWon(acceptedOffer.amount))));
+    if (agreed) {
+        priceChoice.appendChild(h("label", { class: "choice__item" },
+            h("input", { type: "radio", name: "price", value: "AGREED", checked: true }),
+            h("span", { class: "choice__label" }, "합의 가격 (예약 중인 합의)"),
+            h("span", { class: "choice__value" }, formatWon(reservedOffer.amount))));
     }
     priceChoice.appendChild(h("p", { class: "field__error", hidden: true }));
 
-    // 결제 수량의 상한은 다른 회원에게 예약된 수량을 뺀 구매 가능 수량이다. 화면의 상한은 입력 편의이며 허용 여부는 서버가 정한다.
+    // 결제 수량의 상한은 다른 회원에게 예약된 수량을 뺀 구매 가능 수량이다. 화면의 상한은 입력 편의이며 허용 여부는 서버의 결제 검사로 정해진다.
     const purchasable = () => Math.max(product.availableQuantity, 1);
-    const quantity = h("input", { class: "input", type: "number", min: "1", step: "1", value: "1", inputMode: "numeric", max: String(purchasable()) });
-    const minus = h("button", { class: "btn btn--ghost", type: "button", attrs: { "aria-label": "수량 줄이기" } }, "−");
-    const plus = h("button", { class: "btn btn--ghost", type: "button", attrs: { "aria-label": "수량 늘리기" } }, "+");
-    const stepQuantity = (delta) => {
-        const current = Number.parseInt(quantity.value, 10) || 0;
-        quantity.value = String(Math.min(Math.max(current + delta, 1), purchasable()));
-        updateSummary();
-    };
-    minus.addEventListener("click", () => stepQuantity(-1));
-    plus.addEventListener("click", () => stepQuantity(1));
     const quantityHint = () => "구매 가능 수량 " + formatNumber(product.availableQuantity) + "개까지 구매할 수 있습니다.";
-    const quantityField = field("구매 수량", quantity, { name: "quantity", hint: quantityHint() });
-    const quantityBox = h("div", { class: "qty" }, minus);
-    quantity.replaceWith(quantityBox);
-    quantityBox.append(quantity, plus);
+    let quantity = null;
+    let quantityField;
+    if (agreed) {
+        // 합의 가격은 제안 수량과 같은 수량을 한 번 결제할 때만 적용되므로 수량을 입력받지 않는다.
+        quantityField = h("div", { class: "field" },
+            h("label", null, "구매 수량"),
+            h("p", { class: "text-strong" }, formatNumber(reservedOffer.quantity) + "개 × " + formatWon(reservedOffer.amount)
+                + " = " + formatWon(multiplyAmount(reservedOffer.amount, reservedOffer.quantity))),
+            h("p", { class: "notice notice--info" }, "예약 중에는 합의한 가격으로 먼저 결제합니다."));
+    } else {
+        quantity = h("input", { class: "input", type: "number", min: "1", step: "1", value: "1", inputMode: "numeric", max: String(purchasable()) });
+        const minus = h("button", { class: "btn btn--ghost", type: "button", attrs: { "aria-label": "수량 줄이기" } }, "−");
+        const plus = h("button", { class: "btn btn--ghost", type: "button", attrs: { "aria-label": "수량 늘리기" } }, "+");
+        const stepQuantity = (delta) => {
+            const current = Number.parseInt(quantity.value, 10) || 0;
+            quantity.value = String(Math.min(Math.max(current + delta, 1), purchasable()));
+            updateSummary();
+        };
+        minus.addEventListener("click", () => stepQuantity(-1));
+        plus.addEventListener("click", () => stepQuantity(1));
+        quantityField = field("구매 수량", quantity, { name: "quantity", hint: quantityHint() });
+        const quantityBox = h("div", { class: "qty" }, minus);
+        quantity.replaceWith(quantityBox);
+        quantityBox.append(quantity, plus);
+    }
+    const quantityValue = () => (agreed ? reservedOffer.quantity : Number(quantity.value));
 
     const recipient = h("input", { class: "input", type: "text", maxLength: 100, placeholder: "받는 분 이름", autocomplete: "name" });
     const address = h("textarea", { class: "input", maxLength: 500, rows: 3, placeholder: "배송 받을 주소" });
@@ -236,9 +252,9 @@ function orderForm(product, acceptedOffer, ctx) {
         h("div", { class: "summary__row summary__row--total" }, h("span", null, "결제 금액"), totalRow),
         shortage);
 
-    const unitPrice = () => (offerRadio && offerRadio.checked ? acceptedOffer.amount : product.price);
+    const unitPrice = () => (agreed ? reservedOffer.amount : product.price);
     function updateSummary() {
-        const qty = Number(quantity.value);
+        const qty = quantityValue();
         unitRow.textContent = formatWon(unitPrice());
         if (!Number.isSafeInteger(qty) || qty < 1) {
             totalRow.textContent = "-";
@@ -261,10 +277,12 @@ function orderForm(product, acceptedOffer, ctx) {
             product.remainingQuantity = latest.remainingQuantity;
             product.initialQuantity = latest.initialQuantity;
             product.availableQuantity = latest.availableQuantity;
-            quantity.max = String(purchasable());
-            const hint = document.getElementById(quantity.id + "-hint");
-            if (hint) {
-                hint.textContent = quantityHint();
+            if (quantity) {
+                quantity.max = String(purchasable());
+                const hint = document.getElementById(quantity.id + "-hint");
+                if (hint) {
+                    hint.textContent = quantityHint();
+                }
             }
             const remaining = document.querySelector("[data-remaining]");
             if (remaining) {
@@ -280,10 +298,8 @@ function orderForm(product, acceptedOffer, ctx) {
             }
         }
     }
-    quantity.addEventListener("input", updateSummary);
-    listedRadio.addEventListener("change", updateSummary);
-    if (offerRadio) {
-        offerRadio.addEventListener("change", updateSummary);
+    if (quantity) {
+        quantity.addEventListener("input", updateSummary);
     }
 
     const submit = h("button", { class: "btn btn--primary btn--block btn--lg", type: "submit" }, "결제하기");
@@ -304,10 +320,11 @@ function orderForm(product, acceptedOffer, ctx) {
             clearErrors(form);
             const body = {
                 productId: product.productId,
-                quantity: numberValue(quantity),
+                // 합의 가격 결제는 제안 수량과 제안 ID 를 그대로 보낸다.
+                quantity: agreed ? reservedOffer.quantity : numberValue(quantity),
                 recipientName: recipient.value.trim(),
                 shippingAddress: address.value.trim(),
-                offerId: offerRadio && offerRadio.checked ? acceptedOffer.offerId : null,
+                offerId: agreed ? reservedOffer.offerId : null,
                 requestId: requestId.value
             };
             const qty = Number(body.quantity);
@@ -337,7 +354,9 @@ function orderForm(product, acceptedOffer, ctx) {
                 if (error instanceof ApiError && ["INSUFFICIENT_STOCK", "PRODUCT_RESERVED"].includes(error.code)) {
                     // 입력한 수령인·주소·가격 선택은 그대로 두고 남은 수량과 구매 가능 수량만 새로 반영한다.
                     await refreshStock();
-                } else if (error instanceof ApiError && ["PRODUCT_NOT_ON_SALE", "INVALID_OFFER_SELECTION"].includes(error.code)) {
+                } else if (error instanceof ApiError && ["PRODUCT_NOT_ON_SALE", "INVALID_OFFER_SELECTION", "AGREED_OFFER_REQUIRED",
+                    "OFFER_ALREADY_USED", "OFFER_RESERVATION_ENDED", "OFFER_QUANTITY_MISMATCH"].includes(error.code)) {
+                    // 상품 상세 화면을 다시 불러오면 상품 정보와 대화 상세(합의 상태)를 함께 다시 조회한다.
                     toast(error.message + " 최신 상품 정보를 다시 불러옵니다.", "error");
                     window.setTimeout(() => ctx.reload(), 1200);
                 }

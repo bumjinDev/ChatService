@@ -7,8 +7,11 @@ import com.chatservice.marketplace.reservation.dto.ReservationResponse;
 
 public interface IReservationService {
 
-    /** 판매자가 대화의 구매 희망자에게 예약을 건다. 가격 제안 수락과 함께 걸 때는 수락과 같은 트랜잭션에서 실행된다. */
-    ReservationResponse reserve(String memberId, Long conversationId, long quantity);
+    /**
+     * 판매자가 가격 제안을 수락할 때 대화의 구매 희망자에게 제안 수량만큼 예약을 건다. 수락과 같은 트랜잭션에서 실행된다.
+     * 예약 행의 OFFER_ID 에 {@code offerId}를 저장한다.
+     */
+    ReservationResponse reserve(String memberId, Long conversationId, long quantity, Long offerId);
 
     /** 판매자 또는 예약된 구매 희망자가 예약을 해제한다. */
     ReservationResponse release(String memberId, Long reservationId);
@@ -18,6 +21,15 @@ public interface IReservationService {
      * 만료 시각이 지난 예약은 예약으로 인정하지 않고 만료 자동 해제가 처리하도록 둔다.
      */
     void fulfillOnPayment(Product product, String buyerId, Long orderId, Instant now);
+
+    /**
+     * 발송 전에 취소한 주문으로 결제 종료된 예약이 있으면, 끝난 행은 그대로 두고 같은 내용의 새 예약 행을 활성으로 만든다.
+     * 호출하는 쪽(주문 취소)의 트랜잭션에서 실행된다. 결제 종료된 예약이 없으면 아무것도 하지 않는다.
+     *
+     * @param orderId 취소한 주문 ID
+     * @param now     취소 시각. 새 행의 예약 시각이 되고, 만료 시각은 이 값에 예약 기간을 더한 값이다.
+     */
+    void reserveAgainOnCancel(Long orderId, Instant now);
 
     /**
      * 만료 시각이 지난 활성 예약을 기간 만료로 바꾼다.

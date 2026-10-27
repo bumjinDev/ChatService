@@ -191,9 +191,14 @@ public abstract class IntegrationTestSupport {
         return sent.get("messageId").asLong();
     }
 
+    /** 수량 1로 가격을 제안하고 offerId 를 돌려준다. */
     protected long propose(TestMember buyer, long conversationId, long amount) throws Exception {
+        return propose(buyer, conversationId, amount, 1);
+    }
+
+    protected long propose(TestMember buyer, long conversationId, long amount, long quantity) throws Exception {
         JsonNode offer = json(postJson("/api/conversations/" + conversationId + "/offers", buyer,
-                java.util.Map.of("amount", amount))
+                java.util.Map.of("amount", amount, "quantity", quantity))
                 .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isCreated()));
         return offer.get("offerId").asLong();
     }

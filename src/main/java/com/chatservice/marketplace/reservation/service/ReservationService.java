@@ -25,7 +25,7 @@ import com.chatservice.marketplace.reservation.domain.ReservationStatus;
 import com.chatservice.marketplace.reservation.dto.ReservationResponse;
 
 /**
- * 예약 걸기, 해제, 결제 종료, 만료 자동 해제.
+ * 예약 걸기(가격 제안 수락과 함께), 해제, 결제 종료, 취소 뒤 새 예약, 만료 자동 해제.
  *
  * 모든 검사는 잠금 없이 조회한 값으로 하고 변경은 dirty checking 의 UPDATE 로 반영한다. 두 예약 요청이 같은 남은 수량과
  * 예약 합계를 읽거나 예약과 결제가 같은 값을 읽는 경합의 보장은 후속 검증 대상이다.
@@ -62,10 +62,11 @@ public class ReservationService implements IReservationService {
      * 같은 구매 희망자에게 활성 예약이 없는지(409 RESERVATION_ALREADY_ACTIVE) →
      * 수량 ≤ 남은 수량 − 다른 회원의 활성 예약 합계(409 RESERVATION_QUANTITY_EXCEEDED) → 저장 → 상품의 모든 대화에 CONVERSATION_STATE(커밋 후).
      * 모든 검사는 변경 전에 끝나므로 거절된 요청은 아무것도 바꾸지 않는다.
+     * 가격 제안 수락(OfferService.respond)이 수락과 같은 트랜잭션에서 제안 수량과 제안 ID 로 호출한다.
      */
     @Override
     @Transactional
-    public ReservationResponse reserve(String memberId, Long conversationId, long quantity) {
+    public ReservationResponse reserve(String memberId, Long conversationId, long quantity, Long offerId) {
         // 1. 처리 기준 시각. 예약 시각과 만료 시각 계산에 같은 값을 쓴다.
         Instant now = timeRules.now();
         // 2. 대화 조회와 참여자 확인. 없으면 404, 참여자가 아니면 403 NOT_CONVERSATION_MEMBER.
@@ -93,9 +94,9 @@ public class ReservationService implements IReservationService {
         }
         // 7. 저장. IDENTITY 채번이라 저장 시점에 INSERT 된다.
         Reservation reservation = reservationRepository.save(Reservation.reserve(product.getProductId(), conversationId,
-                conversation.getBuyerId(), memberId, quantity, now, now.plus(reservationDuration)));
-        logger.info("[예약 걸기] reservationId={}, conversationId={}, productId={}, memberId={}, quantity={}, expiresAt={}",
-                reservation.getReservationId(), conversationId, product.getProductId(), memberId, quantity,
+                conversation.getBuyerId(), memberId, offerId, quantity, now, now.plus(reservationDuration)));
+        logger.info("[예약 걸기] reservationId={}, conversationId={}, productId={}, memberId={}, offerId={}, quantity={}, expiresAt={}",
+                reservation.getReservationId(), conversationId, product.getProductId(), memberId, offerId, quantity,
                 reservation.getExpiresAt());
         // 8. 상품의 모든 대화에 상태 이벤트 전송 등록. 다른 대화의 구매 가능 수량이 바뀌기 때문이다. 실제 전송은 커밋 후.
         conversationService.publishStateToProductConversations(product);
@@ -139,6 +140,28 @@ public class ReservationService implements IReservationService {
             reservation.fulfill(orderId, now);
             logger.info("[예약 결제 종료] reservationId={}, orderId={}, memberId={}",
                     reservation.getReservationId(), orderId, buyerId);
+        }
+    }
+
+    /*
+     * 처리 순서(가격 제안 수량 설계안 5.5): 취소한 주문으로 결제 종료된 예약 조회 → 예약마다 같은 상품·대화·구매 희망자·판매자·
+     * 수량·제안 ID 로 새 행 저장(예약 시각 now, 만료 시각 now + 예약 기간).
+     * 등록 가격 결제는 합의가 예약 중인 동안 거절되므로, 결제 종료된 예약이 있는 주문은 합의 가격 주문뿐이다.
+     * 수량 상한 검사는 하지 않는다. 취소로 늘어난 남은 수량과 새 예약의 수량이 같아 다른 회원의 구매 가능 수량이 취소 전과 같기 때문이다.
+     * 상태 이벤트는 호출하는 주문 취소가 상품의 모든 대화에 보낸다.
+     */
+    @Override
+    @Transactional
+    public void reserveAgainOnCancel(Long orderId, Instant now) {
+        List<Reservation> fulfilled = reservationRepository.findByFulfilledOrderIdAndStatus(orderId, ReservationStatus.FULFILLED);
+        // 보통 하나이고, 경합으로 둘 이상이면 각각 새 행을 만든다. 결제 종료된 행은 바꾸지 않는다.
+        for (Reservation previous : fulfilled) {
+            Reservation reservation = reservationRepository.save(Reservation.reserve(previous.getProductId(),
+                    previous.getConversationId(), previous.getBuyerId(), previous.getSellerId(), previous.getOfferId(),
+                    previous.getQuantity(), now, now.plus(reservationDuration)));
+            logger.info("[취소로 예약 생성] reservationId={}, previousReservationId={}, orderId={}, memberId={}, quantity={}, expiresAt={}",
+                    reservation.getReservationId(), previous.getReservationId(), orderId, reservation.getBuyerId(),
+                    reservation.getQuantity(), reservation.getExpiresAt());
         }
     }
 
