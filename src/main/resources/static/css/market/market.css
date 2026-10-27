@@ -162,7 +162,8 @@ a.brand:hover { text-decoration: none; }
     word-break: break-word;
 }
 .product-card__price { font-size: 1.2rem; font-weight: 900; letter-spacing: -.01em; }
-.product-card__meta { margin-top: auto; display: flex; justify-content: space-between; gap: 8px; color: var(--text-muted); font-size: .82rem; }
+/* 수량 항목과 판매자 닉네임이 한 줄에 들어가지 않는 좁은 카드에서는 닉네임이 다음 줄로 내려간다. */
+.product-card__meta { margin-top: auto; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 8px; color: var(--text-muted); font-size: .82rem; }
 .product-card__meta span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* ---- 상품 상세 ---- */
