@@ -18,6 +18,8 @@ import com.chatservice.marketplace.offer.domain.PriceOffer;
 import com.chatservice.marketplace.offer.dto.OfferResponse;
 import com.chatservice.marketplace.product.domain.Product;
 import com.chatservice.marketplace.product.service.IProductService;
+import com.chatservice.marketplace.reservation.dto.ReservationResponse;
+import com.chatservice.marketplace.reservation.service.IReservationService;
 
 @Service
 public class OfferService implements IOfferService {
@@ -27,14 +29,17 @@ public class OfferService implements IOfferService {
     private final PriceOfferRepository priceOfferRepository;
     private final IConversationService conversationService;
     private final IProductService productService;
+    private final IReservationService reservationService;
     private final RealtimePublisher realtimePublisher;
     private final TimeRules timeRules;
 
     public OfferService(PriceOfferRepository priceOfferRepository, IConversationService conversationService,
-                        IProductService productService, RealtimePublisher realtimePublisher, TimeRules timeRules) {
+                        IProductService productService, IReservationService reservationService,
+                        RealtimePublisher realtimePublisher, TimeRules timeRules) {
         this.priceOfferRepository = priceOfferRepository;
         this.conversationService = conversationService;
         this.productService = productService;
+        this.reservationService = reservationService;
         this.realtimePublisher = realtimePublisher;
         this.timeRules = timeRules;
     }
@@ -74,12 +79,13 @@ public class OfferService implements IOfferService {
 
     /*
      * 처리 순서(설계 6.9): 제안(404) → 판매자인지(403) → 판매 중인지(409, 제안 상태는 그대로) →
-     * 응답 대기인지(409) → 응답 기록 → 구매 희망자 세션에 OFFER 전달.
-     * 수락해도 재고를 예약하지 않고 공개 등록 가격을 바꾸지 않는다.
+     * 응답 대기인지(409) → 응답 기록 → [수락이고 예약 수량이 있으면 같은 트랜잭션에서 예약 걸기] → 구매 희망자 세션에 OFFER 전달.
+     * 수락 자체는 재고를 예약하지 않고 공개 등록 가격을 바꾸지 않는다. 「예약도 함께」는 예약 걸기와 같은 검사를 거치며,
+     * 예약이 거절되면 트랜잭션이 롤백되어 수락도 반영되지 않는다.
      */
     @Override
     @Transactional
-    public OfferResponse respond(String memberId, Long offerId, boolean accept) {
+    public OfferResponse respond(String memberId, Long offerId, boolean accept, Long reserveQuantity) {
         PriceOffer offer = priceOfferRepository.findById(offerId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.OFFER_NOT_FOUND));
         if (!offer.getSellerId().equals(memberId)) {
@@ -95,8 +101,13 @@ public class OfferService implements IOfferService {
         OfferStatus before = offer.getStatus();
         offer.respond(accept, timeRules.now());
         logger.info("[가격 제안 응답] offerId={}, memberId={}, {} -> {}", offerId, memberId, before, offer.getStatus());
+        ReservationResponse reservation = null;
+        if (accept && reserveQuantity != null) {
+            // 수락과 예약을 한 트랜잭션에서 처리한다. 예약 걸기가 409 로 거절되면 이 수락도 롤백된다.
+            reservation = reservationService.reserve(memberId, offer.getConversationId(), reserveQuantity);
+        }
         publish(offer, memberId);
-        return OfferResponse.of(offer);
+        return OfferResponse.of(offer, reservation);
     }
 
     @Override

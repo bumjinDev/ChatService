@@ -108,6 +108,8 @@ const LABELS = {
     refundReason: { DESCRIPTION_MISMATCH: "상품 설명과 실제 상태가 다름" },
     transactionType: { CHARGE: "충전", PURCHASE: "구매 결제", CANCEL_REFUND: "주문 취소 반환", REFUND: "환불", SALE_PAYOUT: "판매대금 지급" },
     role: { BUYER: "구매자", SELLER: "판매자" },
+    reservationStatus: { ACTIVE: "예약 중", RELEASED: "해제됨", EXPIRED: "만료됨", FULFILLED: "결제로 종료" },
+    releasedBy: { SELLER: "판매자", BUYER: "구매 희망자" },
     readOnlyReason: {
         NO_ACTIVE_ORDER: "판매가 종료되어 읽기 전용 대화입니다.",
         TRADE_FINALIZED: "이 대화의 거래가 모두 끝나 읽기 전용 대화입니다."
@@ -117,6 +119,7 @@ const LABELS = {
 const TONES = {
     productStatus: { ON_SALE: "success", SOLD: "outline" },
     offerStatus: { PENDING: "warn", ACCEPTED: "success", REJECTED: "outline" },
+    reservationStatus: { ACTIVE: "accent", RELEASED: "outline", EXPIRED: "outline", FULFILLED: "success" },
     tradeStatus: { IN_PROGRESS: "accent", ON_HOLD: "warn", COMPLETED: "success", REFUNDED: "danger", CANCELLED: "outline" },
     shippingStatus: { WAITING_SHIPMENT: "warn", SHIPPING: "accent", DELIVERED: "success" },
     priceSource: { LISTED: "outline", AGREED: "accent" },
