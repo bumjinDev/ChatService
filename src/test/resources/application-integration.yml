@@ -22,6 +22,8 @@ marketplace:
     enabled: false
   mock-delivery:
     duration: PT2M
+  reservation:
+    duration: PT20M
 
 logging:
   level:

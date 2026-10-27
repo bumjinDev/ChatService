@@ -13,10 +13,12 @@ import com.chatservice.marketplace.order.domain.PurchaseOrder;
 import com.chatservice.marketplace.product.domain.Product;
 import com.chatservice.marketplace.product.domain.ProductCategory;
 import com.chatservice.marketplace.product.domain.ProductStatus;
+import com.chatservice.marketplace.reservation.dto.ReservationResponse;
 
 /**
  * 대화 상세·거래 표시(설계 5.2.8). 재접속 후 최신 저장 상태를 확인하는 용도다(F-007-AC-02).
  * orders 에는 이 대화의 상품·구매자·판매자가 모두 일치하는 주문만 담는다(BR-008).
+ * reservation 은 이 대화의 상품·구매 희망자로 저장된 예약 가운데 가장 최근 것 하나이며, 없으면 null 이다.
  */
 public record ConversationDetailResponse(
         Long conversationId,
@@ -27,15 +29,17 @@ public record ConversationDetailResponse(
         boolean writable,
         ReadOnlyReason readOnlyReason,
         List<OfferItem> offers,
-        List<OrderSummary> orders) {
+        List<OrderSummary> orders,
+        ReservationResponse reservation) {
 
+    /** availableQuantity 는 조회한 회원 기준 구매 가능 수량이다. 남은 수량에서 다른 회원에게 걸린 활성 예약의 수량을 뺀 값이다. */
     public record ProductInfo(Long productId, String name, String description, ProductCategory category, long price,
-                              long initialQuantity, long remainingQuantity, ProductStatus status) {
+                              long initialQuantity, long remainingQuantity, long availableQuantity, ProductStatus status) {
 
-        public static ProductInfo of(Product product) {
+        public static ProductInfo of(Product product, long availableQuantity) {
             return new ProductInfo(product.getProductId(), product.getName(), product.getDescription(),
                     product.getCategory(), product.getPrice(), product.getInitialQuantity(),
-                    product.getRemainingQuantity(), product.getStatus());
+                    product.getRemainingQuantity(), availableQuantity, product.getStatus());
         }
     }
 

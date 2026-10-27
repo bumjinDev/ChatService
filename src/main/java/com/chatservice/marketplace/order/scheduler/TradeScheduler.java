@@ -14,11 +14,12 @@ import com.chatservice.marketplace.order.service.IOrderCancellationService;
 import com.chatservice.marketplace.order.service.IRefundService;
 import com.chatservice.marketplace.order.service.IShipmentService;
 import com.chatservice.marketplace.order.service.ITradeCompletionService;
+import com.chatservice.marketplace.reservation.service.IReservationService;
 
 /**
- * 거래 자동 처리 네 가지를 일정 간격으로 실행하는 스케줄러.
+ * 거래 자동 처리 다섯 가지를 일정 간격으로 실행하는 스케줄러.
  *
- * 대상 주문의 선택과 상태 변경은 각 서비스의 자동 처리 메서드가 한다. 이 클래스는 실행 순서와 실행 간격만 정한다.
+ * 대상 주문·예약의 선택과 상태 변경은 각 서비스의 자동 처리 메서드가 한다. 이 클래스는 실행 순서와 실행 간격만 정한다.
  *
  * - 각 자동 처리는 DB에 저장된 상태와 기준 시각으로 대상을 조회한다. 그래서 애플리케이션을 재시작해도 같은 대상을 처리한다.
  * - 한 작업이 예외로 끝나도 다음 작업은 실행한다.
@@ -36,20 +37,22 @@ public class TradeScheduler {
     private final IShipmentService shipmentService;
     private final ITradeCompletionService tradeCompletionService;
     private final IRefundService refundService;
+    private final IReservationService reservationService;
     private final TimeRules timeRules;
 
     public TradeScheduler(IOrderCancellationService cancellationService, IShipmentService shipmentService,
                           ITradeCompletionService tradeCompletionService, IRefundService refundService,
-                          TimeRules timeRules) {
+                          IReservationService reservationService, TimeRules timeRules) {
         this.cancellationService = cancellationService;
         this.shipmentService = shipmentService;
         this.tradeCompletionService = tradeCompletionService;
         this.refundService = refundService;
+        this.reservationService = reservationService;
         this.timeRules = timeRules;
     }
 
     /**
-     * 자동 처리 네 가지를 정해진 순서로 한 번씩 실행한다.
+     * 자동 처리 다섯 가지를 정해진 순서로 한 번씩 실행한다.
      *
      * 실행 간격은 {@code marketplace.scheduler.fixed-delay}로 정한다. application.yml의 설정값은 30000ms다.
      * 실행 순서:
@@ -57,6 +60,7 @@ public class TradeScheduler {
      *   2. 모의 배송 완료
      *   3. 확인 기간 만료 자동 완료
      *   4. 무응답 자동 환불
+     *   5. 만료 예약 해제
      * 각 작업은 {@link #runJob}이 실행하며, 작업마다 현재 시각을 새로 구한다.
      */
     @Scheduled(fixedDelayString = "${marketplace.scheduler.fixed-delay}")
@@ -73,6 +77,9 @@ public class TradeScheduler {
         // 4. 무응답 자동 환불. 판매자가 응답 기한까지 응답하지 않은 환불 요청을 자동 승인하고 구매자에게 결제 금액 전액을 반환한다.
         //    호출 흐름: runJob() → RefundService.autoApproveExpired() → RefundRequestRepository.findIdsByResponseExpired() → autoApproveIfExpired() → decide() → refund()
         runJob("무응답 자동 환불", refundService::autoApproveExpired);
+        // 5. 만료 예약 해제. 만료 시각이 지난 활성 예약을 기간 만료로 바꾼다. 재고는 바꾸지 않고 다른 회원의 구매 가능 수량만 돌아온다.
+        //    호출 흐름: runJob() → ReservationService.expireReservations() → ReservationRepository.findIdsByExpired() → expireIfStillDue() → Reservation.expire()
+        runJob("만료 예약 해제", reservationService::expireReservations);
     }
 
     /**

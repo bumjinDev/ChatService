@@ -4,7 +4,7 @@
  */
 import { api, ApiError, requestIdHolder } from "../api.js";
 import { h, badge, loading, emptyState, errorState, toast, toastError, confirmDialog, field, formError, clearErrors, showErrors, withBusy, numberValue } from "../dom.js";
-import { CATEGORIES, formatWon, formatNumber, formatDateTime, label, tone, multiplyAmount } from "../format.js";
+import { CATEGORIES, formatWon, formatNumber, formatDateTime, timeLeft, label, tone, multiplyAmount } from "../format.js";
 import { session, links, refreshBalance } from "../shell.js";
 
 export async function productListView(mount, ctx) {
@@ -52,20 +52,21 @@ function productCard(product) {
         h("div", { class: "product-card__price" }, formatWon(product.price)),
         h("div", { class: "product-card__meta" },
             h("span", null, "남은 수량 " + formatNumber(product.remainingQuantity) + "개"),
+            h("span", null, "구매 가능 " + formatNumber(product.availableQuantity) + "개"),
             h("span", null, product.sellerNickname)),
         h("div", { class: "text-muted text-small" }, formatDateTime(product.createdAt) + " 등록"));
 }
 
-/* 이 상품에 대한 내 대화(구매 희망자로 참여)와 그 대화의 수락된 제안을 찾는다. */
+/* 이 상품에 대한 내 대화(구매 희망자로 참여)와 그 대화의 수락된 제안, 가장 최근 예약을 찾는다. */
 async function findBuyerConversation(productId) {
     const conversations = await api("/conversations");
     const summary = conversations.find((c) => c.product.productId === productId && c.myRole === "BUYER");
     if (!summary) {
-        return { conversation: null, acceptedOffer: null };
+        return { conversation: null, acceptedOffer: null, reservation: null };
     }
     const detail = await api("/conversations/" + summary.conversationId);
     const acceptedOffer = (detail.offers || []).find((offer) => offer.status === "ACCEPTED") || null;
-    return { conversation: detail, acceptedOffer };
+    return { conversation: detail, acceptedOffer, reservation: detail.reservation || null };
 }
 
 export async function productDetailView(mount, ctx) {
@@ -109,6 +110,8 @@ export async function productDetailView(mount, ctx) {
         h("dl", { class: "kv" },
             h("dt", null, "판매자"), h("dd", null, product.sellerNickname + (isMine ? " (나)" : "")),
             h("dt", null, "남은 수량"), h("dd", { dataset: { remaining: "" } }, remainingText(product)),
+            // 다른 회원에게 예약된 수량을 뺀 값. 로그인하지 않았으면 모든 예약을 뺀 값이다.
+            h("dt", null, "구매 가능 수량"), h("dd", { dataset: { available: "" } }, availableText(product)),
             h("dt", null, "등록일"), h("dd", null, formatDateTime(product.createdAt))),
         h("hr", { class: "divider" }),
         h("h2", { class: "panel__title" }, "상품 설명"),
@@ -123,6 +126,10 @@ export async function productDetailView(mount, ctx) {
 
 function remainingText(product) {
     return formatNumber(product.remainingQuantity) + "개 / 최초 " + formatNumber(product.initialQuantity) + "개";
+}
+
+function availableText(product) {
+    return formatNumber(product.availableQuantity) + "개";
 }
 
 function purchasePanel(product, isMine, buyerContext, ctx) {
@@ -157,10 +164,27 @@ function purchasePanel(product, isMine, buyerContext, ctx) {
 
     return h("section", { class: "panel panel--accent stack-md" },
         h("h2", { class: "panel__title" }, "구매하기"),
+        reservationNotice(product, buyerContext.reservation),
         orderForm(product, buyerContext.acceptedOffer, ctx),
         h("hr", { class: "divider" }),
         h("p", { class: "text-muted text-small" }, "가격을 흥정하려면 판매자와 대화에서 개당 가격을 제안하세요. 판매자가 수락하면 여기서 합의 가격을 선택할 수 있습니다."),
         chatButton);
+}
+
+/*
+ * 예약 안내. 나에게 걸린 활성 예약이 있으면 그 수량과 만료 시각을 알리고, 없는데 구매 가능 수량이 0 이하이면 다른 회원에게 예약된 것을 알린다.
+ * 예약 정보는 상품 API 가 아니라 이 상품에 대한 내 대화 상세에서 온다. 결제 허용 여부는 서버가 정한다.
+ */
+function reservationNotice(product, reservation) {
+    if (reservation && reservation.status === "ACTIVE") {
+        return h("p", { class: "notice notice--success" },
+            "이 상품은 나에게 " + formatNumber(reservation.quantity) + "개 예약되어 있습니다. 만료 " + formatDateTime(reservation.expiresAt)
+            + " (" + timeLeft(reservation.expiresAt) + "). 결제하면 예약이 끝납니다.");
+    }
+    if (product.availableQuantity <= 0) {
+        return h("p", { class: "notice notice--warn" }, "다른 회원에게 예약되어 지금은 구매할 수 없습니다. 예약이 해제되거나 만료되면 다시 구매할 수 있습니다.");
+    }
+    return null;
 }
 
 function orderForm(product, acceptedOffer, ctx) {
@@ -181,17 +205,19 @@ function orderForm(product, acceptedOffer, ctx) {
     }
     priceChoice.appendChild(h("p", { class: "field__error", hidden: true }));
 
-    const quantity = h("input", { class: "input", type: "number", min: "1", step: "1", value: "1", inputMode: "numeric", max: String(product.remainingQuantity) });
+    // 결제 수량의 상한은 다른 회원에게 예약된 수량을 뺀 구매 가능 수량이다. 화면의 상한은 입력 편의이며 허용 여부는 서버가 정한다.
+    const purchasable = () => Math.max(product.availableQuantity, 1);
+    const quantity = h("input", { class: "input", type: "number", min: "1", step: "1", value: "1", inputMode: "numeric", max: String(purchasable()) });
     const minus = h("button", { class: "btn btn--ghost", type: "button", attrs: { "aria-label": "수량 줄이기" } }, "−");
     const plus = h("button", { class: "btn btn--ghost", type: "button", attrs: { "aria-label": "수량 늘리기" } }, "+");
     const stepQuantity = (delta) => {
         const current = Number.parseInt(quantity.value, 10) || 0;
-        quantity.value = String(Math.min(Math.max(current + delta, 1), product.remainingQuantity));
+        quantity.value = String(Math.min(Math.max(current + delta, 1), purchasable()));
         updateSummary();
     };
     minus.addEventListener("click", () => stepQuantity(-1));
     plus.addEventListener("click", () => stepQuantity(1));
-    const quantityHint = () => "남은 수량 " + formatNumber(product.remainingQuantity) + "개까지 구매할 수 있습니다.";
+    const quantityHint = () => "구매 가능 수량 " + formatNumber(product.availableQuantity) + "개까지 구매할 수 있습니다.";
     const quantityField = field("구매 수량", quantity, { name: "quantity", hint: quantityHint() });
     const quantityBox = h("div", { class: "qty" }, minus);
     quantity.replaceWith(quantityBox);
@@ -234,7 +260,8 @@ function orderForm(product, acceptedOffer, ctx) {
             const latest = await api("/products/" + product.productId);
             product.remainingQuantity = latest.remainingQuantity;
             product.initialQuantity = latest.initialQuantity;
-            quantity.max = String(latest.remainingQuantity);
+            product.availableQuantity = latest.availableQuantity;
+            quantity.max = String(purchasable());
             const hint = document.getElementById(quantity.id + "-hint");
             if (hint) {
                 hint.textContent = quantityHint();
@@ -242,6 +269,10 @@ function orderForm(product, acceptedOffer, ctx) {
             const remaining = document.querySelector("[data-remaining]");
             if (remaining) {
                 remaining.textContent = remainingText(product);
+            }
+            const available = document.querySelector("[data-available]");
+            if (available) {
+                available.textContent = availableText(product);
             }
         } catch (error) {
             if (error instanceof ApiError && error.code === "PRODUCT_NOT_FOUND") {
@@ -303,8 +334,8 @@ function orderForm(product, acceptedOffer, ctx) {
                     return;
                 }
                 showErrors(form, error);
-                if (error instanceof ApiError && error.code === "INSUFFICIENT_STOCK") {
-                    // 입력한 수령인·주소·가격 선택은 그대로 두고 남은 수량만 새로 반영한다.
+                if (error instanceof ApiError && ["INSUFFICIENT_STOCK", "PRODUCT_RESERVED"].includes(error.code)) {
+                    // 입력한 수령인·주소·가격 선택은 그대로 두고 남은 수량과 구매 가능 수량만 새로 반영한다.
                     await refreshStock();
                 } else if (error instanceof ApiError && ["PRODUCT_NOT_ON_SALE", "INVALID_OFFER_SELECTION"].includes(error.code)) {
                     toast(error.message + " 최신 상품 정보를 다시 불러옵니다.", "error");

@@ -1,15 +1,15 @@
 package com.chatservice.marketplace.conversation.realtime.event;
 
 /**
- * 상품 남은 수량 변경, 주문 생성·최종 상태 시 두 참여자 세션에 보내는 대화 상태(설계 5.3 CONVERSATION_STATE).
- * 다른 구매자의 주문 정보는 넣지 않는다.
+ * 상품 남은 수량 변경, 예약 변경, 주문 생성·최종 상태 시 두 참여자 세션에 보내는 대화 상태(설계 5.3 CONVERSATION_STATE).
+ * 다른 구매자의 주문 정보는 넣지 않는다. availableQuantity 는 이 대화의 구매 희망자 기준 구매 가능 수량이다.
  */
 public record ConversationStateEvent(String type, Long conversationId, String productStatus, long remainingQuantity,
-                                     boolean writable, String readOnlyReason) {
+                                     long availableQuantity, boolean writable, String readOnlyReason) {
 
     public static ConversationStateEvent of(Long conversationId, String productStatus, long remainingQuantity,
-                                            boolean writable, String readOnlyReason) {
+                                            long availableQuantity, boolean writable, String readOnlyReason) {
         return new ConversationStateEvent("CONVERSATION_STATE", conversationId, productStatus, remainingQuantity,
-                writable, readOnlyReason);
+                availableQuantity, writable, readOnlyReason);
     }
 }

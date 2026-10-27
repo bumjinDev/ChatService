@@ -56,6 +56,8 @@ public abstract class IntegrationTestSupport {
     private static final AtomicInteger SEQUENCE = new AtomicInteger();
 
     private static final List<String> CLEANUP_SQL = List.of(
+            // RESERVATION 은 PURCHASE_ORDER·CONVERSATION·PRODUCT 를 참조하므로 그 세 테이블보다 먼저 지운다.
+            "DELETE FROM RESERVATION WHERE BUYER_ID LIKE 'itest%' OR SELLER_ID LIKE 'itest%'",
             "DELETE FROM BALANCE_TRANSACTION WHERE MEMBER_ID LIKE 'itest%'",
             "DELETE FROM CHAT_MESSAGE WHERE CONVERSATION_ID IN "
                     + "(SELECT CONVERSATION_ID FROM CONVERSATION WHERE BUYER_ID LIKE 'itest%' OR SELLER_ID LIKE 'itest%')",

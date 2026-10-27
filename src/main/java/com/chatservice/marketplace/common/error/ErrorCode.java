@@ -52,6 +52,8 @@ public enum ErrorCode {
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "주문을 찾을 수 없습니다."),
     /** 판매자 환불 응답에서 주문 또는 환불 요청이 없다. */
     REFUND_REQUEST_NOT_FOUND(HttpStatus.NOT_FOUND, "환불 요청을 찾을 수 없습니다."),
+    /** 예약이 없다. */
+    RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "예약을 찾을 수 없습니다."),
 
     // ---- 409 Conflict: 현재 상태에서 허용되지 않는 요청
 
@@ -94,7 +96,15 @@ public enum ErrorCode {
     /** 보류 중이 아닌 주문에 판매자가 환불 응답을 했다. */
     ORDER_NOT_ON_HOLD(HttpStatus.CONFLICT, "보류 중인 주문이 아닙니다."),
     /** 최종 상태(정상 완료, 환불 완료, 취소 완료)인 주문을 취소하거나, 구매 확정하거나, 환불 요청했다. */
-    TRADE_ALREADY_FINALIZED(HttpStatus.CONFLICT, "이미 종료된 거래입니다.");
+    TRADE_ALREADY_FINALIZED(HttpStatus.CONFLICT, "이미 종료된 거래입니다."),
+    /** 결제 수량이 남은 수량 안이지만 다른 회원에게 걸린 활성 예약 때문에 구매 가능 수량을 넘는다. */
+    PRODUCT_RESERVED(HttpStatus.CONFLICT, "다른 회원에게 예약된 수량은 구매할 수 없습니다."),
+    /** 같은 구매 희망자에게 활성 예약이 있는데 다시 예약을 걸었다. 수량을 바꾸려면 해제한 뒤 다시 건다. */
+    RESERVATION_ALREADY_ACTIVE(HttpStatus.CONFLICT, "이 구매 희망자에게 걸린 예약이 이미 있습니다."),
+    /** 예약 수량이 상한(남은 수량 − 다른 회원에게 걸린 활성 예약 수량의 합계)을 넘는다. */
+    RESERVATION_QUANTITY_EXCEEDED(HttpStatus.CONFLICT, "예약할 수 있는 수량보다 많이 예약할 수 없습니다."),
+    /** 해제, 기간 만료, 결제 종료로 이미 끝난 예약을 해제하려 했다. */
+    RESERVATION_NOT_ACTIVE(HttpStatus.CONFLICT, "이미 끝난 예약입니다.");
 
     /** 응답에 사용할 HTTP 상태 코드 */
     private final HttpStatus status;
