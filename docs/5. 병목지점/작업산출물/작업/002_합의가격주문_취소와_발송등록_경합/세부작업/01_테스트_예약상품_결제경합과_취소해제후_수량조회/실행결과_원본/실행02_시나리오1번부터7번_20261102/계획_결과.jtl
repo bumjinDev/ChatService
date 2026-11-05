@@ -1,0 +1,138 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
+1793849009964,728,회원 CSV에서 실행 번호의 회원 읽기,200,OK,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,text,true,,71,0,1,1,null,0,0,0
+1793849010732,51,판매자 로그인,200,,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,text,false,"Test failed: code expected to equal /
+
+****** received  : [[[200]]]
+
+****** comparison: [[[302]]]
+
+/",451,251,1,1,http://wherehouse.it.kr:8186/ChatService/login,46,0,31
+1793849010786,7,주문 취소 구매자 로그인,200,,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,text,false,"Test failed: code expected to equal /
+
+****** received  : [[[200]]]
+
+****** comparison: [[[302]]]
+
+/",451,251,1,1,http://wherehouse.it.kr:8186/ChatService/login,7,0,0
+1793849010794,7,정가 구매자 로그인,200,,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,text,false,"Test failed: code expected to equal /
+
+****** received  : [[[200]]]
+
+****** comparison: [[[302]]]
+
+/",451,251,1,1,http://wherehouse.it.kr:8186/ChatService/login,7,0,0
+1793849010801,7,추가 제안 구매자 로그인,200,,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,text,false,"Test failed: code expected to equal /
+
+****** received  : [[[200]]]
+
+****** comparison: [[[302]]]
+
+/",451,250,1,1,http://wherehouse.it.kr:8186/ChatService/login,7,0,0
+1793849010809,26,로그인 토큰 파일 다시 쓰기(실행 폴더의 로그인토큰.csv),200,OK,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,text,true,,336,0,1,1,null,0,0,0
+1793849289471,22,회원 CSV에서 실행 번호의 회원 읽기,200,OK,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,text,true,,71,0,1,1,null,0,0,0
+1793849289494,107,판매자 로그인,302,,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,,true,,595,251,1,1,http://wherehouse.it.kr:8186/ChatService/login,107,0,14
+1793849289602,91,주문 취소 구매자 로그인,302,,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,,true,,595,251,1,1,http://wherehouse.it.kr:8186/ChatService/login,91,0,0
+1793849289693,92,정가 구매자 로그인,302,,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,,true,,595,251,1,1,http://wherehouse.it.kr:8186/ChatService/login,92,0,0
+1793849289786,90,추가 제안 구매자 로그인,302,,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,,true,,593,250,1,1,http://wherehouse.it.kr:8186/ChatService/login,90,0,0
+1793849289877,13,로그인 토큰 파일 다시 쓰기(실행 폴더의 로그인토큰.csv),200,OK,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,text,true,,336,0,1,1,null,0,0,0
+1793849503622,667,"실행 폴더 만들기, 회원 CSV에서 실행 번호의 회원 읽기, 처리 기준 시각 정하기",200,OK,"시나리오 1번: 준비(처리 기준 시각 고정, 로그인, 충전, 상품 등록, 대화, 제안과 수락) 1-1",text,true,,350,0,1,1,null,0,0,0
+1793849504332,24,처리 기준 시각 고정,200,,"시나리오 1번: 준비(처리 기준 시각 고정, 로그인, 충전, 상품 등록, 대화, 제안과 수락) 1-1",text,true,,220,240,1,1,http://wherehouse.it.kr:8186/ChatService/test-support/clock,20,0,11
+1793849504359,94,판매자 로그인,302,,"시나리오 1번: 준비(처리 기준 시각 고정, 로그인, 충전, 상품 등록, 대화, 제안과 수락) 1-1",,true,,595,251,1,1,http://wherehouse.it.kr:8186/ChatService/login,94,0,0
+1793849504454,90,주문 취소 구매자 로그인,302,,"시나리오 1번: 준비(처리 기준 시각 고정, 로그인, 충전, 상품 등록, 대화, 제안과 수락) 1-1",,true,,595,251,1,1,http://wherehouse.it.kr:8186/ChatService/login,90,0,0
+1793849504544,91,정가 구매자 로그인,302,,"시나리오 1번: 준비(처리 기준 시각 고정, 로그인, 충전, 상품 등록, 대화, 제안과 수락) 1-1",,true,,595,251,1,1,http://wherehouse.it.kr:8186/ChatService/login,91,0,0
+1793849504636,90,추가 제안 구매자 로그인,302,,"시나리오 1번: 준비(처리 기준 시각 고정, 로그인, 충전, 상품 등록, 대화, 제안과 수락) 1-1",,true,,593,250,1,1,http://wherehouse.it.kr:8186/ChatService/login,90,0,0
+1793849504727,25,로그인 토큰 파일 쓰기(실행 폴더의 로그인토큰.csv),200,OK,"시나리오 1번: 준비(처리 기준 시각 고정, 로그인, 충전, 상품 등록, 대화, 제안과 수락) 1-1",text,true,,336,0,1,1,null,0,0,0
+1793849504753,32,주문 취소 구매자 충전,201,,"시나리오 1번: 준비(처리 기준 시각 고정, 로그인, 충전, 상품 등록, 대화, 제안과 수락) 1-1",text,true,,501,504,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet/charges,31,0,0
+1793849504785,15,정가 구매자 충전,201,,"시나리오 1번: 준비(처리 기준 시각 고정, 로그인, 충전, 상품 등록, 대화, 제안과 수락) 1-1",text,true,,501,504,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet/charges,15,0,0
+1793849504800,25,추가 제안 구매자 충전,201,,"시나리오 1번: 준비(처리 기준 시각 고정, 로그인, 충전, 상품 등록, 대화, 제안과 수락) 1-1",text,true,,501,502,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet/charges,25,0,0
+1793849504826,42,판매자 상품 등록,201,,"시나리오 1번: 준비(처리 기준 시각 고정, 로그인, 충전, 상품 등록, 대화, 제안과 수락) 1-1",text,true,,640,575,1,1,http://wherehouse.it.kr:8186/ChatService/api/products,41,0,0
+1793849504898,36,주문 취소 구매자 대화 시작,201,,"시나리오 1번: 준비(처리 기준 시각 고정, 로그인, 충전, 상품 등록, 대화, 제안과 수락) 1-1",text,true,,776,479,1,1,http://wherehouse.it.kr:8186/ChatService/api/products/141/conversations,36,0,0
+1793849504935,19,정가 구매자 대화 시작,201,,"시나리오 1번: 준비(처리 기준 시각 고정, 로그인, 충전, 상품 등록, 대화, 제안과 수락) 1-1",text,true,,776,479,1,1,http://wherehouse.it.kr:8186/ChatService/api/products/141/conversations,19,0,0
+1793849504955,18,추가 제안 구매자 대화 시작,201,,"시나리오 1번: 준비(처리 기준 시각 고정, 로그인, 충전, 상품 등록, 대화, 제안과 수락) 1-1",text,true,,775,477,1,1,http://wherehouse.it.kr:8186/ChatService/api/products/141/conversations,18,0,0
+1793849504974,29,"주문 취소 구매자의 가격 제안(3개, 개당 100,000원)",201,,"시나리오 1번: 준비(처리 기준 시각 고정, 로그인, 충전, 상품 등록, 대화, 제안과 수락) 1-1",text,true,,499,527,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/141/offers,29,0,0
+1793849505006,37,판매자의 주문 취소 구매자 제안 수락(3개 예약),200,,"시나리오 1번: 준비(처리 기준 시각 고정, 로그인, 충전, 상품 등록, 대화, 제안과 수락) 1-1",text,true,,744,437,1,1,http://wherehouse.it.kr:8186/ChatService/api/offers/81/accept,37,0,0
+1793849505045,17,"추가 제안 구매자의 가격 제안(3개, 개당 110,000원, 응답 대기)",201,,"시나리오 1번: 준비(처리 기준 시각 고정, 로그인, 충전, 상품 등록, 대화, 제안과 수락) 1-1",text,true,,499,525,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/143/offers,17,0,0
+1793849505063,13,정가 구매자의 상품 상세 조회,200,,"시나리오 1번: 준비(처리 기준 시각 고정, 로그인, 충전, 상품 등록, 대화, 제안과 수락) 1-1",text,true,,640,381,1,1,http://wherehouse.it.kr:8186/ChatService/api/products/141,12,0,0
+1793849505077,15,"상품, 대화, 제안, 예약 ID와 처리 기준 시각 쓰기(실행 폴더의 준비단계_ID와_처리기준시각.csv)",200,OK,"시나리오 1번: 준비(처리 기준 시각 고정, 로그인, 충전, 상품 등록, 대화, 제안과 수락) 1-1",text,true,,150,0,1,1,null,0,0,0
+1793850405098,42,판매자의 추가 제안 구매자 제안 수락,200,,시나리오 2번: 결제와 수락 경합(세 요청을 같은 순간에 보냄) 1-3,text,true,,744,437,3,3,http://wherehouse.it.kr:8186/ChatService/api/offers/82/accept,42,0,13
+1793850405098,66,주문 취소 구매자의 합의 가격 결제,201,,시나리오 2번: 결제와 수락 경합(세 요청을 같은 순간에 보냄) 1-1,text,true,,1216,615,2,2,http://wherehouse.it.kr:8186/ChatService/api/orders,66,0,4
+1793850405098,66,정가 구매자의 등록 가격 결제,201,,시나리오 2번: 결제와 수락 경합(세 요청을 같은 순간에 보냄) 1-2,text,true,,1211,595,2,2,http://wherehouse.it.kr:8186/ChatService/api/orders,66,0,4
+1793850800614,21,회원 CSV에서 실행 번호의 회원 읽기,200,OK,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,text,true,,71,0,1,1,null,0,0,0
+1793850800635,110,판매자 로그인,302,,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,,true,,595,251,1,1,http://wherehouse.it.kr:8186/ChatService/login,110,0,15
+1793850800745,92,주문 취소 구매자 로그인,302,,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,,true,,595,251,1,1,http://wherehouse.it.kr:8186/ChatService/login,92,0,0
+1793850800837,91,정가 구매자 로그인,302,,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,,true,,595,251,1,1,http://wherehouse.it.kr:8186/ChatService/login,91,0,0
+1793850800929,93,추가 제안 구매자 로그인,302,,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,,true,,593,250,1,1,http://wherehouse.it.kr:8186/ChatService/login,93,0,0
+1793850801024,15,로그인 토큰 파일 다시 쓰기(실행 폴더의 로그인토큰.csv),200,OK,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,text,true,,336,0,1,1,null,0,0,0
+1793851085868,20,정가 구매자의 상품 상세 조회,200,,시나리오 2번 실행 후 단계 : 사용자 입장에서 수량 등 조회 1-1,text,true,,640,381,1,1,http://wherehouse.it.kr:8186/ChatService/api/products/141,20,0,5
+1793851085889,14,추가 제안 구매자의 상품 상세 조회,200,,시나리오 2번 실행 후 단계 : 사용자 입장에서 수량 등 조회 1-1,text,true,,640,379,1,1,http://wherehouse.it.kr:8186/ChatService/api/products/141,14,0,0
+1793851085904,13,주문 취소 구매자의 상품 상세 조회,200,,시나리오 2번 실행 후 단계 : 사용자 입장에서 수량 등 조회 1-1,text,true,,640,381,1,1,http://wherehouse.it.kr:8186/ChatService/api/products/141,13,0,0
+1793851085919,16,판매자의 판매 목록 조회,200,,시나리오 2번 실행 후 단계 : 사용자 입장에서 수량 등 조회 1-1,text,true,,905,381,1,1,http://wherehouse.it.kr:8186/ChatService/api/orders/sales,16,0,0
+1793851085937,22,주문 취소 구매자의 대화 상세 조회,200,,시나리오 2번 실행 후 단계 : 사용자 입장에서 수량 등 조회 1-1,text,true,,1351,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/141,22,0,0
+1793851085960,18,정가 구매자의 대화 상세 조회,200,,시나리오 2번 실행 후 단계 : 사용자 입장에서 수량 등 조회 1-1,text,true,,945,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/142,18,0,0
+1793851085979,18,추가 제안 구매자의 대화 상세 조회,200,,시나리오 2번 실행 후 단계 : 사용자 입장에서 수량 등 조회 1-1,text,true,,1164,384,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/143,18,0,0
+1793851085999,32,「시나리오 2번: 결제와 수락 경합(세 요청을 같은 순간에 보냄)」 그룹의 응답 코드로 이어갈 흐름 정하기(실행 폴더의 2번_응답코드와_이어갈_흐름.csv),200,OK,시나리오 2번 실행 후 단계 : 사용자 입장에서 수량 등 조회 1-1,text,true,,53,0,1,1,null,0,0,0
+1793854739777,24,회원 CSV에서 실행 번호의 회원 읽기,200,OK,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,text,true,,71,0,1,1,null,0,0,0
+1793854739802,118,판매자 로그인,302,,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,,true,,595,251,1,1,http://wherehouse.it.kr:8186/ChatService/login,118,0,26
+1793854739921,135,주문 취소 구매자 로그인,302,,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,,true,,595,251,1,1,http://wherehouse.it.kr:8186/ChatService/login,135,0,0
+1793854740057,90,정가 구매자 로그인,302,,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,,true,,595,251,1,1,http://wherehouse.it.kr:8186/ChatService/login,90,0,0
+1793854740148,113,추가 제안 구매자 로그인,302,,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,,true,,593,250,1,1,http://wherehouse.it.kr:8186/ChatService/login,113,0,0
+1793854740262,10,로그인 토큰 파일 다시 쓰기(실행 폴더의 로그인토큰.csv),200,OK,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,text,true,,336,0,1,1,null,0,0,0
+1793854745593,17,ID 얻기: 주문 취소 구매자의 구매 목록에서 진행 중 주문 ID,200,,추가 제안 수락 성공 흐름 3번: 주문 취소 구매자의 주문 취소 1-1,text,true,,625,385,1,1,http://wherehouse.it.kr:8186/ChatService/api/orders/purchases,17,0,4
+1793854745622,43,주문 취소 구매자의 주문 취소,200,,추가 제안 수락 성공 흐름 3번: 주문 취소 구매자의 주문 취소 1-1,text,true,,1445,465,1,1,http://wherehouse.it.kr:8186/ChatService/api/orders/162/cancel,43,0,0
+1793855067272,34,정가 구매자의 상품 상세 조회,200,,추가 제안 수락 성공 흐름 4번: 정가 구매자의 상품 재조회와 주문 취소 구매자의 새 예약 확인 1-1,text,true,,640,381,1,1,http://wherehouse.it.kr:8186/ChatService/api/products/141,34,0,18
+1793855067307,24,주문 취소 구매자의 대화 상세 조회(새 예약 확인),200,,추가 제안 수락 성공 흐름 4번: 정가 구매자의 상품 재조회와 주문 취소 구매자의 새 예약 확인 1-1,text,true,,1330,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/141,24,0,0
+1793855682061,23,회원 CSV에서 실행 번호의 회원 읽기,200,OK,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,text,true,,71,0,1,1,null,0,0,0
+1793855682084,110,판매자 로그인,302,,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,,true,,595,251,1,1,http://wherehouse.it.kr:8186/ChatService/login,110,0,17
+1793855682195,89,주문 취소 구매자 로그인,302,,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,,true,,595,251,1,1,http://wherehouse.it.kr:8186/ChatService/login,89,0,0
+1793855682285,90,정가 구매자 로그인,302,,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,,true,,595,251,1,1,http://wherehouse.it.kr:8186/ChatService/login,90,0,0
+1793855682376,89,추가 제안 구매자 로그인,302,,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,,true,,593,250,1,1,http://wherehouse.it.kr:8186/ChatService/login,89,0,0
+1793855682466,10,로그인 토큰 파일 다시 쓰기(실행 폴더의 로그인토큰.csv),200,OK,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,text,true,,336,0,1,1,null,0,0,0
+1793855696260,41,ID 얻기: 주문 취소 구매자의 대화 상세에서 새 예약 ID,200,,추가 제안 수락 성공 흐름 5번: 주문 취소 구매자의 새 예약 해제와 정가 구매자의 재조회 1-1,text,true,,1330,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/141,41,0,16
+1793855696302,23,주문 취소 구매자의 새 예약 해제,200,,추가 제안 수락 성공 흐름 5번: 주문 취소 구매자의 새 예약 해제와 정가 구매자의 재조회 1-1,text,true,,595,470,1,1,http://wherehouse.it.kr:8186/ChatService/api/reservations/63,23,0,0
+1793855696326,18,정가 구매자의 상품 상세 조회,200,,추가 제안 수락 성공 흐름 5번: 주문 취소 구매자의 새 예약 해제와 정가 구매자의 재조회 1-1,text,true,,640,381,1,1,http://wherehouse.it.kr:8186/ChatService/api/products/141,18,0,0
+1793857506782,19,회원 CSV에서 실행 번호의 회원 읽기,200,OK,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,text,true,,71,0,1,1,null,0,0,0
+1793857506802,108,판매자 로그인,302,,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,,true,,595,251,1,1,http://wherehouse.it.kr:8186/ChatService/login,108,0,14
+1793857506910,92,주문 취소 구매자 로그인,302,,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,,true,,595,251,1,1,http://wherehouse.it.kr:8186/ChatService/login,92,0,0
+1793857507003,90,정가 구매자 로그인,302,,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,,true,,595,251,1,1,http://wherehouse.it.kr:8186/ChatService/login,90,0,0
+1793857507094,92,추가 제안 구매자 로그인,302,,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,,true,,593,250,1,1,http://wherehouse.it.kr:8186/ChatService/login,92,0,0
+1793857507186,12,로그인 토큰 파일 다시 쓰기(실행 폴더의 로그인토큰.csv),200,OK,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,text,true,,336,0,1,1,null,0,0,0
+1793857596213,19,정가 구매자의 상품 상세 조회,200,,추가 제안 수락 성공 흐름 6번: 추가 제안 구매자의 합의 가격 결제와 정가 구매자의 조회 뒤 결제(같은 순간에 출발) 1-2,text,true,,640,381,2,2,http://wherehouse.it.kr:8186/ChatService/api/products/141,19,0,4
+1793857596213,47,추가 제안 구매자의 합의 가격 3개 결제,201,,추가 제안 수락 성공 흐름 6번: 추가 제안 구매자의 합의 가격 결제와 정가 구매자의 조회 뒤 결제(같은 순간에 출발) 1-1,text,true,,1215,613,2,2,http://wherehouse.it.kr:8186/ChatService/api/orders,47,0,4
+1793857596252,35,정가 구매자의 등록 가격 2개 결제,201,,추가 제안 수락 성공 흐름 6번: 추가 제안 구매자의 합의 가격 결제와 정가 구매자의 조회 뒤 결제(같은 순간에 출발) 1-2,text,true,,1211,595,1,1,http://wherehouse.it.kr:8186/ChatService/api/orders,35,0,0
+1793858429163,22,정가 구매자의 상품 상세 조회,200,,추가 제안 수락 성공 흐름 6번 실행 후 단계 : 정가 구매자의 상품 재조회 1-1,text,true,,640,381,1,1,http://wherehouse.it.kr:8186/ChatService/api/products/141,22,0,5
+1793858591820,21,회원 CSV에서 실행 번호의 회원 읽기,200,OK,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,text,true,,71,0,1,1,null,0,0,0
+1793858591842,112,판매자 로그인,302,,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,,true,,595,251,1,1,http://wherehouse.it.kr:8186/ChatService/login,112,0,15
+1793858591955,91,주문 취소 구매자 로그인,302,,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,,true,,595,251,1,1,http://wherehouse.it.kr:8186/ChatService/login,91,0,0
+1793858592045,91,정가 구매자 로그인,302,,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,,true,,595,251,1,1,http://wherehouse.it.kr:8186/ChatService/login,91,0,0
+1793858592136,91,추가 제안 구매자 로그인,302,,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,,true,,593,250,1,1,http://wherehouse.it.kr:8186/ChatService/login,91,0,0
+1793858592227,12,로그인 토큰 파일 다시 쓰기(실행 폴더의 로그인토큰.csv),200,OK,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,text,true,,336,0,1,1,null,0,0,0
+1793859268426,21,회원 CSV에서 실행 번호의 회원 읽기,200,OK,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,text,true,,71,0,1,1,null,0,0,0
+1793859268448,98,판매자 로그인,302,,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,,true,,595,251,1,1,http://wherehouse.it.kr:8186/ChatService/login,98,0,4
+1793859268547,91,주문 취소 구매자 로그인,302,,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,,true,,595,251,1,1,http://wherehouse.it.kr:8186/ChatService/login,91,0,0
+1793859268638,92,정가 구매자 로그인,302,,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,,true,,595,251,1,1,http://wherehouse.it.kr:8186/ChatService/login,92,0,0
+1793859268730,91,추가 제안 구매자 로그인,302,,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,,true,,593,250,1,1,http://wherehouse.it.kr:8186/ChatService/login,91,0,0
+1793859268821,10,로그인 토큰 파일 다시 쓰기(실행 폴더의 로그인토큰.csv),200,OK,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,text,true,,336,0,1,1,null,0,0,0
+1793859284235,32,ID 얻기: 정가 구매자의 구매 목록에서 진행 중 주문 ID,200,,"추가 제안 수락 성공 흐름 7번: 발송, 모의 배송 완료, 구매 확정 1-1",text,true,,905,385,1,1,http://wherehouse.it.kr:8186/ChatService/api/orders/purchases,31,0,16
+1793859284268,12,ID 얻기: 추가 제안 구매자의 구매 목록에서 진행 중 주문 ID,200,,"추가 제안 수락 성공 흐름 7번: 발송, 모의 배송 완료, 구매 확정 1-1",text,true,,625,383,1,1,http://wherehouse.it.kr:8186/ChatService/api/orders/purchases,12,0,0
+1793859284281,35,판매자의 정가 구매자 주문 발송 등록,201,,"추가 제안 수락 성공 흐름 7번: 발송, 모의 배송 완료, 구매 확정 1-1",text,true,,1218,564,1,1,http://wherehouse.it.kr:8186/ChatService/api/orders/164/shipment,35,0,0
+1793859284317,20,판매자의 추가 제안 구매자 주문 발송 등록,201,,"추가 제안 수락 성공 흐름 7번: 발송, 모의 배송 완료, 구매 확정 1-1",text,true,,1222,564,1,1,http://wherehouse.it.kr:8186/ChatService/api/orders/163/shipment,20,0,0
+1793859284352,6,테스트 제어: 처리 기준 시각을 고정 시각의 3분 뒤로 이동,200,,"추가 제안 수락 성공 흐름 7번: 발송, 모의 배송 완료, 구매 확정 1-1",text,true,,220,240,1,1,http://wherehouse.it.kr:8186/ChatService/test-support/clock,6,0,0
+1793859284359,24,테스트 제어: 모의 배송 완료 실행,200,,"추가 제안 수락 성공 흐름 7번: 발송, 모의 배송 완료, 구매 확정 1-1",text,true,,187,223,1,1,http://wherehouse.it.kr:8186/ChatService/test-support/jobs/delivery-complete,24,0,0
+1793859284384,31,정가 구매자의 구매 확정,200,,"추가 제안 수락 성공 흐름 7번: 발송, 모의 배송 완료, 구매 확정 1-1",text,true,,1410,447,1,1,http://wherehouse.it.kr:8186/ChatService/api/orders/164/confirm-receipt,31,0,0
+1793859284416,22,추가 제안 구매자의 구매 확정,200,,"추가 제안 수락 성공 흐름 7번: 발송, 모의 배송 완료, 구매 확정 1-1",text,true,,1414,445,1,1,http://wherehouse.it.kr:8186/ChatService/api/orders/163/confirm-receipt,22,0,0
+1793861381850,19,회원 CSV에서 실행 번호의 회원 읽기,200,OK,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,text,true,,71,0,1,1,null,0,0,0
+1793861381869,118,판매자 로그인,302,,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,,true,,595,251,1,1,http://wherehouse.it.kr:8186/ChatService/login,118,0,26
+1793861381988,91,주문 취소 구매자 로그인,302,,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,,true,,595,251,1,1,http://wherehouse.it.kr:8186/ChatService/login,91,0,0
+1793861382079,91,정가 구매자 로그인,302,,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,,true,,595,251,1,1,http://wherehouse.it.kr:8186/ChatService/login,91,0,0
+1793861382171,90,추가 제안 구매자 로그인,302,,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,,true,,593,250,1,1,http://wherehouse.it.kr:8186/ChatService/login,90,0,0
+1793861382261,10,로그인 토큰 파일 다시 쓰기(실행 폴더의 로그인토큰.csv),200,OK,로그인 토큰 갱신: 네 회원 다시 로그인 1-1,text,true,,336,0,1,1,null,0,0,0
+1793861406290,16,판매자의 잔액 조회,200,,시나리오 7번 실행 후 단계 : 사용자 입장에서 잔액과 주문 조회 1-1,text,true,,386,375,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,16,0,5
+1793861406307,15,판매자의 판매 목록 조회,200,,시나리오 7번 실행 후 단계 : 사용자 입장에서 잔액과 주문 조회 1-1,text,true,,1499,381,1,1,http://wherehouse.it.kr:8186/ChatService/api/orders/sales,15,0,0
+1793861406323,11,주문 취소 구매자의 잔액 조회,200,,시나리오 7번 실행 후 단계 : 사용자 입장에서 잔액과 주문 조회 1-1,text,true,,386,375,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,11,0,0
+1793861406335,17,주문 취소 구매자의 구매 목록 조회,200,,시나리오 7번 실행 후 단계 : 사용자 입장에서 잔액과 주문 조회 1-1,text,true,,641,385,1,1,http://wherehouse.it.kr:8186/ChatService/api/orders/purchases,17,0,0
+1793861406353,10,정가 구매자의 잔액 조회,200,,시나리오 7번 실행 후 단계 : 사용자 입장에서 잔액과 주문 조회 1-1,text,true,,386,375,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,10,0,0
+1793861406364,12,정가 구매자의 구매 목록 조회,200,,시나리오 7번 실행 후 단계 : 사용자 입장에서 잔액과 주문 조회 1-1,text,true,,914,385,1,1,http://wherehouse.it.kr:8186/ChatService/api/orders/purchases,11,0,0
+1793861406377,9,추가 제안 구매자의 잔액 조회,200,,시나리오 7번 실행 후 단계 : 사용자 입장에서 잔액과 주문 조회 1-1,text,true,,385,373,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,9,0,0
+1793861406388,11,추가 제안 구매자의 구매 목록 조회,200,,시나리오 7번 실행 후 단계 : 사용자 입장에서 잔액과 주문 조회 1-1,text,true,,634,383,1,1,http://wherehouse.it.kr:8186/ChatService/api/orders/purchases,11,0,0
+1793861406400,13,정가 구매자의 상품 상세 조회,200,,시나리오 7번 실행 후 단계 : 사용자 입장에서 잔액과 주문 조회 1-1,text,true,,640,381,1,1,http://wherehouse.it.kr:8186/ChatService/api/products/141,13,0,0
+1793861673102,19,종료 처리 기준 시각 고정 해제,200,,종료 정리: 처리 기준 시각 고정 해제 1-1,text,true,,228,208,1,1,http://wherehouse.it.kr:8186/ChatService/test-support/clock,19,0,15
