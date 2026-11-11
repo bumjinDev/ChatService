@@ -1,0 +1,1315 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="세부 작업 01 실행 01: 회원 가입과 판매자의 가격 제안 수락 18건 동시 요청">
+      <stringProp name="TestPlan.comments">작업 003 세부 작업 01 「예약–예약 경합」의 테스트다. 판매 수량 50개인 상품 하나에 흥정 구매자 18명이 2개·3개·5개를 6명씩 가격 제안해 두고, 판매자가 18건의 가격 제안 수락을 같은 순간에 보낸다. 수락은 그 제안 수량만큼 예약을 만든다. runId, outDir, memberFile, joinResultFile에는 이 실행의 값이 들어 있다. 스레드 그룹은 위에서부터 차례대로 하나씩 실행하며, 요청이 실패해도 멈추지 않고 다음 요청을 보낸다.
+- 회원 가입: 회원 CSV의 판매자 1명과 흥정 구매자 18명을 가입시키고 가입 결과를 joinResultFile에 쓴다.
+- 로그인: 판매자와 흥정 구매자 18명이 로그인하고, 로그인 토큰을 JMeter 속성에 넣는다. 같은 JMeter 창에서 이 그룹만 다시 실행하면 준비한 상품과 가격 제안은 그대로 두고 로그인 토큰만 새로 받는다.
+- 준비: 판매자가 상품을 등록하고, 흥정 구매자마다 대화를 시작해 가격 제안을 하나씩 등록한다. 로그인 토큰은 로그인 그룹이 넣은 속성에서 읽는다. 그 뒤 판매자의 상품 상세와 대화 상세 18건을 조회해 요청 전 상태(남은 수량 50개, 예약·주문 없음, 응답 대기 제안 18건, 제안 수량 합계 60개)를 확인한다.
+- 수락 경합: 스레드 18개가 동기화 타이머로 같은 순간에 판매자의 가격 제안 수락을 보낸다. 요청마다 서버 로그용 실행 ID와 요청 ID를 헤더에 담는다.
+- 수락 경합 뒤 저장 상태 확인: 판매자의 상품 상세와 대화 상세 18건을 조회해, 요청마다 응답과 저장된 가격 제안·예약이 맞는지와 실행 전체의 결과 확인 기준 위반을 사후확인.log에 쓴다.
+수량 부족으로 거절된 수락과 응답을 받지 못한 수락은 다시 보내지 않는다. 로그인 토큰과 준비한 상품·가격 제안은 파일에 쓰지 않고 JMeter 속성으로만 다음 그룹에 넘기므로, JMeter 창을 닫으면 이 값이 없어진다.</stringProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">true</boolProp>
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+        <collectionProp name="Arguments.arguments">
+          <elementProp name="runId" elementType="Argument">
+            <stringProp name="Argument.name">runId</stringProp>
+            <stringProp name="Argument.value">01</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+            <stringProp name="Argument.desc">실행 번호 두 자리. 회원 CSV의 run_id, 상품명, 서버 로그의 실행 ID에 쓴다. 실행마다 바꾼다</stringProp>
+          </elementProp>
+          <elementProp name="outDir" elementType="Argument">
+            <stringProp name="Argument.name">outDir</stringProp>
+            <stringProp name="Argument.value">E:\devSpace\SpringBootProjects\ChatService\docs\5. 병목지점\작업산출물\작업\003_거래정합성_검증과_기술적의사결정\세부작업\01_테스트_예약과_예약_경합\실행결과_원본\실행01_가격제안수락18건동시요청_20261111</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+            <stringProp name="Argument.desc">이번 실행의 결과 폴더 전체 경로(실행결과_원본의 실행 폴더). 실행마다 바꾼다</stringProp>
+          </elementProp>
+          <elementProp name="memberFile" elementType="Argument">
+            <stringProp name="Argument.name">memberFile</stringProp>
+            <stringProp name="Argument.value">E:\devSpace\SpringBootProjects\ChatService\docs\5. 병목지점\작업산출물\작업\003_거래정합성_검증과_기술적의사결정\세부작업\01_테스트_예약과_예약_경합\테스트데이터\실행01_가격제안수락18건동시요청_20261111\실행01_회원.csv</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+            <stringProp name="Argument.desc">이 실행의 판매자 1명과 흥정 구매자 18명의 ID, 제안 수량, 비밀번호가 있는 CSV</stringProp>
+          </elementProp>
+          <elementProp name="joinResultFile" elementType="Argument">
+            <stringProp name="Argument.name">joinResultFile</stringProp>
+            <stringProp name="Argument.value">E:\devSpace\SpringBootProjects\ChatService\docs\5. 병목지점\작업산출물\작업\003_거래정합성_검증과_기술적의사결정\세부작업\01_테스트_예약과_예약_경합\테스트데이터\실행01_가격제안수락18건동시요청_20261111\실행01_회원가입결과.csv</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+            <stringProp name="Argument.desc">가입 결과를 쓸 CSV 파일. 실행할 때마다 새로 만든다</stringProp>
+          </elementProp>
+          <elementProp name="testLogName" elementType="Argument">
+            <stringProp name="Argument.name">testLogName</stringProp>
+            <stringProp name="Argument.value">예약–예약</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+            <stringProp name="Argument.desc">서버 로그의 테스트명. 요청 헤더에는 URL 인코딩해서 담는다</stringProp>
+          </elementProp>
+          <elementProp name="productDescription" elementType="Argument">
+            <stringProp name="Argument.name">productDescription</stringProp>
+            <stringProp name="Argument.value">예약–예약 경합 테스트용 상품</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+            <stringProp name="Argument.desc">상품 설명</stringProp>
+          </elementProp>
+          <elementProp name="productCategory" elementType="Argument">
+            <stringProp name="Argument.name">productCategory</stringProp>
+            <stringProp name="Argument.value">ELECTRONICS</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+            <stringProp name="Argument.desc">카테고리</stringProp>
+          </elementProp>
+          <elementProp name="productPrice" elementType="Argument">
+            <stringProp name="Argument.name">productPrice</stringProp>
+            <stringProp name="Argument.value">120000</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+            <stringProp name="Argument.desc">개당 등록 가격</stringProp>
+          </elementProp>
+          <elementProp name="productQuantity" elementType="Argument">
+            <stringProp name="Argument.name">productQuantity</stringProp>
+            <stringProp name="Argument.value">50</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+            <stringProp name="Argument.desc">판매 수량</stringProp>
+          </elementProp>
+          <elementProp name="offerAmount" elementType="Argument">
+            <stringProp name="Argument.name">offerAmount</stringProp>
+            <stringProp name="Argument.value">100000</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+            <stringProp name="Argument.desc">흥정 구매자의 가격 제안 개당 금액. 개당 등록 가격보다 작아야 한다</stringProp>
+          </elementProp>
+        </collectionProp>
+      </elementProp>
+      <stringProp name="TestPlan.user_define_classpath"></stringProp>
+    </TestPlan>
+    <hashTree>
+      <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP 요청 기본값(서버 주소)">
+        <intProp name="HTTPSampler.connect_timeout">5000</intProp>
+        <intProp name="HTTPSampler.response_timeout">60000</intProp>
+        <stringProp name="HTTPSampler.domain">wherehouse.it.kr</stringProp>
+        <stringProp name="HTTPSampler.port">8186</stringProp>
+        <stringProp name="HTTPSampler.protocol">http</stringProp>
+        <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+        <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+          <collectionProp name="Arguments.arguments"/>
+        </elementProp>
+        <stringProp name="HTTPSampler.implementation"></stringProp>
+      </ConfigTestElement>
+      <hashTree/>
+      <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="결과 보기(화면에서 요청과 응답 확인)">
+        <boolProp name="ResultCollector.error_logging">false</boolProp>
+        <objProp>
+          <name>saveConfig</name>
+          <value class="SampleSaveConfiguration">
+            <time>true</time>
+            <latency>true</latency>
+            <timestamp>true</timestamp>
+            <success>true</success>
+            <label>true</label>
+            <code>true</code>
+            <message>true</message>
+            <threadName>true</threadName>
+            <dataType>true</dataType>
+            <encoding>false</encoding>
+            <assertions>true</assertions>
+            <subresults>true</subresults>
+            <responseData>false</responseData>
+            <samplerData>false</samplerData>
+            <xml>false</xml>
+            <fieldNames>true</fieldNames>
+            <responseHeaders>false</responseHeaders>
+            <requestHeaders>false</requestHeaders>
+            <responseDataOnError>false</responseDataOnError>
+            <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+            <assertionsResultsToSave>0</assertionsResultsToSave>
+            <bytes>true</bytes>
+            <sentBytes>true</sentBytes>
+            <url>true</url>
+            <threadCounts>true</threadCounts>
+            <idleTime>true</idleTime>
+            <connectTime>true</connectTime>
+          </value>
+        </objProp>
+        <stringProp name="filename"></stringProp>
+      </ResultCollector>
+      <hashTree/>
+      <ResultCollector guiclass="SimpleDataWriter" testclass="ResultCollector" testname="결과 파일 저장(실행 폴더의 계획_결과.jtl)">
+        <boolProp name="ResultCollector.error_logging">false</boolProp>
+        <objProp>
+          <name>saveConfig</name>
+          <value class="SampleSaveConfiguration">
+            <time>true</time>
+            <latency>true</latency>
+            <timestamp>true</timestamp>
+            <success>true</success>
+            <label>true</label>
+            <code>true</code>
+            <message>true</message>
+            <threadName>true</threadName>
+            <dataType>true</dataType>
+            <encoding>false</encoding>
+            <assertions>true</assertions>
+            <subresults>true</subresults>
+            <responseData>false</responseData>
+            <samplerData>false</samplerData>
+            <xml>false</xml>
+            <fieldNames>true</fieldNames>
+            <responseHeaders>false</responseHeaders>
+            <requestHeaders>false</requestHeaders>
+            <responseDataOnError>false</responseDataOnError>
+            <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+            <assertionsResultsToSave>0</assertionsResultsToSave>
+            <bytes>true</bytes>
+            <sentBytes>true</sentBytes>
+            <url>true</url>
+            <threadCounts>true</threadCounts>
+            <idleTime>true</idleTime>
+            <connectTime>true</connectTime>
+          </value>
+        </objProp>
+        <stringProp name="filename">${outDir}\계획_결과.jtl</stringProp>
+      </ResultCollector>
+      <hashTree/>
+      <SetupThreadGroup guiclass="SetupThreadGroupGui" testclass="SetupThreadGroup" testname="회원 가입 준비: 가입 결과 CSV 새로 만들기">
+        <stringProp name="TestPlan.comments">이 실행의 회원 가입 결과를 기록할 CSV 파일을 새로 만든다. 「회원 가입: 판매자 1명과 흥정 구매자 18명」 그룹보다 먼저 실행한다.</stringProp>
+        <intProp name="ThreadGroup.num_threads">1</intProp>
+        <intProp name="ThreadGroup.ramp_time">0</intProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">1</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </SetupThreadGroup>
+      <hashTree>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="가입 결과 CSV에 열 이름 줄 쓰기" enabled="true">
+          <stringProp name="TestPlan.comments">테스트데이터의 실행 폴더에 있는 회원가입결과 CSV 파일을 새로 만들고 열 이름 줄을 쓴다. 이전에 쓴 내용은 지워진다.</stringProp>
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script">// 가입 결과 CSV를 새로 만들고 열 이름 줄을 쓴다. 이전 실행의 내용은 지워진다. 맨 앞의 ﻿는 엑셀이 UTF-8로 읽게 하는 표시(BOM)다.
+new File(vars.get(&apos;joinResultFile&apos;)).setText(&apos;﻿run_id,role,buyer_no,member_id,join_code\n&apos;, &apos;UTF-8&apos;)
+</stringProp>
+        </JSR223Sampler>
+        <hashTree/>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="회원 가입: 판매자 1명과 흥정 구매자 18명" enabled="true">
+        <stringProp name="TestPlan.comments">회원 CSV에 있는 이 실행의 판매자 1명과 흥정 구매자 18명을 한 명씩 가입시키고, 가입 응답 코드를 회원가입결과 CSV 파일에 쓴다.</stringProp>
+        <intProp name="ThreadGroup.num_threads">1</intProp>
+        <intProp name="ThreadGroup.ramp_time">0</intProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <intProp name="LoopController.loops">-1</intProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="JSON 헤더" enabled="true">
+          <collectionProp name="HeaderManager.headers">
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">Content-Type</stringProp>
+              <stringProp name="Header.value">application/json</stringProp>
+            </elementProp>
+          </collectionProp>
+        </HeaderManager>
+        <hashTree/>
+        <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV 데이터 셋 설정(회원 CSV를 한 줄씩 읽기, 끝나면 멈춤)" enabled="true">
+          <stringProp name="filename">${memberFile}</stringProp>
+          <stringProp name="fileEncoding">UTF-8</stringProp>
+          <stringProp name="variableNames">run_id,role,buyer_no,member_id,offer_quantity,password</stringProp>
+          <boolProp name="ignoreFirstLine">true</boolProp>
+          <stringProp name="delimiter">,</stringProp>
+          <boolProp name="quotedData">true</boolProp>
+          <boolProp name="recycle">false</boolProp>
+          <boolProp name="stopThread">true</boolProp>
+          <stringProp name="shareMode">shareMode.thread</stringProp>
+        </CSVDataSet>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="실행 ${run_id} ${role} 가입(${member_id})" enabled="true">
+          <stringProp name="TestPlan.comments">회원 CSV의 한 줄에 있는 회원 ID와 비밀번호로 가입시킨다. 같은 회원이 이미 가입되어 있으면 409로 거절된다.</stringProp>
+          <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+          <stringProp name="HTTPSampler.path">/ChatService/members/join</stringProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">{&quot;id&quot;:&quot;${member_id}&quot;,&quot;pw&quot;:&quot;${password}&quot;,&quot;nickName&quot;:&quot;${member_id}&quot;,&quot;tel&quot;:&quot;010-0000-0000&quot;,&quot;email&quot;:&quot;${member_id}@example.com&quot;}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="응답 코드 200" enabled="true">
+            <collectionProp name="Asserion.test_strings">
+              <stringProp name="49586">200</stringProp>
+            </collectionProp>
+            <stringProp name="Assertion.custom_message"></stringProp>
+            <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+            <boolProp name="Assertion.assume_success">false</boolProp>
+            <intProp name="Assertion.test_type">8</intProp>
+          </ResponseAssertion>
+          <hashTree/>
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="가입 결과 CSV에 이 회원의 줄 쓰기" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">// 가입 결과 CSV 끝에 이 회원의 줄을 붙인다.
+List row = [vars.get(&apos;run_id&apos;), vars.get(&apos;role&apos;), vars.get(&apos;buyer_no&apos;), vars.get(&apos;member_id&apos;), prev.getResponseCode()]
+new File(vars.get(&apos;joinResultFile&apos;)).append(row.join(&apos;,&apos;) + &apos;\n&apos;, &apos;UTF-8&apos;)
+</stringProp>
+          </JSR223PostProcessor>
+          <hashTree/>
+        </hashTree>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="로그인: 판매자 1명과 흥정 구매자 18명">
+        <stringProp name="TestPlan.comments">판매자와 흥정 구매자 18명이 로그인하고, 로그인 토큰을 JMeter 속성에 넣는다. 토큰은 파일에 쓰지 않는다. 같은 JMeter 창에서 이 그룹만 다시 실행하면 준비한 상품과 가격 제안은 그대로 두고 로그인 토큰만 새로 받는다.</stringProp>
+        <intProp name="ThreadGroup.num_threads">1</intProp>
+        <intProp name="ThreadGroup.ramp_time">0</intProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">1</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="회원 CSV에서 판매자와 흥정 구매자 18명의 ID와 비밀번호 읽기" enabled="true">
+          <stringProp name="TestPlan.comments">회원 CSV에서 이 실행 번호의 판매자와 흥정 구매자 18명의 ID와 비밀번호를 읽는다. 준비 그룹이 속성에 넣은 값은 지우지 않는다.</stringProp>
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script">// 회원 CSV에서 run_id가 runId와 같은 줄을 모두 읽는다.
+String runId = vars.get(&apos;runId&apos;)
+List&lt;String&gt; lines = new File(vars.get(&apos;memberFile&apos;)).readLines(&apos;UTF-8&apos;)
+List&lt;String&gt; cols = (lines[0].replace(&apos;﻿&apos;, &apos;&apos;).trim().split(&apos;,&apos;) as List)
+List&lt;Map&lt;String, String&gt;&gt; rows = []
+for (String line : lines.drop(1)) {
+    if (line.trim().isEmpty()) continue
+    List&lt;String&gt; vals = (line.trim().split(&apos;,&apos;, -1) as List)
+    Map&lt;String, String&gt; row = [:]
+    for (int i = 0; i &lt; cols.size(); i++) { row[cols[i]] = vals[i] }
+    if (row[&apos;run_id&apos;] == runId) rows &lt;&lt; row
+}
+Map&lt;String, String&gt; seller = rows.find { it[&apos;role&apos;] == &apos;판매자&apos; }
+List&lt;Map&lt;String, String&gt;&gt; buyers = rows.findAll { it[&apos;role&apos;] == &apos;흥정 구매자&apos; }.sort { it[&apos;buyer_no&apos;] as int }
+if (seller == null || buyers.size() != 18) {
+    throw new IllegalStateException(&apos;회원 CSV에 실행 번호 &apos; + runId + &apos;의 판매자 1명과 흥정 구매자 18명이 없습니다. 판매자 &apos; + (seller == null ? 0 : 1) + &apos;명, 흥정 구매자 &apos; + buyers.size() + &apos;명&apos;)
+}
+vars.put(&apos;seller_id&apos;, seller[&apos;member_id&apos;])
+vars.put(&apos;seller_pw&apos;, seller[&apos;password&apos;])
+buyers.eachWithIndex { b, idx -&gt;
+    int n = idx + 1
+    vars.put(&apos;buyer_id_&apos; + n, b[&apos;member_id&apos;])
+    vars.put(&apos;buyer_pw_&apos; + n, b[&apos;password&apos;])
+    vars.put(&apos;offer_qty_&apos; + n, b[&apos;offer_quantity&apos;])
+}
+
+// 준비 그룹이 속성에 넣은 상품·대화·가격 제안·실행 ID는 지우지 않는다. 이 그룹은 로그인 토큰 속성만 새로 쓴다.
+vars.put(&apos;login_index&apos;, &apos;0&apos;)
+SampleResult.setResponseData(&apos;runId=&apos; + runId + &apos;, 판매자=&apos; + seller[&apos;member_id&apos;] + &apos;, 흥정 구매자=&apos; + buyers.size() + &apos;명&apos;, &apos;UTF-8&apos;)
+</stringProp>
+        </JSR223Sampler>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="판매자 로그인">
+          <stringProp name="TestPlan.comments">판매자로 로그인해 로그인 토큰을 받는다.</stringProp>
+          <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+          <stringProp name="HTTPSampler.path">/ChatService/login</stringProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="userid" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">true</boolProp>
+                <stringProp name="Argument.name">userid</stringProp>
+                <stringProp name="Argument.value">${seller_id}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+                <boolProp name="HTTPArgument.use_equals">true</boolProp>
+              </elementProp>
+              <elementProp name="password" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">true</boolProp>
+                <stringProp name="Argument.name">password</stringProp>
+                <stringProp name="Argument.value">${seller_pw}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+                <boolProp name="HTTPArgument.use_equals">true</boolProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="폼 헤더" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/x-www-form-urlencoded</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="응답 코드 302" enabled="true">
+            <collectionProp name="Asserion.test_strings">
+              <stringProp name="50549">302</stringProp>
+            </collectionProp>
+            <stringProp name="Assertion.custom_message"></stringProp>
+            <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+            <boolProp name="Assertion.assume_success">false</boolProp>
+            <intProp name="Assertion.test_type">8</intProp>
+          </ResponseAssertion>
+          <hashTree/>
+          <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="응답 헤더의 로그인 쿠키(Authorization)를 변수 seller_token에 저장" enabled="true">
+            <stringProp name="RegexExtractor.useHeaders">true</stringProp>
+            <stringProp name="RegexExtractor.refname">seller_token</stringProp>
+            <stringProp name="RegexExtractor.regex">Authorization=([^;\s]+)</stringProp>
+            <stringProp name="RegexExtractor.template">$1$</stringProp>
+            <stringProp name="RegexExtractor.default">NOT_FOUND</stringProp>
+            <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+            <stringProp name="RegexExtractor.match_number">1</stringProp>
+          </RegexExtractor>
+          <hashTree/>
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="판매자의 로그인 토큰을 속성에 넣기" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">// 판매자의 로그인 토큰을 속성에 넣는다. 준비, 수락 경합, 수락 경합 뒤 저장 상태 확인 그룹이 이 속성을 읽는다. 토큰은 파일에 쓰지 않는다.
+String token = vars.get(&apos;seller_token&apos;)
+props.put(&apos;rsv.seller_token&apos;, token ?: &apos;NOT_FOUND&apos;)
+if (token == null || token == &apos;NOT_FOUND&apos;) {
+    prev.setSuccessful(false)
+    prev.setResponseMessage(&apos;판매자의 로그인 토큰을 받지 못함&apos;)
+}
+</stringProp>
+          </JSR223PostProcessor>
+          <hashTree/>
+        </hashTree>
+        <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="흥정 구매자 18명마다 로그인">
+          <stringProp name="TestPlan.comments">회원 CSV의 흥정 구매자 순서대로 18번 반복한다. 반복마다 흥정 구매자 한 명이 로그인한다.</stringProp>
+          <stringProp name="LoopController.loops">18</stringProp>
+          <boolProp name="LoopController.continue_forever">true</boolProp>
+        </LoopController>
+        <hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="흥정 구매자 ${cur_no} 로그인" enabled="true">
+            <stringProp name="TestPlan.comments">이번 반복의 흥정 구매자로 로그인해 로그인 토큰을 받는다.</stringProp>
+            <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+            <stringProp name="HTTPSampler.path">/ChatService/login</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="userid" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">true</boolProp>
+                  <stringProp name="Argument.name">userid</stringProp>
+                  <stringProp name="Argument.value">${cur_buyer_id}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                  <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                </elementProp>
+                <elementProp name="password" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">true</boolProp>
+                  <stringProp name="Argument.name">password</stringProp>
+                  <stringProp name="Argument.value">${cur_buyer_pw}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                  <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="이번 반복의 흥정 구매자 정하기" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">// 이번 반복에서 로그인할 흥정 구매자를 정한다.
+int n = (vars.get(&apos;login_index&apos;) as int) + 1
+vars.put(&apos;login_index&apos;, String.valueOf(n))
+vars.put(&apos;cur_no&apos;, String.format(&apos;%02d&apos;, n))
+vars.put(&apos;cur_buyer_id&apos;, vars.get(&apos;buyer_id_&apos; + n))
+vars.put(&apos;cur_buyer_pw&apos;, vars.get(&apos;buyer_pw_&apos; + n))
+</stringProp>
+            </JSR223PreProcessor>
+            <hashTree/>
+            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="폼 헤더" enabled="true">
+              <collectionProp name="HeaderManager.headers">
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">Content-Type</stringProp>
+                  <stringProp name="Header.value">application/x-www-form-urlencoded</stringProp>
+                </elementProp>
+              </collectionProp>
+            </HeaderManager>
+            <hashTree/>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="응답 코드 302" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="50549">302</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.custom_message"></stringProp>
+              <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">8</intProp>
+            </ResponseAssertion>
+            <hashTree/>
+            <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="응답 헤더의 로그인 쿠키(Authorization)를 변수 cur_token에 저장" enabled="true">
+              <stringProp name="RegexExtractor.useHeaders">true</stringProp>
+              <stringProp name="RegexExtractor.refname">cur_token</stringProp>
+              <stringProp name="RegexExtractor.regex">Authorization=([^;\s]+)</stringProp>
+              <stringProp name="RegexExtractor.template">$1$</stringProp>
+              <stringProp name="RegexExtractor.default">NOT_FOUND</stringProp>
+              <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+              <stringProp name="RegexExtractor.match_number">1</stringProp>
+            </RegexExtractor>
+            <hashTree/>
+            <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="흥정 구매자의 로그인 토큰을 번호별 속성에 넣기" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">// 이 흥정 구매자의 로그인 토큰을 번호별 속성에 넣는다. 준비 그룹이 대화 시작과 가격 제안 등록에 쓴다. 토큰은 파일에 쓰지 않는다.
+String n = vars.get(&apos;login_index&apos;)
+String token = vars.get(&apos;cur_token&apos;)
+props.put(&apos;rsv.buyer_token_&apos; + n, token ?: &apos;NOT_FOUND&apos;)
+if (token == null || token == &apos;NOT_FOUND&apos;) {
+    prev.setSuccessful(false)
+    prev.setResponseMessage(&apos;흥정 구매자 &apos; + vars.get(&apos;cur_no&apos;) + &apos;의 로그인 토큰을 받지 못함&apos;)
+}
+</stringProp>
+            </JSR223PostProcessor>
+            <hashTree/>
+          </hashTree>
+        </hashTree>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="준비: 상품 등록, 대화 시작, 가격 제안 18건 등록, 요청 전 상태 확인" enabled="true">
+        <stringProp name="TestPlan.comments">판매자가 상품을 등록하고, 흥정 구매자마다 대화를 시작해 가격 제안을 하나씩 등록한다. 로그인 토큰은 로그인 그룹이 넣은 속성에서 읽는다. 이 그룹의 요청은 수락 경합의 요청 수에 들어가지 않는다. 등록이 끝나면 요청 전 상태를 확인한다.</stringProp>
+        <intProp name="ThreadGroup.num_threads">1</intProp>
+        <intProp name="ThreadGroup.ramp_time">0</intProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">1</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="로그인 토큰 확인, 실행 폴더 만들기, 회원 CSV에서 판매자와 흥정 구매자 18명 읽기, 실행 ID 정하기">
+          <stringProp name="TestPlan.comments">로그인 그룹이 속성에 넣은 판매자와 흥정 구매자 18명의 로그인 토큰이 있는지 확인한다. 하나라도 없으면 상품을 등록하지 않고 이 그룹을 멈춘다. 토큰이 모두 있으면 실행 폴더를 만들고, 회원 CSV에서 이 실행 번호의 판매자와 흥정 구매자 18명의 ID와 제안 수량을 읽고, 서버 로그에서 이번 실행을 구분할 실행 ID를 정한다. 같은 JMeter 창에서 다시 실행할 때 이전 실행이 속성에 남긴 값을 지우되, 로그인 토큰은 남긴다.</stringProp>
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script">import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
+// 회원 CSV에서 run_id가 runId와 같은 줄을 모두 읽는다.
+String runId = vars.get(&apos;runId&apos;)
+List&lt;String&gt; lines = new File(vars.get(&apos;memberFile&apos;)).readLines(&apos;UTF-8&apos;)
+List&lt;String&gt; cols = (lines[0].replace(&apos;﻿&apos;, &apos;&apos;).trim().split(&apos;,&apos;) as List)
+List&lt;Map&lt;String, String&gt;&gt; rows = []
+for (String line : lines.drop(1)) {
+    if (line.trim().isEmpty()) continue
+    List&lt;String&gt; vals = (line.trim().split(&apos;,&apos;, -1) as List)
+    Map&lt;String, String&gt; row = [:]
+    for (int i = 0; i &lt; cols.size(); i++) { row[cols[i]] = vals[i] }
+    if (row[&apos;run_id&apos;] == runId) rows &lt;&lt; row
+}
+Map&lt;String, String&gt; seller = rows.find { it[&apos;role&apos;] == &apos;판매자&apos; }
+List&lt;Map&lt;String, String&gt;&gt; buyers = rows.findAll { it[&apos;role&apos;] == &apos;흥정 구매자&apos; }.sort { it[&apos;buyer_no&apos;] as int }
+if (seller == null || buyers.size() != 18) {
+    throw new IllegalStateException(&apos;회원 CSV에 실행 번호 &apos; + runId + &apos;의 판매자 1명과 흥정 구매자 18명이 없습니다. 판매자 &apos; + (seller == null ? 0 : 1) + &apos;명, 흥정 구매자 &apos; + buyers.size() + &apos;명&apos;)
+}
+vars.put(&apos;seller_id&apos;, seller[&apos;member_id&apos;])
+vars.put(&apos;seller_pw&apos;, seller[&apos;password&apos;])
+buyers.eachWithIndex { b, idx -&gt;
+    int n = idx + 1
+    vars.put(&apos;buyer_id_&apos; + n, b[&apos;member_id&apos;])
+    vars.put(&apos;buyer_pw_&apos; + n, b[&apos;password&apos;])
+    vars.put(&apos;offer_qty_&apos; + n, b[&apos;offer_quantity&apos;])
+}
+
+// 로그인 그룹이 속성에 넣은 로그인 토큰을 읽는다. 하나라도 없으면 상품을 등록하지 않고 이 그룹을 멈춘다.
+String sellerToken = (props.get(&apos;rsv.seller_token&apos;) ?: &apos;NOT_FOUND&apos;) as String
+List&lt;String&gt; missing = []
+if (sellerToken == &apos;NOT_FOUND&apos;) missing &lt;&lt; &apos;판매자&apos;
+for (int n = 1; n &lt;= 18; n++) {
+    if (((props.get(&apos;rsv.buyer_token_&apos; + n) ?: &apos;NOT_FOUND&apos;) as String) == &apos;NOT_FOUND&apos;) missing &lt;&lt; (&apos;흥정 구매자 &apos; + String.format(&apos;%02d&apos;, n))
+}
+if (!missing.isEmpty()) {
+    SampleResult.setSuccessful(false)
+    SampleResult.setResponseMessage(&apos;로그인 토큰 없음: &apos; + missing.join(&apos;, &apos;) + &apos;. 같은 JMeter 창에서 「로그인」 그룹을 먼저 실행해야 한다&apos;)
+    SampleResult.setStopThread(true)
+    return
+}
+// 같은 JMeter 창에서 다시 실행할 때 이전 실행이 속성에 남긴 값이 섞이지 않도록 지운다. 로그인 그룹이 넣은 로그인 토큰은 남긴다.
+props.keySet().findAll { String k = it.toString(); k.startsWith(&apos;rsv.&apos;) &amp;&amp; k != &apos;rsv.seller_token&apos; &amp;&amp; !k.startsWith(&apos;rsv.buyer_token_&apos;) }.each { props.remove(it) }
+vars.put(&apos;seller_token&apos;, sellerToken)
+// 이번 실행의 결과를 남길 실행 폴더를 만든다. 이미 있으면 그대로 둔다.
+new File(vars.get(&apos;outDir&apos;)).mkdirs()
+// 실행 ID: 서버 로그에서 이번 실행을 구분하는 값. 실행 번호와 지금 시각으로 만든다.
+String runLogId = &apos;run&apos; + runId + &apos;-&apos; + LocalDateTime.now().format(DateTimeFormatter.ofPattern(&apos;yyyyMMdd-HHmmss&apos;))
+vars.put(&apos;run_log_id&apos;, runLogId)
+vars.put(&apos;buyer_index&apos;, &apos;0&apos;)
+vars.put(&apos;check_index&apos;, &apos;0&apos;)
+SampleResult.setResponseData(&apos;runId=&apos; + runId + &apos;, 실행ID=&apos; + runLogId + &apos;, 판매자=&apos; + seller[&apos;member_id&apos;] + &apos;, 흥정 구매자=&apos; + buyers.size() + &apos;명, outDir=&apos; + vars.get(&apos;outDir&apos;), &apos;UTF-8&apos;)
+</stringProp>
+        </JSR223Sampler>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="판매자 상품 등록(50개, 개당 120,000원)" enabled="true">
+          <stringProp name="TestPlan.comments">판매자가 상품 하나를 판매 수량 50개, 개당 120,000원에 등록한다. 응답의 상품 ID를 이후 요청에 쓴다. 실행마다 새 상품을 등록하므로 이전 실행의 예약·제안을 쓰지 않는다.</stringProp>
+          <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+          <stringProp name="HTTPSampler.path">/ChatService/api/products</stringProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">{&quot;name&quot;:&quot;예약경합 상품 실행${runId}&quot;,&quot;description&quot;:&quot;${productDescription}&quot;,&quot;category&quot;:&quot;${productCategory}&quot;,&quot;price&quot;:${productPrice},&quot;quantity&quot;:${productQuantity}}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="JSON 헤더와 판매자 로그인 쿠키" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/json</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Cookie</stringProp>
+                <stringProp name="Header.value">Authorization=${seller_token}</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="응답 코드 201" enabled="true">
+            <collectionProp name="Asserion.test_strings">
+              <stringProp name="49587">201</stringProp>
+            </collectionProp>
+            <stringProp name="Assertion.custom_message"></stringProp>
+            <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+            <boolProp name="Assertion.assume_success">false</boolProp>
+            <intProp name="Assertion.test_type">8</intProp>
+          </ResponseAssertion>
+          <hashTree/>
+          <JSONPostProcessor guiclass="JSONPostProcessorGui" testclass="JSONPostProcessor" testname="상품 ID 꺼내기(응답의 productId를 변수 product_id에)" enabled="true">
+            <stringProp name="JSONPostProcessor.referenceNames">product_id</stringProp>
+            <stringProp name="JSONPostProcessor.jsonPathExprs">$.productId</stringProp>
+            <stringProp name="JSONPostProcessor.match_numbers">1</stringProp>
+            <stringProp name="JSONPostProcessor.defaultValues">NOT_FOUND</stringProp>
+          </JSONPostProcessor>
+          <hashTree/>
+          <ResultSaver guiclass="ResultSaverGui" testclass="ResultSaver" testname="응답 본문 저장(실행 폴더의 준비_판매자_상품등록응답)" enabled="true">
+            <stringProp name="FileSaver.filename">${outDir}\준비_판매자_상품등록응답</stringProp>
+            <boolProp name="FileSaver.errorsonly">false</boolProp>
+            <boolProp name="FileSaver.successonly">false</boolProp>
+            <boolProp name="FileSaver.skipautonumber">true</boolProp>
+            <boolProp name="FileSaver.skipsuffix">false</boolProp>
+          </ResultSaver>
+          <hashTree/>
+        </hashTree>
+        <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="흥정 구매자 18명마다 대화 시작, 가격 제안 등록" enabled="true">
+          <stringProp name="TestPlan.comments">회원 CSV의 흥정 구매자 순서대로 18번 반복한다. 반복마다 흥정 구매자 한 명이 대화를 시작하고, 가격 제안을 하나 등록한다.</stringProp>
+          <stringProp name="LoopController.loops">18</stringProp>
+          <boolProp name="LoopController.continue_forever">true</boolProp>
+        </LoopController>
+        <hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="흥정 구매자 ${cur_no} 대화 시작" enabled="true">
+            <stringProp name="TestPlan.comments">흥정 구매자가 상품에 대화를 시작한다. 응답의 대화 ID를 가격 제안에 쓴다.</stringProp>
+            <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+            <stringProp name="HTTPSampler.path">/ChatService/api/products/${product_id}/conversations</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+              <collectionProp name="Arguments.arguments"/>
+            </elementProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="이번 반복의 흥정 구매자 정하기" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">// 이번 반복에서 대화를 시작하고 가격 제안을 등록할 흥정 구매자를 정한다. 로그인 토큰은 로그인 그룹이 넣은 속성에서 읽는다.
+int n = (vars.get(&apos;buyer_index&apos;) as int) + 1
+vars.put(&apos;buyer_index&apos;, String.valueOf(n))
+vars.put(&apos;cur_no&apos;, String.format(&apos;%02d&apos;, n))
+vars.put(&apos;cur_buyer_id&apos;, vars.get(&apos;buyer_id_&apos; + n))
+vars.put(&apos;cur_token&apos;, (props.get(&apos;rsv.buyer_token_&apos; + n) ?: &apos;NOT_FOUND&apos;) as String)
+vars.put(&apos;cur_qty&apos;, vars.get(&apos;offer_qty_&apos; + n))
+</stringProp>
+            </JSR223PreProcessor>
+            <hashTree/>
+            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="흥정 구매자 로그인 쿠키" enabled="true">
+              <collectionProp name="HeaderManager.headers">
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">Cookie</stringProp>
+                  <stringProp name="Header.value">Authorization=${cur_token}</stringProp>
+                </elementProp>
+              </collectionProp>
+            </HeaderManager>
+            <hashTree/>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="응답 코드 201" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="49587">201</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.custom_message"></stringProp>
+              <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">8</intProp>
+            </ResponseAssertion>
+            <hashTree/>
+            <JSONPostProcessor guiclass="JSONPostProcessorGui" testclass="JSONPostProcessor" testname="대화 ID 꺼내기(변수 cur_conv에)" enabled="true">
+              <stringProp name="JSONPostProcessor.referenceNames">cur_conv</stringProp>
+              <stringProp name="JSONPostProcessor.jsonPathExprs">$.conversationId</stringProp>
+              <stringProp name="JSONPostProcessor.match_numbers">1</stringProp>
+              <stringProp name="JSONPostProcessor.defaultValues">NOT_FOUND</stringProp>
+            </JSONPostProcessor>
+            <hashTree/>
+          </hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="흥정 구매자 ${cur_no}의 가격 제안(${cur_qty}개, 개당 100,000원)" enabled="true">
+            <stringProp name="TestPlan.comments">흥정 구매자가 회원 CSV의 제안 수량을 개당 100,000원에 사겠다고 판매자에게 제안한다. 이 제안은 응답 대기로 남는다.</stringProp>
+            <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+            <stringProp name="HTTPSampler.path">/ChatService/api/conversations/${cur_conv}/offers</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{&quot;amount&quot;:${offerAmount},&quot;quantity&quot;:${cur_qty},&quot;requestId&quot;:&quot;${__UUID()}&quot;}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="JSON 헤더와 흥정 구매자 로그인 쿠키" enabled="true">
+              <collectionProp name="HeaderManager.headers">
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">Content-Type</stringProp>
+                  <stringProp name="Header.value">application/json</stringProp>
+                </elementProp>
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">Cookie</stringProp>
+                  <stringProp name="Header.value">Authorization=${cur_token}</stringProp>
+                </elementProp>
+              </collectionProp>
+            </HeaderManager>
+            <hashTree/>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="응답 코드 201" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="49587">201</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.custom_message"></stringProp>
+              <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">8</intProp>
+            </ResponseAssertion>
+            <hashTree/>
+            <JSONPostProcessor guiclass="JSONPostProcessorGui" testclass="JSONPostProcessor" testname="제안 ID 꺼내기(변수 cur_offer에)" enabled="true">
+              <stringProp name="JSONPostProcessor.referenceNames">cur_offer</stringProp>
+              <stringProp name="JSONPostProcessor.jsonPathExprs">$.offerId</stringProp>
+              <stringProp name="JSONPostProcessor.match_numbers">1</stringProp>
+              <stringProp name="JSONPostProcessor.defaultValues">NOT_FOUND</stringProp>
+            </JSONPostProcessor>
+            <hashTree/>
+            <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="번호별 변수에 대화 ID와 제안 ID 넣고 응답 본문 저장(실행 폴더의 준비_흥정구매자번호_가격제안응답.json)" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">// 이 흥정 구매자의 대화 ID와 제안 ID를 번호별 변수에 넣고, 가격 제안 응답 본문을 실행 폴더에 저장한다.
+String n = vars.get(&apos;buyer_index&apos;)
+vars.put(&apos;conv_&apos; + n, vars.get(&apos;cur_conv&apos;))
+vars.put(&apos;offer_&apos; + n, vars.get(&apos;cur_offer&apos;))
+new File(vars.get(&apos;outDir&apos;), &apos;준비_흥정구매자&apos; + vars.get(&apos;cur_no&apos;) + &apos;_가격제안응답.json&apos;).setText(prev.getResponseDataAsString(), &apos;UTF-8&apos;)
+</stringProp>
+            </JSR223PostProcessor>
+            <hashTree/>
+          </hashTree>
+        </hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="판매자의 상품 상세 조회(요청 전 상태)" enabled="true">
+          <stringProp name="TestPlan.comments">판매자가 상품 상세를 조회해 남은 수량과 구매 가능 수량이 50개인지 확인한다.</stringProp>
+          <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+          <stringProp name="HTTPSampler.path">/ChatService/api/products/${product_id}</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="판매자 로그인 쿠키" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Cookie</stringProp>
+                <stringProp name="Header.value">Authorization=${seller_token}</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="응답 코드 200" enabled="true">
+            <collectionProp name="Asserion.test_strings">
+              <stringProp name="49586">200</stringProp>
+            </collectionProp>
+            <stringProp name="Assertion.custom_message"></stringProp>
+            <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+            <boolProp name="Assertion.assume_success">false</boolProp>
+            <intProp name="Assertion.test_type">8</intProp>
+          </ResponseAssertion>
+          <hashTree/>
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="남은 수량과 구매 가능 수량을 변수에 넣고 응답 본문 저장(실행 폴더의 요청전_판매자_상품상세응답.json)" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">import groovy.json.JsonSlurper
+// 판매자가 본 상품의 남은 수량과 구매 가능 수량을 변수에 넣고, 응답 본문을 실행 폴더에 저장한다.
+String body = prev.getResponseDataAsString()
+new File(vars.get(&apos;outDir&apos;), &apos;요청전_판매자_상품상세응답.json&apos;).setText(body, &apos;UTF-8&apos;)
+try {
+    def j = new JsonSlurper().parseText(body)
+    vars.put(&apos;pre_remaining&apos;, String.valueOf(j.remainingQuantity))
+    vars.put(&apos;pre_available&apos;, String.valueOf(j.availableQuantity))
+} catch (Exception e) {
+    vars.put(&apos;pre_remaining&apos;, &apos;확인못함&apos;)
+    vars.put(&apos;pre_available&apos;, &apos;확인못함&apos;)
+}
+</stringProp>
+          </JSR223PostProcessor>
+          <hashTree/>
+        </hashTree>
+        <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="흥정 구매자 18명마다 판매자의 대화 상세 조회(요청 전 상태)" enabled="true">
+          <stringProp name="LoopController.loops">18</stringProp>
+          <boolProp name="LoopController.continue_forever">true</boolProp>
+        </LoopController>
+        <hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="판매자의 흥정 구매자 ${cur_no} 대화 상세 조회(요청 전 상태)" enabled="true">
+            <stringProp name="TestPlan.comments">판매자가 이 흥정 구매자의 대화 상세를 조회해 가격 제안이 응답 대기인지, 예약과 주문이 없는지 확인한다.</stringProp>
+            <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+            <stringProp name="HTTPSampler.path">/ChatService/api/conversations/${cur_conv}</stringProp>
+            <stringProp name="HTTPSampler.method">GET</stringProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+              <collectionProp name="Arguments.arguments"/>
+            </elementProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="이번 반복의 흥정 구매자 정하기" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">// 이번 반복에서 대화 상세를 조회할 흥정 구매자를 정한다.
+int n = (vars.get(&apos;check_index&apos;) as int) + 1
+vars.put(&apos;check_index&apos;, String.valueOf(n))
+vars.put(&apos;cur_no&apos;, String.format(&apos;%02d&apos;, n))
+vars.put(&apos;cur_conv&apos;, vars.get(&apos;conv_&apos; + n))
+</stringProp>
+            </JSR223PreProcessor>
+            <hashTree/>
+            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="판매자 로그인 쿠키" enabled="true">
+              <collectionProp name="HeaderManager.headers">
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">Cookie</stringProp>
+                  <stringProp name="Header.value">Authorization=${seller_token}</stringProp>
+                </elementProp>
+              </collectionProp>
+            </HeaderManager>
+            <hashTree/>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="응답 코드 200" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="49586">200</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.custom_message"></stringProp>
+              <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">8</intProp>
+            </ResponseAssertion>
+            <hashTree/>
+            <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="가격 제안 상태와 예약, 주문을 변수에 넣고 응답 본문 저장(실행 폴더의 요청전_흥정구매자번호_대화상세응답.json)" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import groovy.json.JsonSlurper
+// 판매자가 본 대화 상세에서 이 흥정 구매자의 가격 제안 상태와 수량, 예약, 주문을 변수에 넣고, 응답 본문을 실행 폴더에 저장한다.
+String n = vars.get(&apos;check_index&apos;)
+String body = prev.getResponseDataAsString()
+new File(vars.get(&apos;outDir&apos;), &apos;요청전_흥정구매자&apos; + vars.get(&apos;cur_no&apos;) + &apos;_대화상세응답.json&apos;).setText(body, &apos;UTF-8&apos;)
+try {
+    def j = new JsonSlurper().parseText(body)
+    def offer = j.offers?.find { String.valueOf(it.offerId) == vars.get(&apos;offer_&apos; + n) }
+    vars.put(&apos;pre_offer_status_&apos; + n, offer ? String.valueOf(offer.status) : &apos;없음&apos;)
+    vars.put(&apos;pre_offer_qty_&apos; + n, offer ? String.valueOf(offer.quantity) : &apos;없음&apos;)
+    vars.put(&apos;pre_reservation_&apos; + n, j.reservation ? String.valueOf(j.reservation.reservationId) : &apos;-&apos;)
+    vars.put(&apos;pre_order_count_&apos; + n, String.valueOf(j.orders ? j.orders.size() : 0))
+} catch (Exception e) {
+    [&apos;pre_offer_status_&apos;, &apos;pre_offer_qty_&apos;, &apos;pre_reservation_&apos;, &apos;pre_order_count_&apos;].each { vars.put(it + n, &apos;확인못함&apos;) }
+}
+</stringProp>
+            </JSR223PostProcessor>
+            <hashTree/>
+          </hashTree>
+        </hashTree>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="요청 전 상태 확인과 수락 경합에 넘길 값 정하기(실행 폴더의 준비_ID와_요청전상태.csv, 준비_요청전상태_요약.csv)" enabled="true">
+          <stringProp name="TestPlan.comments">흥정 구매자 18명의 회원 ID, 대화 ID, 제안 ID, 제안 수량, 요청 전 가격 제안 상태와 예약·주문, 서버 로그용 요청 ID를 준비_ID와_요청전상태.csv에 쓴다. 남은 수량과 구매 가능 수량이 50개이고, 응답 대기 제안이 18건이고, 제안 수량 합계가 60개이고, 예약과 주문이 없으면 「기본 구성과 같음」으로 표시한다. 다르더라도 다음 그룹은 그대로 실행한다.</stringProp>
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script">import java.net.URLEncoder
+
+// 흥정 구매자 18명의 ID와 요청 전 상태를 실행 폴더의 준비_ID와_요청전상태.csv에 쓰고, 요청 전 상태가 기본 구성과 같은지 확인한다.
+// 속성에는 빈 값을 넣을 수 없으므로 값이 없으면 「-」를 넣는다.
+def put = { String key, Object value -&gt; props.put(key, value == null ? &apos;-&apos; : value.toString()) }
+long expectedQty = (vars.get(&apos;productQuantity&apos;) as long)
+StringBuilder csv = new StringBuilder(&apos;﻿buyer_no,buyer_id,conversation_id,offer_id,offer_quantity,offer_status,reservation_id,order_count,request_log_id\n&apos;)
+int pending = 0
+long qtySum = 0
+int reservations = 0
+long orders = 0
+boolean readable = true
+for (int n = 1; n &lt;= 18; n++) {
+    String no = String.format(&apos;%02d&apos;, n)
+    String reqId = &apos;accept-&apos; + no
+    List row = [no, vars.get(&apos;buyer_id_&apos; + n), vars.get(&apos;conv_&apos; + n), vars.get(&apos;offer_&apos; + n), vars.get(&apos;pre_offer_qty_&apos; + n),
+                vars.get(&apos;pre_offer_status_&apos; + n), vars.get(&apos;pre_reservation_&apos; + n), vars.get(&apos;pre_order_count_&apos; + n), reqId]
+    csv.append(row.join(&apos;,&apos;)).append(&apos;\n&apos;)
+    if (vars.get(&apos;pre_offer_status_&apos; + n) == &apos;PENDING&apos;) pending++
+    if ((vars.get(&apos;pre_offer_qty_&apos; + n) ?: &apos;&apos;).isLong()) qtySum += (vars.get(&apos;pre_offer_qty_&apos; + n) as long) else readable = false
+    if (vars.get(&apos;pre_reservation_&apos; + n) != &apos;-&apos;) reservations++
+    if ((vars.get(&apos;pre_order_count_&apos; + n) ?: &apos;&apos;).isLong()) orders += (vars.get(&apos;pre_order_count_&apos; + n) as long) else readable = false
+    // 수락 경합 그룹과 저장 상태 확인 그룹이 쓸 값을 속성에 넣는다. 판매자의 로그인 토큰은 로그인 그룹이 속성에 넣는다.
+    put(&apos;rsv.buyer_&apos; + n, vars.get(&apos;buyer_id_&apos; + n))
+    put(&apos;rsv.conv_&apos; + n, vars.get(&apos;conv_&apos; + n))
+    put(&apos;rsv.offer_&apos; + n, vars.get(&apos;offer_&apos; + n))
+    put(&apos;rsv.qty_&apos; + n, vars.get(&apos;pre_offer_qty_&apos; + n))
+}
+long expectedOfferSum = (1..18).collect { (vars.get(&apos;offer_qty_&apos; + it) as long) }.sum()
+put(&apos;rsv.product_id&apos;, vars.get(&apos;product_id&apos;))
+put(&apos;rsv.run_log_id&apos;, vars.get(&apos;run_log_id&apos;))
+put(&apos;rsv.test_log_name&apos;, URLEncoder.encode(vars.get(&apos;testLogName&apos;), &apos;UTF-8&apos;))
+new File(vars.get(&apos;outDir&apos;), &apos;준비_ID와_요청전상태.csv&apos;).setText(csv.toString(), &apos;UTF-8&apos;)
+
+boolean same = readable &amp;&amp; vars.get(&apos;pre_remaining&apos;) == String.valueOf(expectedQty) &amp;&amp; vars.get(&apos;pre_available&apos;) == String.valueOf(expectedQty) &amp;&amp;
+        pending == 18 &amp;&amp; qtySum == expectedOfferSum &amp;&amp; reservations == 0 &amp;&amp; orders == 0
+String result = same ? &apos;기본 구성과 같음&apos; : &apos;기본 구성과 다름&apos;
+List summary = [vars.get(&apos;product_id&apos;), vars.get(&apos;pre_remaining&apos;), vars.get(&apos;pre_available&apos;), pending, qtySum, reservations, orders, result]
+new File(vars.get(&apos;outDir&apos;), &apos;준비_요청전상태_요약.csv&apos;).setText(
+        &apos;﻿product_id,remaining_quantity,available_quantity,pending_offer_count,offer_quantity_sum,reservation_count,order_count,check_result\n&apos; + summary.join(&apos;,&apos;) + &apos;\n&apos;, &apos;UTF-8&apos;)
+SampleResult.setSuccessful(same)
+SampleResult.setResponseMessage(&apos;요청 전 상태: &apos; + result)
+SampleResult.setResponseData(&apos;상품ID=&apos; + vars.get(&apos;product_id&apos;) + &apos;, 남은 수량=&apos; + vars.get(&apos;pre_remaining&apos;) + &apos;, 판매자가 본 구매 가능 수량=&apos; + vars.get(&apos;pre_available&apos;) +
+        &apos;, 응답 대기 제안=&apos; + pending + &apos;건, 제안 수량 합계=&apos; + qtySum + &apos;개, 예약=&apos; + reservations + &apos;건, 주문=&apos; + orders + &apos;건, 판정=&apos; + result + &apos;, 실행ID=&apos; + vars.get(&apos;run_log_id&apos;), &apos;UTF-8&apos;)
+</stringProp>
+        </JSR223Sampler>
+        <hashTree/>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="수락 경합: 판매자의 가격 제안 수락 18건을 같은 순간에 보냄" enabled="true">
+        <stringProp name="TestPlan.comments">스레드 18개가 각각 흥정 구매자 한 명의 가격 제안을 맡는다. 동기화 타이머로 18개 요청을 같은 순간에 보낸다. 요청을 같은 순간에 보냈다는 사실만으로 서버의 수량 확인과 예약 저장이 겹쳤다고 보지 않고, 서버 로그로 확인한다.</stringProp>
+        <intProp name="ThreadGroup.num_threads">18</intProp>
+        <intProp name="ThreadGroup.ramp_time">0</intProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">1</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <SyncTimer guiclass="TestBeanGUI" testclass="SyncTimer" testname="동기화 타이머(18개 요청이 모두 준비되면 같은 순간에 보냄, 최대 10초 대기)">
+          <stringProp name="TestPlan.comments">스레드 18개가 모두 요청 직전에 도착하면 18개 요청을 같은 순간에 보낸다. 10초 안에 모이지 않으면 더 기다리지 않고 보낸다.</stringProp>
+          <intProp name="groupSize">18</intProp>
+          <longProp name="timeoutInMs">10000</longProp>
+        </SyncTimer>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="판매자의 흥정 구매자 ${cur_no} 가격 제안 수락(${cur_qty}개 예약)">
+          <stringProp name="TestPlan.comments">판매자가 이 스레드에 정해진 흥정 구매자의 가격 제안을 수락한다. 수락과 함께 그 제안 수량만큼 예약이 만들어진다. 요청 헤더에 서버 로그의 테스트명, 실행 ID, 요청 ID를 담는다. 수량 부족으로 거절되거나 응답을 받지 못해도 다시 보내지 않는다.</stringProp>
+          <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+          <stringProp name="HTTPSampler.path">/ChatService/api/offers/${cur_offer}/accept</stringProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="스레드 번호로 수락할 가격 제안 정하기" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">// 이 스레드가 수락할 가격 제안을 스레드 번호로 정한다. 스레드 1은 흥정 구매자 01의 제안을, 스레드 18은 흥정 구매자 18의 제안을 수락한다.
+int n = ctx.getThreadNum() + 1
+String no = String.format(&apos;%02d&apos;, n)
+vars.put(&apos;cur_no&apos;, no)
+vars.put(&apos;cur_offer&apos;, (props.get(&apos;rsv.offer_&apos; + n) ?: &apos;NOT_FOUND&apos;) as String)
+vars.put(&apos;cur_qty&apos;, (props.get(&apos;rsv.qty_&apos; + n) ?: &apos;&apos;) as String)
+vars.put(&apos;seller_token&apos;, (props.get(&apos;rsv.seller_token&apos;) ?: &apos;&apos;) as String)
+vars.put(&apos;run_log_id&apos;, (props.get(&apos;rsv.run_log_id&apos;) ?: &apos;&apos;) as String)
+vars.put(&apos;test_log_name&apos;, (props.get(&apos;rsv.test_log_name&apos;) ?: &apos;&apos;) as String)
+vars.put(&apos;req_log_id&apos;, &apos;accept-&apos; + no)
+</stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="JSON 헤더, 판매자 로그인 쿠키, 서버 로그용 테스트명·실행 ID·요청 ID" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/json</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Cookie</stringProp>
+                <stringProp name="Header.value">Authorization=${seller_token}</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">X-Test-Log-Name</stringProp>
+                <stringProp name="Header.value">${test_log_name}</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">X-Test-Log-Run-Id</stringProp>
+                <stringProp name="Header.value">${run_log_id}</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">X-Test-Log-Request-Id</stringProp>
+                <stringProp name="Header.value">${req_log_id}</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="응답 코드, 오류 코드, 예약을 속성에 넣고 응답 본문 저장(실행 폴더의 수락_흥정구매자번호_응답)" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">import groovy.json.JsonSlurper
+// 응답 코드, 오류 코드, 응답에 담긴 예약, 요청 시각과 걸린 시간을 속성에 넣고, 응답 본문을 실행 폴더에 저장한다.
+int n = ctx.getThreadNum() + 1
+String body = prev.getResponseDataAsString()
+String errorCode = &apos;-&apos;
+String reservationId = &apos;-&apos;
+String reservationQty = &apos;-&apos;
+boolean isJson = false
+try {
+    def j = new JsonSlurper().parseText(body)
+    isJson = true
+    if (j instanceof Map) {
+        if (j.code) errorCode = String.valueOf(j.code)
+        if (j.reservation) {
+            reservationId = String.valueOf(j.reservation.reservationId)
+            reservationQty = String.valueOf(j.reservation.quantity)
+        }
+    }
+} catch (Exception ignored) {
+}
+props.put(&apos;rsv.accept_code_&apos; + n, prev.getResponseCode() ?: &apos;&apos;)
+props.put(&apos;rsv.accept_error_&apos; + n, errorCode)
+props.put(&apos;rsv.accept_reservation_&apos; + n, reservationId)
+props.put(&apos;rsv.accept_reservation_qty_&apos; + n, reservationQty)
+props.put(&apos;rsv.accept_start_&apos; + n, String.valueOf(prev.getStartTime()))
+props.put(&apos;rsv.accept_elapsed_&apos; + n, String.valueOf(prev.getTime()))
+new File(vars.get(&apos;outDir&apos;), &apos;수락_흥정구매자&apos; + vars.get(&apos;cur_no&apos;) + &apos;_응답&apos; + (isJson ? &apos;.json&apos; : &apos;.txt&apos;)).setText(body, &apos;UTF-8&apos;)
+</stringProp>
+          </JSR223PostProcessor>
+          <hashTree/>
+          <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="응답 구분: 성공과 수량 부족은 통과, 기타 오류와 응답 미확인은 실패로 표시" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">import groovy.json.JsonSlurper
+// 성공(200)과 수량 부족(409, 오류 코드 RESERVATION_QUANTITY_EXCEEDED)은 통과로, 그 밖의 응답과 응답을 받지 못한 요청은 실패로 표시한다.
+String code = SampleResult.getResponseCode()
+String errorCode = &apos;-&apos;
+try {
+    def j = new JsonSlurper().parseText(SampleResult.getResponseDataAsString())
+    if (j instanceof Map &amp;&amp; j.code) errorCode = String.valueOf(j.code)
+} catch (Exception ignored) {
+}
+if (code == &apos;200&apos;) {
+    SampleResult.setResponseMessage(&apos;성공&apos;)
+} else if (code == &apos;409&apos; &amp;&amp; errorCode == &apos;RESERVATION_QUANTITY_EXCEEDED&apos;) {
+    SampleResult.setSuccessful(true)
+    SampleResult.setResponseMessage(&apos;수량부족&apos;)
+} else {
+    AssertionResult.setFailure(true)
+    AssertionResult.setFailureMessage((code ==~ /\d{3}/ ? &apos;기타오류: &apos; : &apos;미확인: &apos;) + code + &apos; &apos; + errorCode)
+}
+</stringProp>
+          </JSR223Assertion>
+          <hashTree/>
+        </hashTree>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="수락 경합 뒤 저장 상태 확인: 판매자의 상품 상세와 대화 상세 18건 조회">
+        <stringProp name="TestPlan.comments">수락 요청 18건이 모두 끝난 뒤 판매자의 상품 상세와 대화 상세 18건을 조회한다. 응답을 받지 못한 요청도 다시 보내지 않고 저장된 상태부터 확인한다.</stringProp>
+        <intProp name="ThreadGroup.num_threads">1</intProp>
+        <intProp name="ThreadGroup.ramp_time">0</intProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">1</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="수락 경합 결과와 확인에 쓸 값 읽기">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script">// 수락 경합 그룹이 속성에 남긴 값과 로그인 그룹·준비 그룹이 넘긴 값을 이 스레드의 변수로 읽는다.
+vars.put(&apos;seller_token&apos;, (props.get(&apos;rsv.seller_token&apos;) ?: &apos;&apos;) as String)
+vars.put(&apos;product_id&apos;, (props.get(&apos;rsv.product_id&apos;) ?: &apos;NOT_FOUND&apos;) as String)
+vars.put(&apos;check_index&apos;, &apos;0&apos;)
+int got = (1..18).count { props.get(&apos;rsv.accept_code_&apos; + it) != null }
+SampleResult.setResponseData(&apos;수락 응답을 기록한 요청 &apos; + got + &apos;건, 상품ID=&apos; + vars.get(&apos;product_id&apos;), &apos;UTF-8&apos;)
+</stringProp>
+        </JSR223Sampler>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="판매자의 상품 상세 조회(수락 경합 뒤)">
+          <stringProp name="TestPlan.comments">판매자가 상품 상세를 조회해 저장된 남은 수량과 구매 가능 수량을 확인한다.</stringProp>
+          <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+          <stringProp name="HTTPSampler.path">/ChatService/api/products/${product_id}</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="판매자 로그인 쿠키">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Cookie</stringProp>
+                <stringProp name="Header.value">Authorization=${seller_token}</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="응답 코드 200">
+            <collectionProp name="Asserion.test_strings">
+              <stringProp name="49586">200</stringProp>
+            </collectionProp>
+            <stringProp name="Assertion.custom_message"></stringProp>
+            <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+            <boolProp name="Assertion.assume_success">false</boolProp>
+            <intProp name="Assertion.test_type">8</intProp>
+          </ResponseAssertion>
+          <hashTree/>
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="남은 수량과 구매 가능 수량을 변수에 넣고 응답 본문 저장(실행 폴더의 사후_판매자_상품상세응답.json)">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">import groovy.json.JsonSlurper
+// 수락 경합 뒤 판매자가 본 상품의 남은 수량과 구매 가능 수량을 변수에 넣고, 응답 본문을 실행 폴더에 저장한다.
+String body = prev.getResponseDataAsString()
+new File(vars.get(&apos;outDir&apos;), &apos;사후_판매자_상품상세응답.json&apos;).setText(body, &apos;UTF-8&apos;)
+try {
+    def j = new JsonSlurper().parseText(body)
+    vars.put(&apos;post_remaining&apos;, String.valueOf(j.remainingQuantity))
+    props.put(&apos;rsv.post_remaining&apos;, String.valueOf(j.remainingQuantity))
+    vars.put(&apos;post_available&apos;, String.valueOf(j.availableQuantity))
+} catch (Exception e) {
+    vars.put(&apos;post_remaining&apos;, &apos;확인못함&apos;)
+    vars.put(&apos;post_available&apos;, &apos;확인못함&apos;)
+}
+</stringProp>
+          </JSR223PostProcessor>
+          <hashTree/>
+        </hashTree>
+        <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="흥정 구매자 18명마다 판매자의 대화 상세 조회(수락 경합 뒤)">
+          <stringProp name="LoopController.loops">18</stringProp>
+          <boolProp name="LoopController.continue_forever">true</boolProp>
+        </LoopController>
+        <hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="판매자의 흥정 구매자 ${cur_no} 대화 상세 조회(수락 경합 뒤)">
+            <stringProp name="TestPlan.comments">판매자가 이 흥정 구매자의 대화 상세를 조회해 저장된 가격 제안 상태, 예약, 주문을 확인한다.</stringProp>
+            <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+            <stringProp name="HTTPSampler.path">/ChatService/api/conversations/${cur_conv}</stringProp>
+            <stringProp name="HTTPSampler.method">GET</stringProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+              <collectionProp name="Arguments.arguments"/>
+            </elementProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="이번 반복의 흥정 구매자 정하기">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">// 이번 반복에서 대화 상세를 조회할 흥정 구매자를 정한다.
+int n = (vars.get(&apos;check_index&apos;) as int) + 1
+vars.put(&apos;check_index&apos;, String.valueOf(n))
+vars.put(&apos;cur_no&apos;, String.format(&apos;%02d&apos;, n))
+vars.put(&apos;cur_conv&apos;, (props.get(&apos;rsv.conv_&apos; + n) ?: &apos;NOT_FOUND&apos;) as String)
+</stringProp>
+            </JSR223PreProcessor>
+            <hashTree/>
+            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="판매자 로그인 쿠키">
+              <collectionProp name="HeaderManager.headers">
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">Cookie</stringProp>
+                  <stringProp name="Header.value">Authorization=${seller_token}</stringProp>
+                </elementProp>
+              </collectionProp>
+            </HeaderManager>
+            <hashTree/>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="응답 코드 200">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="49586">200</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.custom_message"></stringProp>
+              <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">8</intProp>
+            </ResponseAssertion>
+            <hashTree/>
+            <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="가격 제안 상태, 예약, 주문을 속성에 넣고 응답 본문 저장(실행 폴더의 사후_흥정구매자번호_대화상세응답.json)">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import groovy.json.JsonSlurper
+// 수락 경합 뒤 판매자가 본 대화 상세에서 가격 제안 상태, 예약, 주문을 속성에 넣고, 응답 본문을 실행 폴더에 저장한다.
+String n = vars.get(&apos;check_index&apos;)
+String body = prev.getResponseDataAsString()
+new File(vars.get(&apos;outDir&apos;), &apos;사후_흥정구매자&apos; + vars.get(&apos;cur_no&apos;) + &apos;_대화상세응답.json&apos;).setText(body, &apos;UTF-8&apos;)
+try {
+    def j = new JsonSlurper().parseText(body)
+    def offer = j.offers?.find { String.valueOf(it.offerId) == props.get(&apos;rsv.offer_&apos; + n) }
+    props.put(&apos;rsv.post_offer_status_&apos; + n, offer ? String.valueOf(offer.status) : &apos;없음&apos;)
+    props.put(&apos;rsv.post_offer_qty_&apos; + n, offer ? String.valueOf(offer.quantity) : &apos;없음&apos;)
+    def r = j.reservation
+    props.put(&apos;rsv.post_res_id_&apos; + n, r ? String.valueOf(r.reservationId) : &apos;-&apos;)
+    props.put(&apos;rsv.post_res_offer_&apos; + n, r ? String.valueOf(r.offerId) : &apos;-&apos;)
+    props.put(&apos;rsv.post_res_product_&apos; + n, r ? String.valueOf(r.productId) : &apos;-&apos;)
+    props.put(&apos;rsv.post_res_conv_&apos; + n, r ? String.valueOf(r.conversationId) : &apos;-&apos;)
+    props.put(&apos;rsv.post_res_qty_&apos; + n, r ? String.valueOf(r.quantity) : &apos;-&apos;)
+    props.put(&apos;rsv.post_res_status_&apos; + n, r ? String.valueOf(r.status) : &apos;-&apos;)
+    long orderQty = (j.orders ?: []).collect { (it.quantity ?: 0) as long }.sum(0L) as long
+    props.put(&apos;rsv.post_order_qty_&apos; + n, String.valueOf(orderQty))
+    props.put(&apos;rsv.post_read_&apos; + n, &apos;Y&apos;)
+} catch (Exception e) {
+    props.put(&apos;rsv.post_read_&apos; + n, &apos;N&apos;)
+}
+</stringProp>
+            </JSR223PostProcessor>
+            <hashTree/>
+          </hashTree>
+        </hashTree>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="요청별사후확인과 전체사후확인 쓰기(실행 폴더의 사후확인.log)">
+          <stringProp name="TestPlan.comments">요청마다 응답 코드와 저장된 가격 제안·예약을 맞춰 보고, 실행 전체의 유효 예약 합계, 남은 수량, 주문 수량, 응답 구분별 건수, 결과 확인 기준 위반을 서버 로그와 같은 형식으로 사후확인.log에 쓴다. 결과 확인 기준 위반이 있으면 이 표본을 실패로 표시한다.</stringProp>
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script">import java.net.URLDecoder
+import java.time.OffsetDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import org.apache.jmeter.services.FileServer
+
+// 요청마다 응답과 저장된 상태를 맞춰 본 줄(요청별사후확인)과 실행 전체를 확인한 줄(전체사후확인)을 서버 로그와 같은 형식으로 실행 폴더의 사후확인.log에 쓴다.
+String runLogId = (props.get(&apos;rsv.run_log_id&apos;) ?: &apos;-&apos;) as String
+String testName = URLDecoder.decode((props.get(&apos;rsv.test_log_name&apos;) ?: &apos;-&apos;) as String, &apos;UTF-8&apos;)
+String jmxName = FileServer.getFileServer().getScriptName()
+String productId = (props.get(&apos;rsv.product_id&apos;) ?: &apos;-&apos;) as String
+long saleQty = (vars.get(&apos;productQuantity&apos;) as long)
+def fmt = DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd&apos;T&apos;HH:mm:ss.SSSSSSXXX&quot;)
+def line = { String stage, String reqId, List items -&gt;
+    StringBuilder sb = new StringBuilder()
+    sb.append(OffsetDateTime.now(ZoneId.of(&apos;Asia/Seoul&apos;)).format(fmt)).append(&apos; - &apos;).append(testName).append(&apos; - 가격 제안 수락 - &apos;)
+      .append(jmxName).append(&apos; - 수락 경합 뒤 저장 상태 확인 | 실행ID=&apos;).append(runLogId).append(&apos; 요청ID=&apos;).append(reqId)
+      .append(&apos; 단계=&apos;).append(stage).append(&apos; |&apos;)
+    for (int i = 0; i + 1 &lt; items.size(); i += 2) { sb.append(&apos; &apos;).append(items[i]).append(&apos;=&apos;).append(items[i + 1]) }
+    sb.toString()
+}
+def p = { String key -&gt; (props.get(&apos;rsv.&apos; + key) ?: &apos;-&apos;) as String }
+
+List&lt;String&gt; out = []
+int success = 0, shortage = 0, otherError = 0, unknown = 0
+long activeSum = 0
+long orderQty = 0
+boolean allRead = true
+List&lt;String&gt; partial = []     // 성공했는데 제안 수량 전부가 예약되지 않은 요청의 제안 ID
+List&lt;String&gt; mismatch = []    // 수락 상태와 예약이 맞지 않는 요청의 제안 ID
+List&lt;String&gt; leftover = []    // 수량 부족으로 거절됐는데 수락이나 예약이 남은 요청의 제안 ID
+for (int n = 1; n &lt;= 18; n++) {
+    String no = String.format(&apos;%02d&apos;, n)
+    String offerId = p(&apos;offer_&apos; + n)
+    String code = p(&apos;accept_code_&apos; + n)
+    String error = p(&apos;accept_error_&apos; + n)
+    String kind
+    if (props.get(&apos;rsv.accept_code_&apos; + n) == null) kind = &apos;미확인&apos;
+    else if (code == &apos;200&apos;) kind = &apos;성공&apos;
+    else if (code == &apos;409&apos; &amp;&amp; error == &apos;RESERVATION_QUANTITY_EXCEEDED&apos;) kind = &apos;수량부족&apos;
+    else if (code ==~ /\d{3}/) kind = &apos;기타오류&apos;
+    else kind = &apos;미확인&apos;
+    switch (kind) { case &apos;성공&apos;: success++; break; case &apos;수량부족&apos;: shortage++; break; case &apos;기타오류&apos;: otherError++; break; default: unknown++ }
+
+    if (p(&apos;post_read_&apos; + n) != &apos;Y&apos;) allRead = false
+    String offerStatus = p(&apos;post_offer_status_&apos; + n)
+    String offerQty = p(&apos;post_offer_qty_&apos; + n)
+    boolean resOfOffer = p(&apos;post_res_offer_&apos; + n) == offerId
+    String resId = resOfOffer ? p(&apos;post_res_id_&apos; + n) : &apos;-&apos;
+    String resQty = resOfOffer ? p(&apos;post_res_qty_&apos; + n) : &apos;-&apos;
+    String resStatus = resOfOffer ? p(&apos;post_res_status_&apos; + n) : &apos;-&apos;
+    if (resOfOffer &amp;&amp; resStatus == &apos;ACTIVE&apos; &amp;&amp; resQty.isLong()) activeSum += (resQty as long)
+    if (p(&apos;post_order_qty_&apos; + n).isLong()) orderQty += (p(&apos;post_order_qty_&apos; + n) as long)
+
+    boolean match
+    if (offerStatus == &apos;ACCEPTED&apos;) {
+        match = resOfOffer &amp;&amp; p(&apos;post_res_product_&apos; + n) == productId &amp;&amp; p(&apos;post_res_conv_&apos; + n) == p(&apos;conv_&apos; + n) &amp;&amp;
+                resQty == offerQty &amp;&amp; resStatus == &apos;ACTIVE&apos;
+    } else {
+        match = !resOfOffer
+    }
+    if (!match) mismatch &lt;&lt; offerId
+    if (kind == &apos;성공&apos; &amp;&amp; !(offerStatus == &apos;ACCEPTED&apos; &amp;&amp; resOfOffer &amp;&amp; resQty == offerQty)) partial &lt;&lt; offerId
+    if (kind == &apos;수량부족&apos; &amp;&amp; (offerStatus == &apos;ACCEPTED&apos; || resOfOffer)) leftover &lt;&lt; offerId
+
+    // HTTP 응답 코드를 받지 못한 요청은 응답상태를 「응답없음(예외 이름)」으로 적는다.
+    String shownCode = (code ==~ /\d{3}/) ? code : (&apos;응답없음(&apos; + (code.contains(&apos;.&apos;) ? code.substring(code.lastIndexOf(&apos;.&apos;) + 1) : code) + &apos;)&apos;)
+    out &lt;&lt; line(&apos;요청별사후확인&apos;, &apos;accept-&apos; + no, [&apos;제안ID&apos;, offerId, &apos;구매자ID&apos;, p(&apos;buyer_&apos; + n), &apos;요청수량&apos;, p(&apos;qty_&apos; + n),
+            &apos;응답상태&apos;, shownCode, &apos;오류코드&apos;, error, &apos;응답구분&apos;, kind, &apos;제안상태&apos;, offerStatus, &apos;예약ID&apos;, resId, &apos;예약수량&apos;, resQty,
+            &apos;예약상태&apos;, resStatus, &apos;수락예약일치&apos;, match ? &apos;일치&apos; : &apos;불일치&apos;])
+}
+
+List&lt;String&gt; violations = []
+if (!allRead) violations &lt;&lt; &apos;저장 상태를 읽지 못한 대화 있음&apos;
+if (activeSum &gt; saleQty) violations &lt;&lt; (&apos;유효 예약 합계가 판매 수량 &apos; + saleQty + &apos;개를 넘음&apos;)
+if (!partial.isEmpty()) violations &lt;&lt; (&apos;성공한 수락에 제안 수량 전부가 예약되지 않음(제안ID &apos; + partial.join(&apos;·&apos;) + &apos;)&apos;)
+if (!mismatch.isEmpty()) violations &lt;&lt; (&apos;수락 상태와 예약이 맞지 않음(제안ID &apos; + mismatch.join(&apos;·&apos;) + &apos;)&apos;)
+if (p(&apos;post_remaining&apos;) != String.valueOf(saleQty)) violations &lt;&lt; (&apos;상품의 남은 수량이 &apos; + saleQty + &apos;개가 아님&apos;)
+if (orderQty != 0) violations &lt;&lt; &apos;주문이 있음&apos;
+if (!leftover.isEmpty()) violations &lt;&lt; (&apos;수량 부족으로 거절된 요청에 수락이나 예약이 남음(제안ID &apos; + leftover.join(&apos;·&apos;) + &apos;)&apos;)
+String remaining = vars.get(&apos;post_remaining&apos;) ?: &apos;-&apos;
+out &lt;&lt; line(&apos;전체사후확인&apos;, &apos;-&apos;, [&apos;유효예약합계&apos;, activeSum, &apos;남은수량&apos;, remaining, &apos;주문수량&apos;, orderQty,
+        &apos;성공수&apos;, success, &apos;수량부족수&apos;, shortage, &apos;기타오류수&apos;, otherError, &apos;미확인수&apos;, unknown,
+        &apos;결과확인기준위반&apos;, violations.isEmpty() ? &apos;없음&apos; : violations.join(&apos;; &apos;)])
+
+new File(vars.get(&apos;outDir&apos;), &apos;사후확인.log&apos;).setText(out.join(&apos;\n&apos;) + &apos;\n&apos;, &apos;UTF-8&apos;)
+SampleResult.setSuccessful(violations.isEmpty())
+SampleResult.setResponseMessage(violations.isEmpty() ? &apos;결과 확인 기준 위반 없음&apos; : &apos;결과 확인 기준 위반 있음&apos;)
+SampleResult.setResponseData(out.join(&apos;\n&apos;), &apos;UTF-8&apos;)
+</stringProp>
+        </JSR223Sampler>
+        <hashTree/>
+      </hashTree>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>
