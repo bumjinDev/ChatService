@@ -46,14 +46,18 @@ public class RealtimePublisher {
      * @param excludeMemberId 받지 않을 회원 ID. null이면 모든 참여자에게 보낸다.
      */
     public void publish(Long conversationId, Object event, String excludeMemberId) {
+        // 이벤트를 JSON 문자열로 바꾼다. 호출된 시점의 내용으로 만들어 둔다
         String payload;
         try {
             payload = objectMapper.writeValueAsString(event);
         } catch (JsonProcessingException e) {
+            // 바꾸지 못하면 로그만 남기고 보내지 않는다. 저장 결과에는 영향이 없다
             logger.error("[실시간 전달] 이벤트 직렬화 실패 conversationId={}", conversationId, e);
             return;
         }
+        // 실제 전송 작업. 여기서는 만들기만 하고 실행하지 않는다
         Runnable send = () -> deliver(conversationId, payload, excludeMemberId);
+        // 트랜잭션이 진행 중이면 커밋이 끝난 뒤에 전송하도록 등록한다. 롤백되면 전송하지 않는다
         if (TransactionSynchronizationManager.isSynchronizationActive()) {
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                 @Override
@@ -62,6 +66,7 @@ public class RealtimePublisher {
                 }
             });
         } else {
+            // 트랜잭션이 없으면 바로 전송한다
             send.run();
         }
     }
@@ -69,21 +74,27 @@ public class RealtimePublisher {
     /** 상품 재고가 바뀌었을 때 그 상품의 모든 대화에 대화별로 계산한 상태 이벤트를 보낸다. */
     public void publishToProductConversations(Long productId, Map<Long, ?> eventsByConversation) {
         logger.info("[실시간 전달] 상품 대화 상태 전달 productId={}, conversations={}", productId, eventsByConversation.size());
+        // 대화마다 이벤트를 하나씩 등록한다. 제외할 회원이 없으므로(null) 그 대화의 구매 희망자와 판매자 모두에게 보낸다
         eventsByConversation.forEach((conversationId, event) -> publish(conversationId, event, null));
     }
 
     private void deliver(Long conversationId, String payload, String excludeMemberId) {
+        // 이 대화에 열려 있는 세션(회원 ID → 세션)을 하나씩 처리한다
         for (Map.Entry<String, WebSocketSession> entry : registry.sessionsOf(conversationId).entrySet()) {
+            // 제외할 회원의 세션은 건너뛴다
             if (entry.getKey().equals(excludeMemberId)) {
                 continue;
             }
             WebSocketSession session = entry.getValue();
+            // 닫힌 세션은 건너뛴다
             if (!session.isOpen()) {
                 continue;
             }
             try {
+                // 세션으로 JSON 문자열을 보낸다. 한 번만 시도한다
                 session.sendMessage(new TextMessage(payload));
             } catch (Exception e) {
+                // 실패하면 로그만 남기고 다음 세션으로 넘어간다
                 logger.warn("[실시간 전달] 전송 실패 conversationId={}, memberId={}, reason={}",
                         conversationId, entry.getKey(), e.getMessage());
             }

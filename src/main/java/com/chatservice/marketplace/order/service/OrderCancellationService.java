@@ -79,7 +79,7 @@ public class OrderCancellationService implements IOrderCancellationService {
         if (!order.isParty(memberId)) {
             throw new BusinessException(ErrorCode.NOT_TRADE_PARTY);
         }
-        // 거래가 이미 최종 상태이면 409로 거절한다.
+        // 주문 상태가 이미 최종 상태이면 409로 거절한다. - 현재 api 에서 상태 바꾸는 위치는 210 줄(order.cancel(by, reason, now)) 후 flush -> commit 하는 순간(메소드 끝나는 지점))
         if (order.isFinalized()) {
             // 호출 흐름: OrderCancellationService.cancelByParty() → PurchaseOrder.isFinalized() → TradeStatus.isFinal()
             throw new BusinessException(ErrorCode.TRADE_ALREADY_FINALIZED);
@@ -128,7 +128,7 @@ public class OrderCancellationService implements IOrderCancellationService {
         //    호출 흐름: PurchaseOrderRepository.findIdsByDeadlinePassed()
         List<Long> targets = purchaseOrderRepository.findIdsByDeadlinePassed(
                 TradeStatus.IN_PROGRESS, ShippingStatus.WAITING_SHIPMENT, now);
-        int processed = 0;
+        int processed = 0;  // 단순 로깅 : 작업 끝난 후 몇 개의 주문 건이 발송 기간이 지나서 취소가 되었는지 확인.
         for (Long orderId : targets) {
             try {
                 // 2. 주문마다 새 트랜잭션에서 상태를 다시 확인하고 취소한다. 콜백이 정상 종료하면 커밋하고, 예외를 던지면 롤백한다.
@@ -217,7 +217,7 @@ public class OrderCancellationService implements IOrderCancellationService {
         // 취소 시각은 잔액 확인과 중지 위치 2를 지난 뒤, 주문 상태를 바꾸기 직전에 구한다.
         Instant now = nowSupplier.get();
 
-        // 로그에 남길 변경 전 거래 상태
+        // 로깅용 - 남길 변경 전 거래 상태
         TradeStatus before = order.getTradeStatus();
 
         // 2. 주문을 취소 완료로 변경. 엔티티 필드만 바꾸며, UPDATE는 flush 때 dirty checking으로 실행된다.
@@ -227,6 +227,8 @@ public class OrderCancellationService implements IOrderCancellationService {
         // 3. 주문 수량만큼 상품의 남은 수량을 되돌린다. 판매 종료였으면 판매 중으로 돌아간다. UPDATE는 flush 때 dirty checking으로 실행된다.
         //    호출 흐름: ProductService.getProduct() → ProductService.restoreStock() → Product.restoreStock()
         Product product = productService.getProduct(order.getProductId());
+        // 겹침 재현 테스트의 중지 위치. 상품을 처음 조회한 직후, 남은 수량을 되돌리기 전이다. 테스트 설정이 꺼져 있거나 테스트 헤더가 없는 요청은 그대로 진행한다.
+        testPause.reach(PausePoint.CANCEL_PRODUCT_READ);
         productService.restoreStock(product, order.getQuantity());
         //    합의 가격 주문이면 그 결제로 끝난 예약은 그대로 두고, 같은 상품·대화·구매 희망자·판매자·수량·제안 ID 로 새 예약 행을 만든다.
         //    호출 흐름: ReservationService.reserveAgainOnCancel() → ReservationRepository.findByFulfilledOrderIdAndStatus() → ReservationRepository.save()

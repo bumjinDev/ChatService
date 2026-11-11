@@ -38,6 +38,8 @@ public class OfferController {
     /** 판매자 수락. 합의가 성립하고, 같은 트랜잭션에서 그 구매 희망자에게 제안 수량만큼 예약을 건다. 응답의 reservation 에 그 예약을 담는다. */
     @PostMapping("/offers/{offerId}/accept")
     public OfferResponse accept(@AuthenticationPrincipal String memberId, @PathVariable("offerId") Long offerId) {
+        // memberId 는 로그인 쿠키의 토큰에서 꺼낸 요청 회원(판매자) ID 이고, offerId 는 요청 주소에 적힌 수락할 가격 제안 ID 다
+        // 수락 처리를 호출한다. 세 번째 값 true 가 수락이고 false 가 거절이다
         return offerService.respond(memberId, offerId, true);
     }
 

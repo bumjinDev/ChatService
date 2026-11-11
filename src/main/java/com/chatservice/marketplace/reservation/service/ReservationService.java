@@ -23,6 +23,9 @@ import com.chatservice.marketplace.reservation.ReservationRepository;
 import com.chatservice.marketplace.reservation.domain.Reservation;
 import com.chatservice.marketplace.reservation.domain.ReservationStatus;
 import com.chatservice.marketplace.reservation.dto.ReservationResponse;
+import com.chatservice.marketplace.testsupport.PausePoint;
+import com.chatservice.marketplace.testsupport.TestPause;
+import com.chatservice.marketplace.testsupport.TradeTestLog;
 
 /**
  * 예약 걸기(가격 제안 수락과 함께), 해제, 결제 종료, 취소 뒤 새 예약, 만료 자동 해제.
@@ -42,12 +45,14 @@ public class ReservationService implements IReservationService {
     private final TransactionTemplate transactionTemplate;
     private final TimeRules timeRules;
     private final Duration reservationDuration;
+    private final TestPause testPause;
 
     public ReservationService(ReservationRepository reservationRepository,
                               IReservationQueryService reservationQueryService,
                               IConversationService conversationService, IProductService productService,
                               TransactionTemplate transactionTemplate, TimeRules timeRules,
-                              @Value("${marketplace.reservation.duration}") Duration reservationDuration) {
+                              @Value("${marketplace.reservation.duration}") Duration reservationDuration,
+                              TestPause testPause) {
         this.reservationRepository = reservationRepository;
         this.reservationQueryService = reservationQueryService;
         this.conversationService = conversationService;
@@ -55,51 +60,92 @@ public class ReservationService implements IReservationService {
         this.transactionTemplate = transactionTemplate;
         this.timeRules = timeRules;
         this.reservationDuration = reservationDuration;
+        this.testPause = testPause;
     }
 
-    /*
-     * 처리 순서(설계안 5.2): 대화·참여자(404/403) → 판매자인지(403 NOT_SELLER) → 판매 중인지(409 PRODUCT_NOT_ON_SALE) →
-     * 같은 구매 희망자에게 활성 예약이 없는지(409 RESERVATION_ALREADY_ACTIVE) →
-     * 수량 ≤ 남은 수량 − 다른 회원의 활성 예약 합계(409 RESERVATION_QUANTITY_EXCEEDED) → 저장 → 상품의 모든 대화에 CONVERSATION_STATE(커밋 후).
-     * 모든 검사는 변경 전에 끝나므로 거절된 요청은 아무것도 바꾸지 않는다.
-     * 가격 제안 수락(OfferService.respond)이 수락과 같은 트랜잭션에서 제안 수량과 제안 ID 로 호출한다.
+    /**
+     * 판매자가 수락한 가격 제안의 구매 희망자에게 제안 수량만큼 예약을 건다.
+     *
+     * 대화·판매자·상품·기존 예약·수량 검사를 모두 마친 뒤 예약을 저장한다. 예약은 상품의 남은 수량을 줄이지 않는다.
+     * 가격 제안 수락과 같은 트랜잭션에서 실행되므로, 여기서 거절되면 수락도 반영되지 않는다. 대화 상태 이벤트는 커밋 후 전송된다.
+     *
+     * @param memberId       예약을 거는 회원 ID. 가격 제안을 수락한 판매자다
+     * @param conversationId 가격 제안이 있는 대화 ID. 이 대화의 구매 희망자에게 예약을 건다
+     * @param quantity       예약 수량. 가격 제안의 제안 수량이다
+     * @param offerId        이 예약을 만드는 가격 제안 ID
+     * @return 저장한 예약
+     * @throws BusinessException 다음 경우에 던지며, 이때 데이터는 변경되지 않는다.
+     *           - {@code CONVERSATION_NOT_FOUND}: 대화가 없다
+     *           - {@code NOT_CONVERSATION_MEMBER}: 요청한 회원이 대화의 참여자가 아니다
+     *           - {@code NOT_SELLER}: 요청한 회원이 대화의 판매자가 아니다
+     *           - {@code PRODUCT_NOT_FOUND}: 상품이 없다
+     *           - {@code PRODUCT_NOT_ON_SALE}: 판매 종료된 상품이다
+     *           - {@code RESERVATION_ALREADY_ACTIVE}: 같은 구매 희망자에게 만료 전인 예약이 이미 있다
+     *           - {@code RESERVATION_QUANTITY_EXCEEDED}: 예약 수량이 더 걸 수 있는 예약 수량보다 많다
      */
     @Override
     @Transactional
     public ReservationResponse reserve(String memberId, Long conversationId, long quantity, Long offerId) {
-        // 1. 처리 기준 시각. 예약 시각과 만료 시각 계산에 같은 값을 쓴다.
+        // 예약 요청을 처리하기 시작하는 시각. 기존 예약의 만료 여부 확인, 예약 시각, 만료 시각 계산에 같은 값을 쓴다
         Instant now = timeRules.now();
-        // 2. 대화 조회와 참여자 확인. 없으면 404, 참여자가 아니면 403 NOT_CONVERSATION_MEMBER.
+
+        // 대화 조회. 없으면 CONVERSATION_NOT_FOUND, 요청한 회원이 참여자가 아니면 NOT_CONVERSATION_MEMBER
         Conversation conversation = conversationService.getForMember(memberId, conversationId);
-        // 3. 판매자 확인
+        // 대화의 판매자만 예약을 걸 수 있다
         if (!conversation.getSellerId().equals(memberId)) {
             throw new BusinessException(ErrorCode.NOT_SELLER);
         }
-        // 4. 상품 조회와 판매 중 확인
+        // 상품 조회. 없으면 PRODUCT_NOT_FOUND.
         Product product = productService.getProduct(conversation.getProductId());
+        // 판매 종료 상품에는 예약을 걸 수 없다
         if (!product.isOnSale()) {
             throw new BusinessException(ErrorCode.PRODUCT_NOT_ON_SALE);
         }
-        // 5. 같은 구매 희망자의 활성 예약 확인. 만료 시각이 지난 예약은 자동 해제를 기다리는 것이라 새 예약을 막지 않는다.
+        // 판매자가 지금 수락하는 가격 제안의 구매 희망자에게, 같은 상품의 예약이 이미 걸려 있는지 확인한다
+        // 걸려 있으면 true 이고, 한 구매 희망자에게 예약이 두 개 걸리지 않도록 아래에서 새 예약을 거절한다
         boolean activeExists = reservationRepository
+                // 예약 테이블(테이블 "RESERVATION")에서 상품 ID 가 이 상품이고, 구매자 ID 가 가격 제안을 한 구매 희망자이고, 상태가 ACTIVE(예약 중)인 예약을 가져온다
                 .findByProductIdAndBuyerIdAndStatus(product.getProductId(), conversation.getBuyerId(), ReservationStatus.ACTIVE)
+                // 가져온 예약 가운데 만료 시각이 아직 지나지 않은 예약이 한 건이라도 있으면 true
+                // 만료 시각이 지나도 상태는 바로 바뀌지 않고, 30초마다 실행되는 자동 해제가 EXPIRED 로 바꿀 때까지 ACTIVE 로 남는다
+                // 그래서 상태가 ACTIVE 여도 만료 시각이 지난 예약은 이미 걸린 예약으로 보지 않는다
                 .stream().anyMatch(existing -> existing.isActiveAt(now));
+        // 같은 구매 희망자에게 두 번째 예약은 걸 수 없다
         if (activeExists) {
             throw new BusinessException(ErrorCode.RESERVATION_ALREADY_ACTIVE);
         }
-        // 6. 수량 상한 확인. 판매자는 어느 대화에서도 구매 희망자가 아니므로 판매자 기준 구매 가능 수량이 곧 더 걸 수 있는 예약 수량이다.
+        // 더 걸 수 있는 예약 수량 = 상품의 남은 수량 − 이 상품에서 만료 전인 예약 수량 전부. 잠금 없이 조회한 값으로 계산한다
+        // 상품 조회·결제와 같이 쓰는 계산이라 회원 ID 를 받지만, 판매자 본인에게 걸린 예약은 없으므로 판매자 ID 를 넘기면 만료 전인 예약을 누구 것이든 모두 남은 수량에서 뺀다
         long limit = reservationQueryService.availableQuantity(product, memberId);
+        TradeTestLog.event(logger, "가격 제안 수락", "ReservationService.java", "reserve", "수량판단",
+                "상품ID", product.getProductId(), "제안ID", offerId, "구매자ID", conversation.getBuyerId(),
+                "요청수량", quantity, "남은수량", TradeTestLog.calculatedRemaining(),
+                "유효예약합계", TradeTestLog.calculatedReservedSum(), "예약가능수량", limit,
+                "판단기준시각", TradeTestLog.calculatedAt(), "판단결과", quantity > limit ? "거절" : "통과");
+        // 더 걸 수 있는 예약 수량을 넘는 예약은 거절한다. 예외로 트랜잭션이 롤백되어 가격 제안의 수락도 반영되지 않는다
         if (quantity > limit) {
             throw new BusinessException(ErrorCode.RESERVATION_QUANTITY_EXCEEDED);
         }
-        // 7. 저장. IDENTITY 채번이라 저장 시점에 INSERT 된다.
+        // 겹침 재현 테스트의 중지 위치. 같은 구매자의 예약과 수량 상한 검사를 통과한 직후, 예약을 저장하기 전이다. 테스트 설정이 꺼져 있거나 테스트 헤더가 없는 요청은 그대로 진행한다.
+        testPause.reach(PausePoint.RESERVATION_CHECKED);
+
+        /* 예약이 안되는 기준을 전부 통과 후에 실제로 예약을 생성하는 위치 */
+
+        // 예약 내역 데이터 생성(테이블 "RESERVATION") : 예약 생성(예약 중). 만료 시각은 예약 시각에 예약 기간을 더한 값이다. IDENTITY 채번이라 저장 시점에 INSERT 되어 예약 ID 가 정해진다
         Reservation reservation = reservationRepository.save(Reservation.reserve(product.getProductId(), conversationId,
                 conversation.getBuyerId(), memberId, offerId, quantity, now, now.plus(reservationDuration)));
+
         logger.info("[예약 걸기] reservationId={}, conversationId={}, productId={}, memberId={}, offerId={}, quantity={}, expiresAt={}",
                 reservation.getReservationId(), conversationId, product.getProductId(), memberId, offerId, quantity,
                 reservation.getExpiresAt());
-        // 8. 상품의 모든 대화에 상태 이벤트 전송 등록. 다른 대화의 구매 가능 수량이 바뀌기 때문이다. 실제 전송은 커밋 후.
+        TradeTestLog.event(logger, "가격 제안 수락", "ReservationService.java", "reserve", "예약저장처리완료",
+                "예약ID", reservation.getReservationId(), "제안ID", offerId, "상품ID", product.getProductId(),
+                "구매자ID", conversation.getBuyerId(), "예약수량", quantity,
+                "예약시각", reservation.getReservedAt(), "만료시각", reservation.getExpiresAt());
+
+        // 상품의 모든 대화에 보낼 상태 이벤트를 등록한다. 다른 대화의 구매 가능 수량이 바뀌기 때문이다. 실제 전송은 커밋 후에 한다
         conversationService.publishStateToProductConversations(product);
+        // 메서드가 반환되면 가격 제안 수락 처리로 돌아가고, 수락 처리가 끝날 때 트랜잭션이 커밋된다
         return ReservationResponse.of(reservation);
     }
 

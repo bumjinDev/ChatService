@@ -40,6 +40,7 @@ public class TimeRules {
      * @return 마이크로초 단위로 절삭한 현재 시각
      */
     public Instant now() {
+        // 서버 시계에서 현재 시각을 구한다. 테스트 설정이 켜진 서버에서 시각을 고정했으면 고정한 시각이 나온다
         return clock.instant().truncatedTo(ChronoUnit.MICROS);
     }
 

@@ -47,11 +47,11 @@ public class TestSupportClockController {
      */
     // PUT /test-support/clock 요청을 처리한다.
     @PutMapping
-    public ResponseEntity<ClockStatus> fix(@RequestBody FixRequest request) {
+    public ResponseEntity<ClockStatus> fix(@RequestBody FixRequest request) {   // 요청 본문({"instant":"2026-10-12T14:59:59.500Z"})은 @RequestBody에 따라 Jackson이 FixRequest 레코드로 바꾼다. 이때 시각 문자열이 Instant 객체가 된다.
         if (request.instant() == null) {
             return ResponseEntity.badRequest().build();
         }
-        testClock.fix(request.instant());
+        testClock.fix(request.instant());   // FixRequest에서 꺼낸 Instant(고정할 시각)를 TestClock에 전달한다.
         logger.info("[테스트 서버 시계] 고정 instant={}", request.instant());
         return ResponseEntity.ok(status());
     }
