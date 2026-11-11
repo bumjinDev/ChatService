@@ -25,6 +25,7 @@ import com.chatservice.marketplace.reservation.domain.ReservationStatus;
 import com.chatservice.marketplace.reservation.dto.ReservationResponse;
 import com.chatservice.marketplace.testsupport.PausePoint;
 import com.chatservice.marketplace.testsupport.TestPause;
+import com.chatservice.marketplace.testsupport.TradeTestLog;
 
 /**
  * 예약 걸기(가격 제안 수락과 함께), 해제, 결제 종료, 취소 뒤 새 예약, 만료 자동 해제.
@@ -116,6 +117,11 @@ public class ReservationService implements IReservationService {
         // 더 걸 수 있는 예약 수량 = 상품의 남은 수량 − 이 상품에서 만료 전인 예약 수량 전부. 잠금 없이 조회한 값으로 계산한다
         // 상품 조회·결제와 같이 쓰는 계산이라 회원 ID 를 받지만, 판매자 본인에게 걸린 예약은 없으므로 판매자 ID 를 넘기면 만료 전인 예약을 누구 것이든 모두 남은 수량에서 뺀다
         long limit = reservationQueryService.availableQuantity(product, memberId);
+        TradeTestLog.event(logger, "가격 제안 수락", "ReservationService.java", "reserve", "수량판단",
+                "상품ID", product.getProductId(), "제안ID", offerId, "구매자ID", conversation.getBuyerId(),
+                "요청수량", quantity, "남은수량", TradeTestLog.calculatedRemaining(),
+                "유효예약합계", TradeTestLog.calculatedReservedSum(), "예약가능수량", limit,
+                "판단기준시각", TradeTestLog.calculatedAt(), "판단결과", quantity > limit ? "거절" : "통과");
         // 더 걸 수 있는 예약 수량을 넘는 예약은 거절한다. 예외로 트랜잭션이 롤백되어 가격 제안의 수락도 반영되지 않는다
         if (quantity > limit) {
             throw new BusinessException(ErrorCode.RESERVATION_QUANTITY_EXCEEDED);
@@ -132,6 +138,10 @@ public class ReservationService implements IReservationService {
         logger.info("[예약 걸기] reservationId={}, conversationId={}, productId={}, memberId={}, offerId={}, quantity={}, expiresAt={}",
                 reservation.getReservationId(), conversationId, product.getProductId(), memberId, offerId, quantity,
                 reservation.getExpiresAt());
+        TradeTestLog.event(logger, "가격 제안 수락", "ReservationService.java", "reserve", "예약저장처리완료",
+                "예약ID", reservation.getReservationId(), "제안ID", offerId, "상품ID", product.getProductId(),
+                "구매자ID", conversation.getBuyerId(), "예약수량", quantity,
+                "예약시각", reservation.getReservedAt(), "만료시각", reservation.getExpiresAt());
 
         // 상품의 모든 대화에 보낼 상태 이벤트를 등록한다. 다른 대화의 구매 가능 수량이 바뀌기 때문이다. 실제 전송은 커밋 후에 한다
         conversationService.publishStateToProductConversations(product);

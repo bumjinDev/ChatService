@@ -14,6 +14,7 @@ import com.chatservice.marketplace.product.domain.Product;
 import com.chatservice.marketplace.reservation.ReservationRepository;
 import com.chatservice.marketplace.reservation.domain.Reservation;
 import com.chatservice.marketplace.reservation.domain.ReservationStatus;
+import com.chatservice.marketplace.testsupport.TradeTestLog;
 
 /**
  * 구매 가능 수량 계산 및 대화의 최근 예약 조회. 어떤 상태도 바꾸지 않는다.
@@ -68,7 +69,9 @@ public class ReservationQueryService implements IReservationQueryService {
                 .sum();
 
         // 남은 수량에서 더한 수량을 뺀 값이 구매 가능 수량이다
-        return product.getRemainingQuantity() - reserved;
+        long available = product.getRemainingQuantity() - reserved;
+        TradeTestLog.rememberQuantityCalculation(product.getRemainingQuantity(), reserved, now);
+        return available;
     }
 
     @Override

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import com.chatservice.marketplace.testsupport.TradeTestLog;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
 /**
@@ -33,6 +34,7 @@ public class ApiExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusiness(BusinessException ex) {
         ErrorCode code = ex.getErrorCode();
+        TradeTestLog.recordErrorCode(code.name());
         logger.info("[업무 오류] code={}, message={}", code, ex.getMessage());
         ErrorResponse body = (code == ErrorCode.VALIDATION_ERROR)
                 ? ErrorResponse.validation(ex.getMessage(), ex.getFieldErrors())
@@ -80,6 +82,7 @@ public class ApiExceptionHandler {
     }
 
     private ResponseEntity<ErrorResponse> validation(String message, Map<String, String> fieldErrors) {
+        TradeTestLog.recordErrorCode(ErrorCode.VALIDATION_ERROR.name());
         return ResponseEntity.status(ErrorCode.VALIDATION_ERROR.getStatus())
                 .body(ErrorResponse.validation(message, fieldErrors));
     }
