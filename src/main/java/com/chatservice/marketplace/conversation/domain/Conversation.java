@@ -59,6 +59,7 @@ public class Conversation {
     }
 
     public boolean isParticipant(String memberId) {
+        // 대화의 구매 희망자 또는 판매자이면 true
         return buyerId.equals(memberId) || sellerId.equals(memberId);
     }
 

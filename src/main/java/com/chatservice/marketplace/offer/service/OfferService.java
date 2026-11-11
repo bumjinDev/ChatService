@@ -95,37 +95,76 @@ public class OfferService implements IOfferService {
         return OfferResponse.of(offer);
     }
 
-    /*
-     * 처리 순서(설계 6.9, 가격 제안 수량 설계안 5.3): 제안(404) → 판매자인지(403) → 판매 중인지(409, 제안 상태는 그대로) →
-     * 응답 대기인지(409) → 응답 기록 → [수락이면 같은 트랜잭션에서 제안 수량만큼 예약 걸기] → 구매 희망자 세션에 OFFER 전달.
-     * 수락하면 합의가 성립하고 제안 수량만큼 예약이 걸린다. 공개 등록 가격과 재고는 바꾸지 않는다.
-     * 예약 걸기가 409 로 거절되면 트랜잭션이 롤백되어 수락도 반영되지 않는다.
+    /**
+     * 판매자가 가격 제안을 수락하거나 거절한다.
+     *
+     * 가격 제안·판매자·상품 검사를 모두 마친 뒤 가격 제안의 응답 상태와 응답 시각을 바꾼다.
+     * 수락이면 같은 트랜잭션에서 가격 제안을 한 구매 희망자에게 제안 수량만큼 예약을 건다. 예약이 거절되면 수락도 반영되지 않는다.
+     * 등록 가격과 상품의 남은 수량은 바꾸지 않는다. 가격 제안 이벤트는 커밋 후 전송된다.
+     *
+     * @param memberId 응답을 요청한 회원 ID(인증 정보에서 얻은 값)
+     * @param offerId  응답할 가격 제안 ID
+     * @param accept   수락이면 {@code true}, 거절이면 {@code false}
+     * @return 응답한 가격 제안. 수락이면 함께 건 예약을 담는다
+     * @throws BusinessException 다음 경우에 던지며, 이때 데이터는 변경되지 않는다.
+     *           - {@code OFFER_NOT_FOUND}: 가격 제안이 없다
+     *           - {@code NOT_SELLER}: 요청한 회원이 가격 제안을 받은 판매자가 아니다
+     *           - {@code PRODUCT_NOT_FOUND}: 상품이 없다
+     *           - {@code PRODUCT_NOT_ON_SALE}: 판매 종료된 상품이다
+     *           - {@code OFFER_ALREADY_RESPONDED}: 이미 수락했거나 거절한 가격 제안이다
+     *           - {@code CONVERSATION_NOT_FOUND}, {@code NOT_CONVERSATION_MEMBER}: 수락하려는데 가격 제안의 대화가 없거나 요청한 회원이 그 대화의 참여자가 아니다
+     *           - {@code RESERVATION_ALREADY_ACTIVE}: 수락하려는데 같은 구매 희망자에게 만료 전인 예약이 이미 있다
+     *           - {@code RESERVATION_QUANTITY_EXCEEDED}: 수락하려는데 제안 수량이 더 걸 수 있는 예약 수량보다 많다
      */
     @Override
     @Transactional
     public OfferResponse respond(String memberId, Long offerId, boolean accept) {
+        // 가격 제안 조회(테이블 "PRICE_OFFER"). 없으면 OFFER_NOT_FOUND
         PriceOffer offer = priceOfferRepository.findById(offerId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.OFFER_NOT_FOUND));
+        // 가격 제안을 받은 판매자 본인만 응답할 수 있다
         if (!offer.getSellerId().equals(memberId)) {
             throw new BusinessException(ErrorCode.NOT_SELLER);
         }
+        // 상품 조회(테이블 "PRODUCT"). 없으면 PRODUCT_NOT_FOUND
         Product product = productService.getProduct(offer.getProductId());
+        // 판매 종료 상품의 가격 제안에는 응답할 수 없다
         if (!product.isOnSale()) {
             throw new BusinessException(ErrorCode.PRODUCT_NOT_ON_SALE);
         }
+        // 이미 수락했거나 거절한 가격 제안에는 다시 응답할 수 없다
         if (!offer.isPending()) {
             throw new BusinessException(ErrorCode.OFFER_ALREADY_RESPONDED);
         }
+
+        /* 응답이 안되는 기준을 전부 통과 후에 실제로 가격 제안 상태를 바꾸는 위치 */
+
+        // 로깅용 - 바꾸기 전 가격 제안 상태
         OfferStatus before = offer.getStatus();
+        // 가격 제안 상태 변경(테이블 "PRICE_OFFER") : 수락이면 ACCEPTED, 거절이면 REJECTED 로 바꾸고 응답 시각을 기록한다. 엔티티 필드만 바꾸며 UPDATE 는 flush 때 실행된다
         offer.respond(accept, timeRules.now());
+
         logger.info("[가격 제안 응답] offerId={}, memberId={}, {} -> {}", offerId, memberId, before, offer.getStatus());
+
+        // 응답에 담을 예약 내역. 수락일 때만 채우고 거절이면 null 이다
         ReservationResponse reservation = null;
+
+        /* 수락이면 같은 트랜잭션에서 예약 내역(수량 점유)까지 생성 */
         if (accept) {
-            // 수락과 예약을 한 트랜잭션에서 처리한다. 예약 걸기가 409 로 거절되면 이 수락도 롤백된다.
-            reservation = reservationService.reserve(memberId, offer.getConversationId(), offer.getQuantity(),
-                    offer.getOfferId());
+            // 예약 내역 데이터 생성(테이블 "RESERVATION") : 가격 제안을 한 구매 희망자에게 제안 수량만큼 예약을 건다. 예약이 거절되면 이 수락도 롤백된다
+            /* memberID : 컨트롤러에서부터 받은 이 제안을 수락하는 당사자인 판매자 ID
+            *  Price_offer 테이블 Entity 속성 값 3 개
+            *   - conversationId : 이 가격 제안이 등록된 대화 ID(컬럼 CONVERSATION_ID). 예약 생성에서 이 대화를 조회해서 상품과, 예약을 받을 구매 희망자를 알아낸다
+            *   - quantity : 구매 희망자가 제안한 수량(컬럼 QUANTITY). 예약 생성에서 더 걸 수 있는 예약 수량과 비교하고, 통과하면 이 수량만큼 예약한다
+            *   - offerId : 지금 수락하는 가격 제안 ID(컬럼 OFFER_ID). 예약 내역에 이 예약을 만든 가격 제안으로 저장한다
+            * */
+            reservation = reservationService.reserve(memberId,
+                    offer.getConversationId(), offer.getQuantity(), offer.getOfferId());
         }
+
+        // 대화 상대(구매 희망자)의 세션에 보낼 가격 제안 이벤트를 등록한다. 실제 전송은 커밋 후에 한다
         publish(offer, memberId);
+        // 메서드가 반환되면 트랜잭션이 커밋된다
         return OfferResponse.of(offer, reservation);
     }
 
@@ -141,6 +180,7 @@ public class OfferService implements IOfferService {
     }
 
     private void publish(PriceOffer offer, String actorId) {
+        // 가격 제안의 대화에 OFFER 이벤트를 보낸다. 요청한 회원(actorId)의 세션에는 보내지 않는다. 실제 전송은 커밋 후에 한다
         realtimePublisher.publish(offer.getConversationId(),
                 OfferEvent.of(offer.getOfferId(), offer.getConversationId(), offer.getAmount(), offer.getQuantity(),
                         offer.getStatus().name(), offer.getCreatedAt(), offer.getRespondedAt()),

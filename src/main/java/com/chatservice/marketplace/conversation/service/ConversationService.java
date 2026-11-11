@@ -125,11 +125,23 @@ public class ConversationService implements IConversationService {
         return buildDetail(conversation, product, memberId);
     }
 
+    /**
+     * 대화를 조회하고 요청한 회원이 그 대화의 참여자인지 확인한다.
+     *
+     * @param memberId       요청한 회원 ID
+     * @param conversationId 조회할 대화 ID
+     * @return 조회한 대화
+     * @throws BusinessException 다음 경우에 던진다.
+     *           - {@code CONVERSATION_NOT_FOUND}: 대화가 없다
+     *           - {@code NOT_CONVERSATION_MEMBER}: 요청한 회원이 대화의 구매 희망자도 판매자도 아니다
+     */
     @Override
     @Transactional(readOnly = true)
     public Conversation getForMember(String memberId, Long conversationId) {
+        // 대화 조회(테이블 "CONVERSATION"). 없으면 CONVERSATION_NOT_FOUND
         Conversation conversation = conversationRepository.findById(conversationId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.CONVERSATION_NOT_FOUND));
+        // 대화의 구매 희망자 또는 판매자만 통과한다
         if (!conversation.isParticipant(memberId)) {
             throw new BusinessException(ErrorCode.NOT_CONVERSATION_MEMBER);
         }
@@ -162,13 +174,24 @@ public class ConversationService implements IConversationService {
                 conversation.getConversationId(), product.getProductId(), buyerId);
     }
 
+    /**
+     * 상품의 모든 대화에 대화 상태 이벤트({@code CONVERSATION_STATE})를 보낸다.
+     *
+     * 상품의 대화를 모두 조회해 대화마다 상태 이벤트를 만든다. DB는 바꾸지 않으며, 실제 전송은 커밋 뒤에 실행된다.
+     *
+     * @param product 남은 수량이나 예약이 바뀐 상품
+     */
     @Override
     @Transactional(readOnly = true)
     public void publishStateToProductConversations(Product product) {
+        // 대화 ID 별로 보낼 상태 이벤트를 담는다
         Map<Long, ConversationStateEvent> events = new LinkedHashMap<>();
+        // 이 상품의 대화를 전부 조회한다(테이블 "CONVERSATION")
         for (Conversation conversation : conversationRepository.findByProductIdOrderByConversationIdAsc(product.getProductId())) {
+            // 대화마다 상태 이벤트를 만든다. 구매 가능 수량을 대화마다 다시 계산하므로 예약 조회(테이블 "RESERVATION")가 대화 수만큼 실행된다
             events.put(conversation.getConversationId(), stateEvent(conversation, product));
         }
+        // 대화별 상태 이벤트를 등록한다. 실제 전송은 커밋 후에 한다. DB 는 바꾸지 않는다
         realtimePublisher.publishToProductConversations(product.getProductId(), events);
     }
 
@@ -198,7 +221,10 @@ public class ConversationService implements IConversationService {
      * @return 상품 상태, 남은 수량, 이 대화의 구매 희망자 기준 구매 가능 수량, 쓰기 가능 여부, 읽기 전용 사유를 담은 이벤트
      */
     private ConversationStateEvent stateEvent(Conversation conversation, Product product) {
+        // 쓰기 가능 여부 계산. 상품이 판매 중이면 쓰기 가능이다
         ConversationWritability writability = writability(conversation, product);
+        // 대화 ID, 상품 상태, 남은 수량, 이 대화의 구매 희망자 기준 구매 가능 수량, 쓰기 가능 여부, 읽기 전용 사유를 담는다
+        // 구매 가능 수량은 예약을 다시 조회해 계산한다. 같은 트랜잭션에서 방금 저장한 예약도 조회된다
         return ConversationStateEvent.of(conversation.getConversationId(), product.getStatus().name(),
                 product.getRemainingQuantity(),
                 reservationQueryService.availableQuantity(product, conversation.getBuyerId()),
@@ -217,10 +243,13 @@ public class ConversationService implements IConversationService {
      * @return 쓰기 가능 여부와 읽기 전용 사유
      */
     private ConversationWritability writability(Conversation conversation, Product product) {
+        // 상품이 판매 중이면 주문을 조회하지 않고 쓰기 가능으로 판단한다
         if (product.isOnSale()) {
             return ConversationWritability.evaluate(true, List.of());
         }
+        // 판매 종료이면 이 대화의 구매자·판매자 주문을 조회한다(테이블 "PURCHASE_ORDER")
         List<PurchaseOrder> partyOrders = partyOrders(conversation);
+        // 조회한 주문들의 거래 상태로 쓰기 가능 여부를 판단한다
         return ConversationWritability.evaluate(false, partyOrders.stream().map(PurchaseOrder::getTradeStatus).toList());
     }
 

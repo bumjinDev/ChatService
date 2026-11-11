@@ -13,6 +13,7 @@ public interface ConversationRepository extends JpaRepository<Conversation, Long
 
     Optional<Conversation> findByProductIdAndBuyerId(Long productId, String buyerId);
 
+    /* 상품의 모든 대화에 상태 이벤트를 보낼 때: 상품 하나의 대화 전체, 대화 ID 오름차순 */
     List<Conversation> findByProductIdOrderByConversationIdAsc(Long productId);
 
     /* 내 채팅 목록: 구매 희망자 또는 판매자로 참여한 대화, 생성 시각 내림차순(설계 5.2.7) */

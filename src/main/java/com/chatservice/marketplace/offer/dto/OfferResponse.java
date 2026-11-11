@@ -18,6 +18,7 @@ public record OfferResponse(Long offerId, Long conversationId, long amount, long
     }
 
     public static OfferResponse of(PriceOffer offer, ReservationResponse reservation) {
+        // 가격 제안과 예약 내역을 응답 객체로 옮긴다. 수락 응답이면 reservation 에 새로 만든 예약이 담기고, 제안 등록·거절 응답이면 null 이다
         return new OfferResponse(offer.getOfferId(), offer.getConversationId(), offer.getAmount(), offer.getQuantity(),
                 offer.getStatus(), offer.getCreatedAt(), offer.getRespondedAt(), reservation);
     }

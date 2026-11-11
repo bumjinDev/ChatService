@@ -11,5 +11,17 @@ public enum PausePoint {
     ORDER_READ,
 
     /** 취소 처리에서 구매자 지갑을 조회하고 잔액 범위를 검사한 직후, 주문과 잔액을 바꾸기 전. 당사자 취소와 미발송 자동 취소가 함께 쓰는 공통 취소 처리(cancel)에 있다. */
-    WALLET_READ
+    WALLET_READ,
+
+    /** 결제(placeOrder)에서 상품, 예약, 제안, 지갑을 읽어 모든 검사를 통과한 직후, 주문을 저장하기 전. */
+    PAYMENT_CHECKED,
+
+    /** 결제(placeOrder)의 마지막 처리가 끝나고 트랜잭션이 커밋되기 직전. 이때까지 실행된 UPDATE의 행 잠금을 유지한 채 멈춘다. */
+    PAYMENT_BEFORE_COMMIT,
+
+    /** 예약 걸기(reserve)에서 같은 구매자의 예약과 구매 가능 수량 검사를 통과한 직후, 예약을 저장하기 전. 제안 수락이 같은 트랜잭션에서 지난다. */
+    RESERVATION_CHECKED,
+
+    /** 공통 취소 처리(cancel)에서 상품을 처음 조회한 직후, 남은 수량을 되돌리기 전. 당사자 취소와 미발송 자동 취소가 함께 지난다. */
+    CANCEL_PRODUCT_READ
 }

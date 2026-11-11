@@ -24,6 +24,8 @@ import com.chatservice.marketplace.product.domain.Product;
 import com.chatservice.marketplace.product.service.IProductService;
 import com.chatservice.marketplace.reservation.service.IReservationQueryService;
 import com.chatservice.marketplace.reservation.service.IReservationService;
+import com.chatservice.marketplace.testsupport.PausePoint;
+import com.chatservice.marketplace.testsupport.TestPause;
 import com.chatservice.marketplace.wallet.service.IWalletService;
 
 @Service
@@ -40,12 +42,13 @@ public class OrderService implements IOrderService {
     private final IReservationQueryService reservationQueryService;
     private final IAgreementQueryService agreementQueryService;
     private final TimeRules timeRules;
+    private final TestPause testPause;
 
     public OrderService(PurchaseOrderRepository purchaseOrderRepository, IProductService productService,
                         IOfferService offerService, IWalletService walletService,
                         IConversationService conversationService, IReservationService reservationService,
                         IReservationQueryService reservationQueryService, IAgreementQueryService agreementQueryService,
-                        TimeRules timeRules) {
+                        TimeRules timeRules, TestPause testPause) {
         this.purchaseOrderRepository = purchaseOrderRepository;
         this.productService = productService;
         this.offerService = offerService;
@@ -55,23 +58,9 @@ public class OrderService implements IOrderService {
         this.reservationQueryService = reservationQueryService;
         this.agreementQueryService = agreementQueryService;
         this.timeRules = timeRules;
+        this.testPause = testPause;
     }
 
-    /*
-     * 처리 순서(설계 6.10, 예약 기능 설계안 5.5, 가격 제안 수량 설계안 5.4)
-     *  1) 상품(404) → 본인 상품(403) → 판매 중(409) → 남은 수량 이상 요청(409 INSUFFICIENT_STOCK)
-     *     → 남은 수량 안이지만 다른 회원의 활성 예약 때문에 구매 가능 수량을 넘는 요청(409 PRODUCT_RESERVED)
-     *  2) 적용 단가
-     *     - offerId 가 없으면 등록 가격(LISTED). 이 상품에서 결제하는 회원에게 활성이고 만료 전인 예약이 있으면(합의가 예약 중) 409 AGREED_OFFER_REQUIRED
-     *     - offerId 가 있으면 본인에게 수락된 같은 상품의 제안 금액(AGREED). 그 제안으로 만든 취소되지 않은 주문이 있으면 409 OFFER_ALREADY_USED
-     *       → 그 제안의 예약 가운데 활성이고 만료 전인 것이 없으면 409 OFFER_RESERVATION_ENDED → 결제 수량이 제안 수량과 다르면 409 OFFER_QUANTITY_MISMATCH
-     *  3) 총 결제액 = 단가 × 수량. 저장·연산 범위를 넘으면 400. 잔액이 부족하면 409
-     *  4) 주문 생성 → 잔액 차감과 PURCHASE 내역(주문 참조) → 주문 수량만 재고 차감(0 이면 SOLD)
-     *     → 결제한 회원에게 걸린 활성 예약을 결제 종료(FULFILLED) → 당사자 대화가 없으면 생성
-     *  5) 상품의 모든 대화에 CONVERSATION_STATE 전달(커밋 후)
-     * 4) 의 변경은 한 트랜잭션으로 반영한다. 모든 검사는 변경 전에 끝나므로 실패한 요청은 주문·차감·재고를 바꾸지 않는다.
-     * 동시 결제에서 재고·잔액을 넘지 않는 보장과 같은 결제 재시도의 중복 방지는 후속 과제다.
-     */
     /**
      * 구매자의 잔액으로 상품을 결제하고 주문을 확정한다.
      *
@@ -174,6 +163,8 @@ public class OrderService implements IOrderService {
         if (walletService.currentBalance(buyerId) < paidAmount) {
             throw new BusinessException(ErrorCode.INSUFFICIENT_BALANCE);
         }
+        // 겹침 재현 테스트의 중지 위치. 상품·예약·제안·지갑을 읽어 모든 검사를 통과한 직후, 주문을 저장하기 전이다. 테스트 설정이 꺼져 있거나 테스트 헤더가 없는 요청은 그대로 진행한다.
+        testPause.reach(PausePoint.PAYMENT_CHECKED);
 
         // 주문 데이터들을 생성 하는 단계
 
@@ -206,6 +197,8 @@ public class OrderService implements IOrderService {
 
         // 상품의 모든 대화에 보낼 상태 이벤트를 등록한다. 실제 전송은 커밋 후에 한다
         conversationService.publishStateToProductConversations(product);
+        // 잠금 대기 관찰용 중지 위치. 여기까지 실행된 UPDATE의 행 잠금을 유지한 채 커밋 직전에 멈춘다. flush를 호출하지 않으므로 SQL 실행 순서는 바꾸지 않는다.
+        testPause.reach(PausePoint.PAYMENT_BEFORE_COMMIT);
         // 메서드가 반환되면 트랜잭션이 커밋된다
         return order.getOrderId();
     }

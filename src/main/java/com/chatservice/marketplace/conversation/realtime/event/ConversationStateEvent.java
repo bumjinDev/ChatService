@@ -9,6 +9,7 @@ public record ConversationStateEvent(String type, Long conversationId, String pr
 
     public static ConversationStateEvent of(Long conversationId, String productStatus, long remainingQuantity,
                                             long availableQuantity, boolean writable, String readOnlyReason) {
+        // 종류(type)는 CONVERSATION_STATE 로 고정한다
         return new ConversationStateEvent("CONVERSATION_STATE", conversationId, productStatus, remainingQuantity,
                 availableQuantity, writable, readOnlyReason);
     }

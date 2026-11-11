@@ -25,6 +25,7 @@ public record ReservationResponse(
         Long fulfilledOrderId) {
 
     public static ReservationResponse of(Reservation reservation) {
+        // 예약 내역을 응답 객체로 옮긴다
         return new ReservationResponse(reservation.getReservationId(), reservation.getConversationId(),
                 reservation.getProductId(), reservation.getOfferId(), reservation.getQuantity(), reservation.getStatus(),
                 reservation.getReservedAt(), reservation.getExpiresAt(), reservation.getEndedAt(),
