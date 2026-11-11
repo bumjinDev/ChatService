@@ -83,9 +83,18 @@ public class ProductService implements IProductService {
                 reservationQueryService.availableQuantity(product, viewerId));
     }
 
+    /**
+     * 상품을 조회한다. 판매 종료된 상품도 조회한다.
+     *
+     * @param productId 조회할 상품 ID
+     * @return 조회한 상품
+     * @throws BusinessException {@code PRODUCT_NOT_FOUND}: 상품이 없다
+     */
     @Override
     @Transactional(readOnly = true)
     public Product getProduct(Long productId) {
+        // 상품 조회(테이블 "PRODUCT"). 잠금 없이 조회하며 없으면 PRODUCT_NOT_FOUND
+        // 같은 트랜잭션에서 이미 조회한 상품이면 DB 를 다시 조회하지 않고 같은 객체를 돌려준다
         return productRepository.findById(productId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
     }

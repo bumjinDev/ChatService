@@ -139,7 +139,7 @@ public class WalletService implements IWalletService {
         if (!AmountRules.fitsBalance(wallet.getBalance(), amount)) {
             throw new BusinessException(ErrorCode.VALIDATION_ERROR, "반환·지급 후 잔액이 저장 가능한 범위를 초과합니다.");
         }
-        // 잔액 증가와 내역 객체 생성 후 내역 INSERT. IDENTITY 전략이라 INSERT는 save 호출 시점에 실행된다.
+        // 잔액 증가와 내역 객체 생성 후 저장하는 작업을 모두 한다.(내역 INSERT) IDENTITY 전략이라 INSERT는 save 호출 시점에 실행된다. - jpa 기본 동작.
         balanceTransactionRepository.save(wallet.apply(type, amount, orderId, null, now));
         logger.info("[잔액 증가] memberId={}, orderId={}, type={}, amount={}, balanceAfter={}",
                 memberId, orderId, type, amount, wallet.getBalance());

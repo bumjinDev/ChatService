@@ -84,6 +84,19 @@ public class Reservation {
     @Column(name = "FULFILLED_ORDER_ID")
     private Long fulfilledOrderId;
 
+    /**
+     * 예약 중 상태의 새 예약을 만든다. 객체만 만들며 INSERT 는 호출한 쪽의 save 에서 실행된다.
+     *
+     * @param productId      예약이 걸리는 상품 ID
+     * @param conversationId 예약을 건 대화 ID
+     * @param buyerId        예약을 받는 구매 희망자 ID
+     * @param sellerId       상품의 판매자 ID
+     * @param offerId        이 예약을 만든 가격 제안 ID
+     * @param quantity       예약 수량
+     * @param reservedAt     예약 시각
+     * @param expiresAt      만료 시각
+     * @return 새 예약
+     */
     public static Reservation reserve(Long productId, Long conversationId, String buyerId, String sellerId,
                                       Long offerId, long quantity, Instant reservedAt, Instant expiresAt) {
         Reservation reservation = new Reservation();
@@ -93,6 +106,7 @@ public class Reservation {
         reservation.sellerId = sellerId;
         reservation.offerId = offerId;
         reservation.quantity = quantity;
+        // 새 예약은 예약 중으로 시작한다
         reservation.status = ReservationStatus.ACTIVE;
         reservation.reservedAt = reservedAt;
         reservation.expiresAt = expiresAt;
@@ -100,6 +114,7 @@ public class Reservation {
     }
 
     public boolean isActive() {
+        // 예약 중인지만 확인한다. 만료 시각은 보지 않는다. ACTIVE : 예약 중, RELEASED : 해제, EXPIRED : 기간 만료, FULFILLED : 결제 종료
         return status == ReservationStatus.ACTIVE;
     }
 
@@ -113,6 +128,7 @@ public class Reservation {
      * @return 상태가 {@code ACTIVE}이고 {@code now}가 만료 시각보다 이르면 {@code true}
      */
     public boolean isActiveAt(Instant now) {
+        // 예약 중(ACTIVE)이고 처리 기준 시각이 만료 시각보다 이르면 true
         return isActive() && now.isBefore(expiresAt);
     }
 

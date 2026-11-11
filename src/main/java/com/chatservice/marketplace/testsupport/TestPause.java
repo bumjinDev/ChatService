@@ -29,13 +29,13 @@ import jakarta.servlet.http.HttpServletRequest;
  * 멈춘 요청은 트랜잭션과 DB 연결을 잡은 채로 기다린다. 그래서 {@code marketplace.test-support.pause-timeout}(기본 30초) 안에
  * 재개되지 않으면 예외를 던져 그 요청을 실패로 끝낸다.
  */
-// 스프링 빈으로 등록한다. OrderCancellationService, ShipmentService, TestSupportController가 생성자로 주입받는다.
+// 스프링 빈으로 등록한다. OrderCancellationService, OrderService, ReservationService, ShipmentService, TestSupportController가 생성자로 주입받는다.
 @Component
 public class TestPause {
 
     // 요청 이름(A, B)을 담는 요청 헤더의 이름. JMeter가 요청 A와 요청 B에 붙인다.
     public static final String NAME_HEADER = "X-Test-Request-Name";
-    // 멈출 위치(ORDER_READ 또는 WALLET_READ)를 담는 요청 헤더의 이름. JMeter가 요청 A와 요청 B에 붙인다.
+    // 멈출 위치({@link PausePoint}의 이름)를 담는 요청 헤더의 이름. JMeter가 멈출 요청에 붙인다.
     public static final String PAUSE_AT_HEADER = "X-Test-Pause-At";
 
     // 멈춤과 재개를 서버 로그에 남기는 로거. 테스트 결과를 확인할 때 이 로그로 순서를 본다.

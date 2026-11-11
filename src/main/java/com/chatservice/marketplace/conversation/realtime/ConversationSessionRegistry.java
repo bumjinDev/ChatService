@@ -40,6 +40,7 @@ public class ConversationSessionRegistry {
 
     /** 대화의 열린 세션(회원 ID → 세션) 복사본. */
     public Map<String, WebSocketSession> sessionsOf(Long conversationId) {
+        // 서버 메모리의 세션 목록에서 꺼낸다. DB 는 조회하지 않는다. 열린 세션이 없으면 빈 목록을 돌려준다
         Map<String, WebSocketSession> members = sessions.get(conversationId);
         return members == null ? Map.of() : Map.copyOf(members);
     }

@@ -8,6 +8,7 @@ public record OfferEvent(String type, Long offerId, Long conversationId, long am
 
     public static OfferEvent of(Long offerId, Long conversationId, long amount, long quantity, String status,
                                 Instant createdAt, Instant respondedAt) {
+        // 종류(type)는 OFFER 로 고정한다
         return new OfferEvent("OFFER", offerId, conversationId, amount, quantity, status, createdAt, respondedAt);
     }
 }

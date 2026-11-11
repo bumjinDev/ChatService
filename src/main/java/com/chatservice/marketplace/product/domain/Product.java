@@ -81,6 +81,7 @@ public class Product {
     }
 
     public boolean isOnSale() {
+        // 판매 중인지 확인한다. ON_SALE : 판매 중, SOLD : 판매 종료
         return status == ProductStatus.ON_SALE;
     }
 

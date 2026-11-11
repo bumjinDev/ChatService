@@ -79,6 +79,7 @@ public class PriceOffer {
     }
 
     public boolean isPending() {
+        // 응답 대기인지 확인한다. PENDING : 수락 혹은 거부 대기중, ACCEPTED : 수락, REJECTED : 거부
         return status == OfferStatus.PENDING;
     }
 
@@ -86,11 +87,21 @@ public class PriceOffer {
         return status == OfferStatus.ACCEPTED;
     }
 
+    /**
+     * 응답 대기인 가격 제안을 수락 또는 거절로 바꾸고 응답 시각을 기록한다. 엔티티 필드만 바꾸며 UPDATE 는 flush 때 실행된다.
+     *
+     * @param accept 수락이면 {@code true}, 거절이면 {@code false}
+     * @param now    응답 시각
+     * @throws IllegalStateException 응답 대기가 아니면 던진다.
+     */
     public void respond(boolean accept, Instant now) {
+        // 응답 대기가 아닌 가격 제안은 바꾸지 않는다. 서비스가 먼저 확인한 뒤 호출한다
         if (!isPending()) {
             throw new IllegalStateException("이미 응답한 제안입니다. offerId=" + offerId);
         }
+        // 수락이면 ACCEPTED, 거절이면 REJECTED 로 바꾼다
         status = accept ? OfferStatus.ACCEPTED : OfferStatus.REJECTED;
+        // 응답 시각을 기록한다
         respondedAt = now;
     }
 }

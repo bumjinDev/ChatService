@@ -27,12 +27,15 @@ public record ConversationWritability(boolean writable, ReadOnlyReason readOnlyR
     private static final ConversationWritability WRITABLE = new ConversationWritability(true, null);
 
     public static ConversationWritability evaluate(boolean productOnSale, Collection<TradeStatus> partyOrderStatuses) {
+        // 상품이 판매 중이면 쓰기 가능
         if (productOnSale) {
             return WRITABLE;
         }
+        // 판매 종료인데 이 대화의 구매자 주문이 없으면 읽기 전용(NO_ACTIVE_ORDER)
         if (partyOrderStatuses.isEmpty()) {
             return new ConversationWritability(false, ReadOnlyReason.NO_ACTIVE_ORDER);
         }
+        // 최종 상태가 아닌 주문이 하나라도 있으면 쓰기 가능, 모두 최종 상태이면 읽기 전용(TRADE_FINALIZED)
         boolean hasActiveOrder = partyOrderStatuses.stream().anyMatch(status -> !status.isFinal());
         return hasActiveOrder ? WRITABLE : new ConversationWritability(false, ReadOnlyReason.TRADE_FINALIZED);
     }
