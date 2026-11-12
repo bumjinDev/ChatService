@@ -5,7 +5,10 @@
       <stringProp name="TestPlan.comments">작업 003 세부 작업 02 「등록 가격 구매–등록 가격 구매 경합」의 테스트다. 판매 수량 50개, 개당 10,000원인 상품 하나에 등록 가격 구매자 18명이 2개·3개·5개를 6명씩 같은 순간에 등록 가격으로 결제한다. 결제는 주문 저장, 잔액 차감, 남은 수량 차감을 요청 하나로 처리한다. runId, outDir, memberFile, joinResultFile에는 이 실행의 값이 들어 있다. 스레드 그룹은 위에서부터 차례대로 하나씩 실행하며, 요청이 실패해도 멈추지 않고 다음 요청을 보낸다.
 - 회원 가입: 회원 CSV의 판매자 1명과 등록 가격 구매자 18명을 가입시키고 가입 결과를 joinResultFile에 쓴다.
 - 로그인: 판매자와 등록 가격 구매자 18명이 로그인하고, 로그인 토큰을 JMeter 속성에 넣는다. 같은 JMeter 창에서 이 그룹만 다시 실행하면 준비한 상품과 대화는 그대로 두고 로그인 토큰만 새로 받는다.
-- 준비: 판매자가 상품을 등록하고, 등록 가격 구매자마다 대화를 시작하고 결제 금액만큼 충전한다. 로그인 토큰은 로그인 그룹이 넣은 속성에서 읽는다. 그 뒤 판매자의 상품 상세와 대화 상세 18건을 조회해 요청 전 상태(남은 수량 50개, 대화 18건, 잔액이 결제 금액과 같음, 가격 제안·예약·주문 없음)를 확인한다.
+- 준비: 상품 등록: 판매자가 상품을 등록하고, 상품 ID와 실행 ID를 JMeter 속성에 넣는다. 로그인 토큰은 로그인 그룹이 넣은 속성에서 읽는다.
+- 준비: 대화 시작 18건: 등록 가격 구매자마다 그 상품에 판매자와의 대화를 시작하고, 대화 ID를 JMeter 속성에 넣는다.
+- 준비: 충전 18건: 등록 가격 구매자마다 결제 금액만큼 충전한다. 이미 결제 금액만큼 충전한 회원으로 상품을 다시 준비할 때는 실행하지 않는다.
+- 준비: 요청 전 상태 확인: 판매자의 상품 상세와 대화 상세 18건, 등록 가격 구매자의 잔액 18건을 조회해 요청 전 상태(남은 수량 50개, 대화 18건, 잔액이 결제 금액과 같음, 가격 제안·예약·주문 없음)를 확인한다.
 - 구매 경합: 스레드 18개가 동기화 타이머로 같은 순간에 등록 가격 구매자의 결제를 보낸다. 요청마다 서버 로그용 실행 ID와 요청 ID를 헤더에 담는다.
 - 구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건을 조회해, 요청마다 응답과 저장된 주문·잔액이 맞는지와 실행 전체의 결과 확인 기준 위반을 종료후확인.log에 쓴다.
 수량 부족으로 거절된 결제와 응답을 받지 못한 결제는 다시 보내지 않는다. 로그인 토큰과 준비한 상품·대화는 파일에 쓰지 않고 JMeter 속성으로만 다음 그룹에 넘기므로, JMeter 창을 닫으면 이 값이 없어진다. 서버는 로그인할 때 토큰을 확인하는 정보를 30분 동안만 보관하므로, 로그인한 지 30분이 지났으면 「로그인」 그룹을 다시 실행한 뒤 저장 상태 확인 그룹을 실행한다.</stringProp>
@@ -189,7 +192,7 @@ new File(vars.get(&apos;joinResultFile&apos;)).setText(&apos;﻿run_id,role,buye
         </JSR223Sampler>
         <hashTree/>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="회원 가입: 판매자 1명과 등록 가격 구매자 18명">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="회원 가입: 판매자 1명과 등록 가격 구매자 18명" enabled="true">
         <stringProp name="TestPlan.comments">회원 CSV에 있는 이 실행의 판매자 1명과 등록 가격 구매자 18명을 한 명씩 가입시키고, 가입 응답 코드를 회원가입결과 CSV 파일에 쓴다.</stringProp>
         <intProp name="ThreadGroup.num_threads">1</intProp>
         <intProp name="ThreadGroup.ramp_time">0</intProp>
@@ -263,7 +266,7 @@ new File(vars.get(&apos;joinResultFile&apos;)).append(row.join(&apos;,&apos;) + 
           <hashTree/>
         </hashTree>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="로그인: 판매자 1명과 등록 가격 구매자 18명">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="로그인: 판매자 1명과 등록 가격 구매자 18명" enabled="true">
         <stringProp name="TestPlan.comments">판매자와 등록 가격 구매자 18명이 로그인하고, 로그인 토큰을 JMeter 속성에 넣는다. 토큰은 파일에 쓰지 않는다. 같은 JMeter 창에서 이 그룹만 다시 실행하면 준비한 상품과 대화는 그대로 두고 로그인 토큰만 새로 받는다.</stringProp>
         <intProp name="ThreadGroup.num_threads">1</intProp>
         <intProp name="ThreadGroup.ramp_time">0</intProp>
@@ -308,7 +311,7 @@ buyers.eachWithIndex { b, idx -&gt;
     vars.put(&apos;qty_&apos; + n, b[&apos;purchase_quantity&apos;])
 }
 
-// 준비 그룹이 속성에 넣은 상품·대화·실행 ID는 지우지 않는다. 이 그룹은 로그인 토큰 속성만 새로 쓴다.
+// 준비 그룹들이 속성에 넣은 상품·대화·실행 ID는 지우지 않는다. 이 그룹은 로그인 토큰 속성만 새로 쓴다.
 vars.put(&apos;login_index&apos;, &apos;0&apos;)
 SampleResult.setResponseData(&apos;runId=&apos; + runId + &apos;, 판매자=&apos; + seller[&apos;member_id&apos;] + &apos;, 등록 가격 구매자=&apos; + buyers.size() + &apos;명&apos;, &apos;UTF-8&apos;)
 </stringProp>
@@ -375,7 +378,7 @@ SampleResult.setResponseData(&apos;runId=&apos; + runId + &apos;, 판매자=&apo
             <stringProp name="parameters"></stringProp>
             <stringProp name="filename"></stringProp>
             <stringProp name="cacheKey">true</stringProp>
-            <stringProp name="script">// 판매자의 로그인 토큰을 속성에 넣는다. 준비 그룹과 구매 경합 뒤 저장 상태 확인 그룹이 이 속성을 읽는다. 토큰은 파일에 쓰지 않는다.
+            <stringProp name="script">// 판매자의 로그인 토큰을 속성에 넣는다. 「준비: 상품 등록」, 「준비: 요청 전 상태 확인」, 구매 경합 뒤 저장 상태 확인 그룹이 이 속성을 읽는다. 토큰은 파일에 쓰지 않는다.
 String token = vars.get(&apos;seller_token&apos;)
 props.put(&apos;buy.seller_token&apos;, token ?: &apos;NOT_FOUND&apos;)
 if (token == null || token == &apos;NOT_FOUND&apos;) {
@@ -467,8 +470,8 @@ vars.put(&apos;cur_buyer_pw&apos;, vars.get(&apos;buyer_pw_&apos; + n))
               <stringProp name="parameters"></stringProp>
               <stringProp name="filename"></stringProp>
               <stringProp name="cacheKey">true</stringProp>
-              <stringProp name="script">// 이 등록 가격 구매자의 로그인 토큰을 번호별 속성에 넣는다. 준비 그룹이 대화 시작과 충전에, 구매 경합 그룹이 결제에,
-// 구매 경합 뒤 저장 상태 확인 그룹이 잔액 조회에 쓴다. 토큰은 파일에 쓰지 않는다.
+              <stringProp name="script">// 이 등록 가격 구매자의 로그인 토큰을 번호별 속성에 넣는다. 「준비: 대화 시작 18건」 그룹이 대화 시작에, 「준비: 충전 18건」 그룹이 충전에,
+// 「준비: 요청 전 상태 확인」 그룹과 구매 경합 뒤 저장 상태 확인 그룹이 잔액 조회에, 구매 경합 그룹이 결제에 쓴다. 토큰은 파일에 쓰지 않는다.
 String n = vars.get(&apos;login_index&apos;)
 String token = vars.get(&apos;cur_token&apos;)
 props.put(&apos;buy.buyer_token_&apos; + n, token ?: &apos;NOT_FOUND&apos;)
@@ -482,8 +485,8 @@ if (token == null || token == &apos;NOT_FOUND&apos;) {
           </hashTree>
         </hashTree>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="준비: 상품 등록, 대화 시작 18건, 충전 18건, 요청 전 상태 확인">
-        <stringProp name="TestPlan.comments">판매자가 상품을 등록하고, 등록 가격 구매자마다 대화를 시작하고 결제 금액만큼 충전한다. 로그인 토큰은 로그인 그룹이 넣은 속성에서 읽는다. 이 그룹의 요청은 구매 경합의 요청 수에 들어가지 않는다. 준비가 끝나면 요청 전 상태를 확인한다.</stringProp>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="준비: 상품 등록" enabled="true">
+        <stringProp name="TestPlan.comments">판매자가 상품을 등록하고, 상품 ID와 실행 ID를 JMeter 속성에 넣는다. 로그인 토큰은 로그인 그룹이 넣은 속성에서 읽는다. 이 그룹을 다시 실행하면 새 상품이 생기므로, 그 뒤 「준비: 대화 시작 18건」과 「준비: 요청 전 상태 확인」 그룹도 다시 실행한다.</stringProp>
         <intProp name="ThreadGroup.num_threads">1</intProp>
         <intProp name="ThreadGroup.ramp_time">0</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -495,12 +498,13 @@ if (token == null || token == &apos;NOT_FOUND&apos;) {
       </ThreadGroup>
       <hashTree>
         <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="로그인 토큰 확인, 실행 폴더 만들기, 회원 CSV에서 판매자와 등록 가격 구매자 18명 읽기, 실행 ID 정하기" enabled="true">
-          <stringProp name="TestPlan.comments">로그인 그룹이 속성에 넣은 판매자와 등록 가격 구매자 18명의 로그인 토큰이 있는지 확인한다. 하나라도 없으면 상품을 등록하지 않고 이 그룹을 멈춘다. 토큰이 모두 있으면 실행 폴더를 만들고, 회원 CSV에서 이 실행 번호의 판매자와 등록 가격 구매자 18명의 ID와 구매 수량을 읽고, 서버 로그에서 이번 실행을 구분할 실행 ID를 정한다. 같은 JMeter 창에서 다시 실행할 때 이전 실행이 속성에 남긴 값을 지우되, 로그인 토큰은 남긴다.</stringProp>
+          <stringProp name="TestPlan.comments">로그인 그룹이 속성에 넣은 판매자와 등록 가격 구매자 18명의 로그인 토큰이 있는지 확인한다. 하나라도 없으면 상품을 등록하지 않고 이 그룹을 멈춘다. 토큰이 모두 있으면 이전 준비와 이전 구매 경합이 속성에 남긴 값을 지우고(로그인 토큰은 남긴다), 실행 폴더를 만들고, 서버 로그에서 이번 실행을 구분할 실행 ID를 정해 속성에 넣는다.</stringProp>
           <stringProp name="scriptLanguage">groovy</stringProp>
           <stringProp name="parameters"></stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="cacheKey">true</stringProp>
-          <stringProp name="script">import java.time.LocalDateTime
+          <stringProp name="script">import java.net.URLEncoder
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 // 회원 CSV에서 run_id가 runId와 같은 줄을 모두 읽는다. 엑셀로 저장하면 「01」이 「1」로 바뀌므로 숫자로 비교한다.
@@ -530,7 +534,7 @@ buyers.eachWithIndex { b, idx -&gt;
     vars.put(&apos;qty_&apos; + n, b[&apos;purchase_quantity&apos;])
 }
 
-// 로그인 그룹이 속성에 넣은 로그인 토큰을 읽는다. 하나라도 없으면 상품을 등록하지 않고 이 그룹을 멈춘다.
+// 로그인 그룹이 속성에 넣은 로그인 토큰을 읽는다. 하나라도 없으면 이 그룹의 요청을 보내지 않고 멈춘다.
 String sellerToken = (props.get(&apos;buy.seller_token&apos;) ?: &apos;NOT_FOUND&apos;) as String
 List&lt;String&gt; missing = []
 if (sellerToken == &apos;NOT_FOUND&apos;) missing &lt;&lt; &apos;판매자&apos;
@@ -543,16 +547,16 @@ if (!missing.isEmpty()) {
     SampleResult.setStopThread(true)
     return
 }
-// 같은 JMeter 창에서 다시 실행할 때 이전 실행이 속성에 남긴 값이 섞이지 않도록 지운다. 로그인 그룹이 넣은 로그인 토큰은 남긴다.
-props.keySet().findAll { String k = it.toString(); k.startsWith(&apos;buy.&apos;) &amp;&amp; k != &apos;buy.seller_token&apos; &amp;&amp; !k.startsWith(&apos;buy.buyer_token_&apos;) }.each { props.remove(it) }
 vars.put(&apos;seller_token&apos;, sellerToken)
+
+// 같은 JMeter 창에서 다시 실행할 때 이전 준비와 이전 구매 경합이 속성에 남긴 값이 섞이지 않도록 지운다. 로그인 그룹이 넣은 로그인 토큰은 남긴다.
+props.keySet().findAll { String k = it.toString(); k.startsWith(&apos;buy.&apos;) &amp;&amp; k != &apos;buy.seller_token&apos; &amp;&amp; !k.startsWith(&apos;buy.buyer_token_&apos;) }.each { props.remove(it) }
 // 이번 실행의 결과를 남길 실행 폴더를 만든다. 이미 있으면 그대로 둔다.
 new File(vars.get(&apos;outDir&apos;)).mkdirs()
-// 실행 ID: 서버 로그에서 이번 실행을 구분하는 값. 실행 번호와 지금 시각으로 만든다.
+// 실행 ID: 서버 로그에서 이번 실행을 구분하는 값. 실행 번호와 지금 시각으로 만든다. 구매 경합 그룹이 이 속성을 읽어 요청 헤더에 담는다.
 String runLogId = &apos;run&apos; + runId + &apos;-&apos; + LocalDateTime.now().format(DateTimeFormatter.ofPattern(&apos;yyyyMMdd-HHmmss&apos;))
-vars.put(&apos;run_log_id&apos;, runLogId)
-vars.put(&apos;buyer_index&apos;, &apos;0&apos;)
-vars.put(&apos;check_index&apos;, &apos;0&apos;)
+props.put(&apos;buy.run_log_id&apos;, runLogId)
+props.put(&apos;buy.test_log_name&apos;, URLEncoder.encode(vars.get(&apos;testLogName&apos;), &apos;UTF-8&apos;))
 SampleResult.setResponseData(&apos;runId=&apos; + runId + &apos;, 실행ID=&apos; + runLogId + &apos;, 판매자=&apos; + seller[&apos;member_id&apos;] + &apos;, 등록 가격 구매자=&apos; + buyers.size() + &apos;명, outDir=&apos; + vars.get(&apos;outDir&apos;), &apos;UTF-8&apos;)
 </stringProp>
         </JSR223Sampler>
@@ -605,6 +609,21 @@ SampleResult.setResponseData(&apos;runId=&apos; + runId + &apos;, 실행ID=&apos
             <stringProp name="JSONPostProcessor.defaultValues">NOT_FOUND</stringProp>
           </JSONPostProcessor>
           <hashTree/>
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="상품 ID를 속성에 넣기" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">// 응답에서 꺼낸 상품 ID를 속성에 넣는다. 「준비: 대화 시작 18건」, 「준비: 요청 전 상태 확인」, 구매 경합, 저장 상태 확인 그룹이 이 속성을 읽는다.
+String productId = vars.get(&apos;product_id&apos;)
+props.put(&apos;buy.product_id&apos;, productId ?: &apos;NOT_FOUND&apos;)
+if (productId == null || productId == &apos;NOT_FOUND&apos;) {
+    prev.setSuccessful(false)
+    prev.setResponseMessage(&apos;상품 ID를 받지 못함&apos;)
+}
+</stringProp>
+          </JSR223PostProcessor>
+          <hashTree/>
           <ResultSaver guiclass="ResultSaverGui" testclass="ResultSaver" testname="응답 본문 저장(실행 폴더의 준비_판매자_상품등록응답)" enabled="true">
             <stringProp name="FileSaver.filename">${outDir}\준비_판매자_상품등록응답</stringProp>
             <boolProp name="FileSaver.errorsonly">false</boolProp>
@@ -614,8 +633,59 @@ SampleResult.setResponseData(&apos;runId=&apos; + runId + &apos;, 실행ID=&apos
           </ResultSaver>
           <hashTree/>
         </hashTree>
-        <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="등록 가격 구매자 18명마다 대화 시작, 충전" enabled="true">
-          <stringProp name="TestPlan.comments">회원 CSV의 등록 가격 구매자 순서대로 18번 반복한다. 반복마다 등록 가격 구매자 한 명이 대화를 시작하고 결제 금액만큼 충전한다.</stringProp>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="준비: 대화 시작 18건" enabled="true">
+        <stringProp name="TestPlan.comments">등록 가격 구매자마다 「준비: 상품 등록」 그룹이 등록한 상품에 판매자와의 대화를 시작하고, 대화 ID를 JMeter 속성에 넣는다.</stringProp>
+        <intProp name="ThreadGroup.num_threads">1</intProp>
+        <intProp name="ThreadGroup.ramp_time">0</intProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">1</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="로그인 토큰과 상품 ID 확인" enabled="true">
+          <stringProp name="TestPlan.comments">로그인 그룹이 넣은 로그인 토큰과 「준비: 상품 등록」 그룹이 넣은 상품 ID가 있는지 확인한다. 하나라도 없으면 대화를 시작하지 않고 이 그룹을 멈춘다.</stringProp>
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script">// 로그인 그룹이 속성에 넣은 로그인 토큰을 읽는다. 하나라도 없으면 이 그룹의 요청을 보내지 않고 멈춘다.
+String sellerToken = (props.get(&apos;buy.seller_token&apos;) ?: &apos;NOT_FOUND&apos;) as String
+List&lt;String&gt; missing = []
+if (sellerToken == &apos;NOT_FOUND&apos;) missing &lt;&lt; &apos;판매자&apos;
+for (int n = 1; n &lt;= 18; n++) {
+    if (((props.get(&apos;buy.buyer_token_&apos; + n) ?: &apos;NOT_FOUND&apos;) as String) == &apos;NOT_FOUND&apos;) missing &lt;&lt; (&apos;등록 가격 구매자 &apos; + String.format(&apos;%02d&apos;, n))
+}
+if (!missing.isEmpty()) {
+    SampleResult.setSuccessful(false)
+    SampleResult.setResponseMessage(&apos;로그인 토큰 없음: &apos; + missing.join(&apos;, &apos;) + &apos;. 같은 JMeter 창에서 「로그인」 그룹을 먼저 실행해야 한다&apos;)
+    SampleResult.setStopThread(true)
+    return
+}
+vars.put(&apos;seller_token&apos;, sellerToken)
+
+// 「준비: 상품 등록」 그룹이 속성에 넣은 상품 ID를 읽는다. 없으면 이 그룹의 요청을 보내지 않고 멈춘다.
+String productId = (props.get(&apos;buy.product_id&apos;) ?: &apos;NOT_FOUND&apos;) as String
+if (productId == &apos;NOT_FOUND&apos;) {
+    SampleResult.setSuccessful(false)
+    SampleResult.setResponseMessage(&apos;상품 ID 없음. 같은 JMeter 창에서 「준비: 상품 등록」 그룹을 먼저 실행해야 한다&apos;)
+    SampleResult.setStopThread(true)
+    return
+}
+vars.put(&apos;product_id&apos;, productId)
+
+// 이 그룹에서 새로 시작하는 대화의 ID만 속성에 남도록, 이전에 대화 시작 그룹이 넣은 대화 ID를 지운다.
+props.keySet().findAll { it.toString().startsWith(&apos;buy.conv_&apos;) }.each { props.remove(it) }
+vars.put(&apos;buyer_index&apos;, &apos;0&apos;)
+SampleResult.setResponseData(&apos;상품ID=&apos; + productId, &apos;UTF-8&apos;)
+</stringProp>
+        </JSR223Sampler>
+        <hashTree/>
+        <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="등록 가격 구매자 18명마다 대화 시작" enabled="true">
+          <stringProp name="TestPlan.comments">회원 CSV의 등록 가격 구매자 순서대로 18번 반복한다. 반복마다 등록 가격 구매자 한 명이 대화를 시작한다.</stringProp>
           <stringProp name="LoopController.loops">18</stringProp>
           <boolProp name="LoopController.continue_forever">true</boolProp>
         </LoopController>
@@ -637,15 +707,11 @@ SampleResult.setResponseData(&apos;runId=&apos; + runId + &apos;, 실행ID=&apos
               <stringProp name="parameters"></stringProp>
               <stringProp name="filename"></stringProp>
               <stringProp name="cacheKey">true</stringProp>
-              <stringProp name="script">// 이번 반복에서 대화를 시작하고 충전할 등록 가격 구매자를 정한다. 충전 금액은 등록 가격 × 구매 수량(결제 금액)이다.
+              <stringProp name="script">// 이번 반복에서 대화를 시작할 등록 가격 구매자를 정한다.
 int n = (vars.get(&apos;buyer_index&apos;) as int) + 1
 vars.put(&apos;buyer_index&apos;, String.valueOf(n))
 vars.put(&apos;cur_no&apos;, String.format(&apos;%02d&apos;, n))
-vars.put(&apos;cur_buyer_id&apos;, vars.get(&apos;buyer_id_&apos; + n))
 vars.put(&apos;cur_token&apos;, (props.get(&apos;buy.buyer_token_&apos; + n) ?: &apos;NOT_FOUND&apos;) as String)
-long charge = (vars.get(&apos;productPrice&apos;) as long) * (vars.get(&apos;qty_&apos; + n) as long)
-vars.put(&apos;cur_charge&apos;, String.valueOf(charge))
-vars.put(&apos;charge_&apos; + n, String.valueOf(charge))
 </stringProp>
             </JSR223PreProcessor>
             <hashTree/>
@@ -675,7 +741,91 @@ vars.put(&apos;charge_&apos; + n, String.valueOf(charge))
               <stringProp name="JSONPostProcessor.defaultValues">NOT_FOUND</stringProp>
             </JSONPostProcessor>
             <hashTree/>
+            <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="대화 ID를 번호별 속성에 넣기" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">// 이 등록 가격 구매자의 대화 ID를 번호별 속성에 넣는다. 「준비: 요청 전 상태 확인」 그룹과 저장 상태 확인 그룹이 이 속성을 읽는다.
+String n = vars.get(&apos;buyer_index&apos;)
+props.put(&apos;buy.conv_&apos; + n, vars.get(&apos;cur_conv&apos;) ?: &apos;NOT_FOUND&apos;)
+</stringProp>
+            </JSR223PostProcessor>
+            <hashTree/>
           </hashTree>
+        </hashTree>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="준비: 충전 18건" enabled="true">
+        <stringProp name="TestPlan.comments">등록 가격 구매자마다 결제 금액만큼 충전한다. 같은 회원에게 이 그룹을 다시 실행하면 잔액이 결제 금액보다 많아지므로, 이미 결제 금액만큼 충전한 회원으로 상품을 다시 준비할 때는 이 그룹을 실행하지 않는다.</stringProp>
+        <intProp name="ThreadGroup.num_threads">1</intProp>
+        <intProp name="ThreadGroup.ramp_time">0</intProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">1</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="회원 CSV에서 등록 가격 구매자 18명의 구매 수량 읽기, 로그인 토큰 확인" enabled="true">
+          <stringProp name="TestPlan.comments">회원 CSV에서 이 실행 번호의 등록 가격 구매자 18명의 구매 수량을 읽고, 로그인 그룹이 넣은 로그인 토큰이 있는지 확인한다. 하나라도 없으면 충전하지 않고 이 그룹을 멈춘다.</stringProp>
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script">// 회원 CSV에서 run_id가 runId와 같은 줄을 모두 읽는다. 엑셀로 저장하면 「01」이 「1」로 바뀌므로 숫자로 비교한다.
+String runId = vars.get(&apos;runId&apos;)
+def sameRun = { String v -&gt; (v != null &amp;&amp; v.isInteger() &amp;&amp; runId.isInteger()) ? (v as int) == (runId as int) : v == runId }
+List&lt;String&gt; lines = new File(vars.get(&apos;memberFile&apos;)).readLines(&apos;UTF-8&apos;)
+List&lt;String&gt; cols = (lines[0].replace(&apos;﻿&apos;, &apos;&apos;).trim().split(&apos;,&apos;) as List)
+List&lt;Map&lt;String, String&gt;&gt; rows = []
+for (String line : lines.drop(1)) {
+    if (line.trim().isEmpty()) continue
+    List&lt;String&gt; vals = (line.trim().split(&apos;,&apos;, -1) as List)
+    Map&lt;String, String&gt; row = [:]
+    for (int i = 0; i &lt; cols.size(); i++) { row[cols[i]] = vals[i] }
+    if (sameRun(row[&apos;run_id&apos;])) rows &lt;&lt; row
+}
+Map&lt;String, String&gt; seller = rows.find { it[&apos;role&apos;] == &apos;판매자&apos; }
+List&lt;Map&lt;String, String&gt;&gt; buyers = rows.findAll { it[&apos;role&apos;] == &apos;등록 가격 구매자&apos; }.sort { it[&apos;buyer_no&apos;] as int }
+if (seller == null || buyers.size() != 18) {
+    throw new IllegalStateException(&apos;회원 CSV에 실행 번호 &apos; + runId + &apos;의 판매자 1명과 등록 가격 구매자 18명이 없습니다. 판매자 &apos; + (seller == null ? 0 : 1) + &apos;명, 등록 가격 구매자 &apos; + buyers.size() + &apos;명&apos;)
+}
+vars.put(&apos;seller_id&apos;, seller[&apos;member_id&apos;])
+vars.put(&apos;seller_pw&apos;, seller[&apos;password&apos;])
+buyers.eachWithIndex { b, idx -&gt;
+    int n = idx + 1
+    vars.put(&apos;buyer_id_&apos; + n, b[&apos;member_id&apos;])
+    vars.put(&apos;buyer_pw_&apos; + n, b[&apos;password&apos;])
+    vars.put(&apos;qty_&apos; + n, b[&apos;purchase_quantity&apos;])
+}
+
+// 로그인 그룹이 속성에 넣은 로그인 토큰을 읽는다. 하나라도 없으면 이 그룹의 요청을 보내지 않고 멈춘다.
+String sellerToken = (props.get(&apos;buy.seller_token&apos;) ?: &apos;NOT_FOUND&apos;) as String
+List&lt;String&gt; missing = []
+if (sellerToken == &apos;NOT_FOUND&apos;) missing &lt;&lt; &apos;판매자&apos;
+for (int n = 1; n &lt;= 18; n++) {
+    if (((props.get(&apos;buy.buyer_token_&apos; + n) ?: &apos;NOT_FOUND&apos;) as String) == &apos;NOT_FOUND&apos;) missing &lt;&lt; (&apos;등록 가격 구매자 &apos; + String.format(&apos;%02d&apos;, n))
+}
+if (!missing.isEmpty()) {
+    SampleResult.setSuccessful(false)
+    SampleResult.setResponseMessage(&apos;로그인 토큰 없음: &apos; + missing.join(&apos;, &apos;) + &apos;. 같은 JMeter 창에서 「로그인」 그룹을 먼저 실행해야 한다&apos;)
+    SampleResult.setStopThread(true)
+    return
+}
+vars.put(&apos;seller_token&apos;, sellerToken)
+
+vars.put(&apos;buyer_index&apos;, &apos;0&apos;)
+SampleResult.setResponseData(&apos;runId=&apos; + runId + &apos;, 등록 가격 구매자=&apos; + buyers.size() + &apos;명&apos;, &apos;UTF-8&apos;)
+</stringProp>
+        </JSR223Sampler>
+        <hashTree/>
+        <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="등록 가격 구매자 18명마다 충전" enabled="true">
+          <stringProp name="TestPlan.comments">회원 CSV의 등록 가격 구매자 순서대로 18번 반복한다. 반복마다 등록 가격 구매자 한 명이 결제 금액만큼 충전한다.</stringProp>
+          <stringProp name="LoopController.loops">18</stringProp>
+          <boolProp name="LoopController.continue_forever">true</boolProp>
+        </LoopController>
+        <hashTree>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="등록 가격 구매자 ${cur_no} 충전(${cur_charge}원)" enabled="true">
             <stringProp name="TestPlan.comments">등록 가격 구매자가 결제 금액(개당 등록 가격 × 구매 수량)만큼 잔액을 충전한다. 지갑이 없으면 이 충전이 지갑을 만든다.</stringProp>
             <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
@@ -694,6 +844,21 @@ vars.put(&apos;charge_&apos; + n, String.valueOf(charge))
             </elementProp>
           </HTTPSamplerProxy>
           <hashTree>
+            <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="이번 반복의 등록 가격 구매자 정하기" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">// 이번 반복에서 충전할 등록 가격 구매자를 정한다. 충전 금액은 등록 가격 × 구매 수량(결제 금액)이다.
+int n = (vars.get(&apos;buyer_index&apos;) as int) + 1
+vars.put(&apos;buyer_index&apos;, String.valueOf(n))
+vars.put(&apos;cur_no&apos;, String.format(&apos;%02d&apos;, n))
+vars.put(&apos;cur_token&apos;, (props.get(&apos;buy.buyer_token_&apos; + n) ?: &apos;NOT_FOUND&apos;) as String)
+long charge = (vars.get(&apos;productPrice&apos;) as long) * (vars.get(&apos;qty_&apos; + n) as long)
+vars.put(&apos;cur_charge&apos;, String.valueOf(charge))
+</stringProp>
+            </JSR223PreProcessor>
+            <hashTree/>
             <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="JSON 헤더와 등록 가격 구매자 로그인 쿠키" enabled="true">
               <collectionProp name="HeaderManager.headers">
                 <elementProp name="" elementType="Header">
@@ -717,29 +882,102 @@ vars.put(&apos;charge_&apos; + n, String.valueOf(charge))
               <intProp name="Assertion.test_type">8</intProp>
             </ResponseAssertion>
             <hashTree/>
-            <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="번호별 변수에 대화 ID와 충전 뒤 잔액 넣고 응답 본문 저장(실행 폴더의 준비_등록가격구매자번호_충전응답.json)" enabled="true">
+            <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="응답 본문 저장(실행 폴더의 준비_등록가격구매자번호_충전응답.json)" enabled="true">
               <stringProp name="scriptLanguage">groovy</stringProp>
               <stringProp name="parameters"></stringProp>
               <stringProp name="filename"></stringProp>
               <stringProp name="cacheKey">true</stringProp>
-              <stringProp name="script">import groovy.json.JsonSlurper
-// 이 등록 가격 구매자의 대화 ID와 충전 뒤 잔액을 번호별 변수에 넣고, 충전 응답 본문을 실행 폴더에 저장한다.
-String n = vars.get(&apos;buyer_index&apos;)
-vars.put(&apos;conv_&apos; + n, vars.get(&apos;cur_conv&apos;))
-String body = prev.getResponseDataAsString()
-new File(vars.get(&apos;outDir&apos;), &apos;준비_등록가격구매자&apos; + vars.get(&apos;cur_no&apos;) + &apos;_충전응답.json&apos;).setText(body, &apos;UTF-8&apos;)
-try {
-    def j = new JsonSlurper().parseText(body)
-    vars.put(&apos;pre_balance_&apos; + n, String.valueOf(j.balance))
-} catch (Exception e) {
-    vars.put(&apos;pre_balance_&apos; + n, &apos;확인못함&apos;)
-}
+              <stringProp name="script">// 충전 응답 본문을 실행 폴더에 저장한다. 요청 전 잔액은 「준비: 요청 전 상태 확인」 그룹이 잔액 조회로 읽는다.
+new File(vars.get(&apos;outDir&apos;), &apos;준비_등록가격구매자&apos; + vars.get(&apos;cur_no&apos;) + &apos;_충전응답.json&apos;).setText(prev.getResponseDataAsString(), &apos;UTF-8&apos;)
 </stringProp>
             </JSR223PostProcessor>
             <hashTree/>
           </hashTree>
         </hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="판매자의 상품 상세 조회(요청 전 상태)">
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="준비: 요청 전 상태 확인" enabled="true">
+        <stringProp name="TestPlan.comments">판매자의 상품 상세와 대화 상세 18건, 등록 가격 구매자의 잔액 18건을 조회해 요청 전 상태를 확인하고, 구매 경합 그룹과 저장 상태 확인 그룹이 쓸 값을 JMeter 속성에 넣는다. 이 그룹의 요청은 구매 경합의 요청 수에 들어가지 않는다.</stringProp>
+        <intProp name="ThreadGroup.num_threads">1</intProp>
+        <intProp name="ThreadGroup.ramp_time">0</intProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">1</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="로그인 토큰과 상품 ID 확인, 회원 CSV에서 등록 가격 구매자 18명 읽기, 대화 ID와 결제 금액 정하기">
+          <stringProp name="TestPlan.comments">로그인 그룹이 넣은 로그인 토큰과 「준비: 상품 등록」 그룹이 넣은 상품 ID가 있는지 확인한다. 하나라도 없으면 조회하지 않고 이 그룹을 멈춘다. 회원 CSV에서 이 실행 번호의 등록 가격 구매자 18명의 ID와 구매 수량을 읽고, 「준비: 대화 시작 18건」 그룹이 넣은 대화 ID와 결제 금액을 번호별 변수에 넣는다.</stringProp>
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script">// 회원 CSV에서 run_id가 runId와 같은 줄을 모두 읽는다. 엑셀로 저장하면 「01」이 「1」로 바뀌므로 숫자로 비교한다.
+String runId = vars.get(&apos;runId&apos;)
+def sameRun = { String v -&gt; (v != null &amp;&amp; v.isInteger() &amp;&amp; runId.isInteger()) ? (v as int) == (runId as int) : v == runId }
+List&lt;String&gt; lines = new File(vars.get(&apos;memberFile&apos;)).readLines(&apos;UTF-8&apos;)
+List&lt;String&gt; cols = (lines[0].replace(&apos;﻿&apos;, &apos;&apos;).trim().split(&apos;,&apos;) as List)
+List&lt;Map&lt;String, String&gt;&gt; rows = []
+for (String line : lines.drop(1)) {
+    if (line.trim().isEmpty()) continue
+    List&lt;String&gt; vals = (line.trim().split(&apos;,&apos;, -1) as List)
+    Map&lt;String, String&gt; row = [:]
+    for (int i = 0; i &lt; cols.size(); i++) { row[cols[i]] = vals[i] }
+    if (sameRun(row[&apos;run_id&apos;])) rows &lt;&lt; row
+}
+Map&lt;String, String&gt; seller = rows.find { it[&apos;role&apos;] == &apos;판매자&apos; }
+List&lt;Map&lt;String, String&gt;&gt; buyers = rows.findAll { it[&apos;role&apos;] == &apos;등록 가격 구매자&apos; }.sort { it[&apos;buyer_no&apos;] as int }
+if (seller == null || buyers.size() != 18) {
+    throw new IllegalStateException(&apos;회원 CSV에 실행 번호 &apos; + runId + &apos;의 판매자 1명과 등록 가격 구매자 18명이 없습니다. 판매자 &apos; + (seller == null ? 0 : 1) + &apos;명, 등록 가격 구매자 &apos; + buyers.size() + &apos;명&apos;)
+}
+vars.put(&apos;seller_id&apos;, seller[&apos;member_id&apos;])
+vars.put(&apos;seller_pw&apos;, seller[&apos;password&apos;])
+buyers.eachWithIndex { b, idx -&gt;
+    int n = idx + 1
+    vars.put(&apos;buyer_id_&apos; + n, b[&apos;member_id&apos;])
+    vars.put(&apos;buyer_pw_&apos; + n, b[&apos;password&apos;])
+    vars.put(&apos;qty_&apos; + n, b[&apos;purchase_quantity&apos;])
+}
+
+// 로그인 그룹이 속성에 넣은 로그인 토큰을 읽는다. 하나라도 없으면 이 그룹의 요청을 보내지 않고 멈춘다.
+String sellerToken = (props.get(&apos;buy.seller_token&apos;) ?: &apos;NOT_FOUND&apos;) as String
+List&lt;String&gt; missing = []
+if (sellerToken == &apos;NOT_FOUND&apos;) missing &lt;&lt; &apos;판매자&apos;
+for (int n = 1; n &lt;= 18; n++) {
+    if (((props.get(&apos;buy.buyer_token_&apos; + n) ?: &apos;NOT_FOUND&apos;) as String) == &apos;NOT_FOUND&apos;) missing &lt;&lt; (&apos;등록 가격 구매자 &apos; + String.format(&apos;%02d&apos;, n))
+}
+if (!missing.isEmpty()) {
+    SampleResult.setSuccessful(false)
+    SampleResult.setResponseMessage(&apos;로그인 토큰 없음: &apos; + missing.join(&apos;, &apos;) + &apos;. 같은 JMeter 창에서 「로그인」 그룹을 먼저 실행해야 한다&apos;)
+    SampleResult.setStopThread(true)
+    return
+}
+vars.put(&apos;seller_token&apos;, sellerToken)
+
+// 「준비: 상품 등록」 그룹이 속성에 넣은 상품 ID를 읽는다. 없으면 이 그룹의 요청을 보내지 않고 멈춘다.
+String productId = (props.get(&apos;buy.product_id&apos;) ?: &apos;NOT_FOUND&apos;) as String
+if (productId == &apos;NOT_FOUND&apos;) {
+    SampleResult.setSuccessful(false)
+    SampleResult.setResponseMessage(&apos;상품 ID 없음. 같은 JMeter 창에서 「준비: 상품 등록」 그룹을 먼저 실행해야 한다&apos;)
+    SampleResult.setStopThread(true)
+    return
+}
+vars.put(&apos;product_id&apos;, productId)
+
+// 「준비: 대화 시작 18건」 그룹이 속성에 넣은 대화 ID와, 결제 금액(등록 가격 × 구매 수량)을 번호별 변수에 넣는다.
+for (int n = 1; n &lt;= 18; n++) {
+    vars.put(&apos;conv_&apos; + n, (props.get(&apos;buy.conv_&apos; + n) ?: &apos;NOT_FOUND&apos;) as String)
+    vars.put(&apos;charge_&apos; + n, String.valueOf((vars.get(&apos;productPrice&apos;) as long) * (vars.get(&apos;qty_&apos; + n) as long)))
+}
+vars.put(&apos;run_log_id&apos;, (props.get(&apos;buy.run_log_id&apos;) ?: &apos;-&apos;) as String)
+vars.put(&apos;check_index&apos;, &apos;0&apos;)
+vars.put(&apos;wallet_index&apos;, &apos;0&apos;)
+SampleResult.setResponseData(&apos;상품ID=&apos; + productId + &apos;, 실행ID=&apos; + vars.get(&apos;run_log_id&apos;), &apos;UTF-8&apos;)
+</stringProp>
+        </JSR223Sampler>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="판매자의 상품 상세 조회(요청 전 상태)" enabled="true">
           <stringProp name="TestPlan.comments">판매자가 상품 상세를 조회해 남은 수량과 구매 가능 수량이 50개인지 확인한다.</stringProp>
           <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
           <stringProp name="HTTPSampler.path">/ChatService/api/products/${product_id}</stringProp>
@@ -791,7 +1029,7 @@ try {
           </JSR223PostProcessor>
           <hashTree/>
         </hashTree>
-        <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="등록 가격 구매자 18명마다 판매자의 대화 상세 조회(요청 전 상태)">
+        <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="등록 가격 구매자 18명마다 판매자의 대화 상세 조회(요청 전 상태)" enabled="true">
           <stringProp name="LoopController.loops">18</stringProp>
           <boolProp name="LoopController.continue_forever">true</boolProp>
         </LoopController>
@@ -863,8 +1101,79 @@ try {
             <hashTree/>
           </hashTree>
         </hashTree>
+        <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="등록 가격 구매자 18명마다 잔액 조회(요청 전 상태)">
+          <stringProp name="LoopController.loops">18</stringProp>
+          <boolProp name="LoopController.continue_forever">true</boolProp>
+        </LoopController>
+        <hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="등록 가격 구매자 ${cur_no} 잔액 조회(요청 전 상태)">
+            <stringProp name="TestPlan.comments">등록 가격 구매자가 자기 잔액을 조회해 잔액이 결제 금액과 같은지 확인한다.</stringProp>
+            <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+            <stringProp name="HTTPSampler.path">/ChatService/api/wallet</stringProp>
+            <stringProp name="HTTPSampler.method">GET</stringProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+              <collectionProp name="Arguments.arguments"/>
+            </elementProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="이번 반복의 등록 가격 구매자 정하기" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">// 이번 반복에서 잔액을 조회할 등록 가격 구매자를 정한다. 로그인 토큰은 로그인 그룹이 넣은 속성에서 읽는다.
+int n = (vars.get(&apos;wallet_index&apos;) as int) + 1
+vars.put(&apos;wallet_index&apos;, String.valueOf(n))
+vars.put(&apos;cur_no&apos;, String.format(&apos;%02d&apos;, n))
+vars.put(&apos;cur_token&apos;, (props.get(&apos;buy.buyer_token_&apos; + n) ?: &apos;NOT_FOUND&apos;) as String)
+</stringProp>
+            </JSR223PreProcessor>
+            <hashTree/>
+            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="등록 가격 구매자 로그인 쿠키" enabled="true">
+              <collectionProp name="HeaderManager.headers">
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">Cookie</stringProp>
+                  <stringProp name="Header.value">Authorization=${cur_token}</stringProp>
+                </elementProp>
+              </collectionProp>
+            </HeaderManager>
+            <hashTree/>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="응답 코드 200" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="49586">200</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.custom_message"></stringProp>
+              <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">8</intProp>
+            </ResponseAssertion>
+            <hashTree/>
+            <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="잔액을 변수에 넣고 응답 본문 저장(실행 폴더의 요청전_등록가격구매자번호_잔액응답.json)" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import groovy.json.JsonSlurper
+// 요청 전 이 등록 가격 구매자의 잔액을 번호별 변수에 넣고, 응답 본문을 실행 폴더에 저장한다.
+String n = vars.get(&apos;wallet_index&apos;)
+String body = prev.getResponseDataAsString()
+new File(vars.get(&apos;outDir&apos;), &apos;요청전_등록가격구매자&apos; + vars.get(&apos;cur_no&apos;) + &apos;_잔액응답.json&apos;).setText(body, &apos;UTF-8&apos;)
+try {
+    def j = new JsonSlurper().parseText(body)
+    if (!(j instanceof Map) || j.balance == null) throw new IllegalStateException(&apos;잔액 응답이 아님&apos;)
+    vars.put(&apos;pre_balance_&apos; + n, String.valueOf(j.balance))
+} catch (Exception e) {
+    vars.put(&apos;pre_balance_&apos; + n, &apos;확인못함&apos;)
+}
+</stringProp>
+            </JSR223PostProcessor>
+            <hashTree/>
+          </hashTree>
+        </hashTree>
         <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="요청 전 상태 확인과 구매 경합에 넘길 값 정하기(실행 폴더의 준비_ID와_요청전상태.csv, 준비_요청전상태_요약.csv)">
-          <stringProp name="TestPlan.comments">등록 가격 구매자 18명의 회원 ID, 대화 ID, 구매 수량, 결제 금액, 충전 뒤 잔액, 요청 전 가격 제안 수·예약·주문 수, 서버 로그용 요청 ID를 준비_ID와_요청전상태.csv에 쓴다. 남은 수량과 구매 가능 수량이 50개이고, 대화가 18건이고, 18명 모두 잔액이 결제 금액과 같고, 가격 제안·예약·주문이 없으면 「기본 구성과 같음」으로 표시한다. 다르더라도 다음 그룹은 그대로 실행한다.</stringProp>
+          <stringProp name="TestPlan.comments">등록 가격 구매자 18명의 회원 ID, 대화 ID, 구매 수량, 결제 금액, 잔액 조회로 읽은 요청 전 잔액, 요청 전 가격 제안 수·예약·주문 수, 서버 로그용 요청 ID를 준비_ID와_요청전상태.csv에 쓴다. 남은 수량과 구매 가능 수량이 50개이고, 대화가 18건이고, 18명 모두 잔액이 결제 금액과 같고, 가격 제안·예약·주문이 없으면 「기본 구성과 같음」으로 표시한다. 다르더라도 다음 그룹은 그대로 실행한다.</stringProp>
           <stringProp name="scriptLanguage">groovy</stringProp>
           <stringProp name="parameters"></stringProp>
           <stringProp name="filename"></stringProp>
@@ -919,7 +1228,7 @@ SampleResult.setResponseData(&apos;상품ID=&apos; + vars.get(&apos;product_id&a
         </JSR223Sampler>
         <hashTree/>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="구매 경합: 등록 가격 구매 18건을 같은 순간에 보냄">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="구매 경합: 등록 가격 구매 18건을 같은 순간에 보냄" enabled="true">
         <stringProp name="TestPlan.comments">스레드 18개가 각각 등록 가격 구매자 한 명의 결제를 맡는다. 동기화 타이머로 18개 요청을 같은 순간에 보낸다. 요청을 같은 순간에 보냈다는 사실만으로 서버의 수량 확인과 저장이 겹쳤다고 보지 않고, 서버 로그로 확인한다.</stringProp>
         <intProp name="ThreadGroup.num_threads">18</intProp>
         <intProp name="ThreadGroup.ramp_time">0</intProp>
@@ -931,7 +1240,7 @@ SampleResult.setResponseData(&apos;상품ID=&apos; + vars.get(&apos;product_id&a
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <SyncTimer guiclass="TestBeanGUI" testclass="SyncTimer" testname="동기화 타이머(18개 요청이 모두 준비되면 같은 순간에 보냄, 최대 10초 대기)">
+        <SyncTimer guiclass="TestBeanGUI" testclass="SyncTimer" testname="동기화 타이머(18개 요청이 모두 준비되면 같은 순간에 보냄, 최대 10초 대기)" enabled="true">
           <stringProp name="TestPlan.comments">스레드 18개가 모두 요청 직전에 도착하면 18개 요청을 같은 순간에 보낸다. 10초 안에 모이지 않으면 더 기다리지 않고 보낸다.</stringProp>
           <intProp name="groupSize">18</intProp>
           <longProp name="timeoutInMs">10000</longProp>
@@ -973,7 +1282,7 @@ vars.put(&apos;req_log_id&apos;, &apos;buy-&apos; + no)
 </stringProp>
           </JSR223PreProcessor>
           <hashTree/>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="JSON 헤더, 등록 가격 구매자 로그인 쿠키, 서버 로그용 테스트명·실행 ID·요청 ID">
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="JSON 헤더, 등록 가격 구매자 로그인 쿠키, 서버 로그용 테스트명·실행 ID·요청 ID" enabled="true">
             <collectionProp name="HeaderManager.headers">
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">Content-Type</stringProp>
@@ -998,7 +1307,7 @@ vars.put(&apos;req_log_id&apos;, &apos;buy-&apos; + no)
             </collectionProp>
           </HeaderManager>
           <hashTree/>
-          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="응답 코드, 오류 코드, 주문 ID를 속성에 넣고 응답 본문 저장(실행 폴더의 구매_등록가격구매자번호_응답)">
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="응답 코드, 오류 코드, 주문 ID를 속성에 넣고 응답 본문 저장(실행 폴더의 구매_등록가격구매자번호_응답)" enabled="true">
             <stringProp name="scriptLanguage">groovy</stringProp>
             <stringProp name="parameters"></stringProp>
             <stringProp name="filename"></stringProp>
@@ -1028,7 +1337,7 @@ new File(vars.get(&apos;outDir&apos;), &apos;구매_등록가격구매자&apos; 
 </stringProp>
           </JSR223PostProcessor>
           <hashTree/>
-          <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="응답 구분: 성공과 수량 부족은 통과, 기타 오류와 응답 미확인은 실패로 표시">
+          <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="응답 구분: 성공과 수량 부족은 통과, 기타 오류와 응답 미확인은 실패로 표시" enabled="true">
             <stringProp name="scriptLanguage">groovy</stringProp>
             <stringProp name="parameters"></stringProp>
             <stringProp name="filename"></stringProp>
@@ -1057,7 +1366,7 @@ if (code == &apos;201&apos;) {
           <hashTree/>
         </hashTree>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회" enabled="true">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회">
         <stringProp name="TestPlan.comments">구매 요청 18건이 모두 끝난 뒤 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건을 조회한다. 응답을 받지 못한 요청도 다시 보내지 않고 저장된 상태부터 확인한다.</stringProp>
         <intProp name="ThreadGroup.num_threads">1</intProp>
         <intProp name="ThreadGroup.ramp_time">0</intProp>

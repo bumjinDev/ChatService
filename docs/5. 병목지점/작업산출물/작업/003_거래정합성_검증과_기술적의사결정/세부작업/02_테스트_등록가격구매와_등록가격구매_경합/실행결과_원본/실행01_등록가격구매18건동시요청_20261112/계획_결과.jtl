@@ -97,3 +97,161 @@ timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success
 1794457628703,22,판매자의 등록 가격 구매자 17 대화 상세 조회(요청 전 상태),200,,"준비: 상품 등록, 대화 시작 18건, 충전 18건, 요청 전 상태 확인 1-1",text,true,,827,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/231,22,0,0
 1794457628728,21,판매자의 등록 가격 구매자 18 대화 상세 조회(요청 전 상태),200,,"준비: 상품 등록, 대화 시작 18건, 충전 18건, 요청 전 상태 확인 1-1",text,true,,827,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/232,19,0,0
 1794457628751,71,"요청 전 상태 확인과 구매 경합에 넘길 값 정하기(실행 폴더의 준비_ID와_요청전상태.csv, 준비_요청전상태_요약.csv)",200,요청 전 상태: 기본 구성과 같음,"준비: 상품 등록, 대화 시작 18건, 충전 18건, 요청 전 상태 확인 1-1",text,true,,254,0,1,1,null,0,0,0
+1794458859113,772,회원 CSV에서 판매자와 등록 가격 구매자 18명의 ID와 비밀번호 읽기,200,OK,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,text,true,,62,0,1,1,null,0,0,0
+1794458859929,146,판매자 로그인,302,,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,,true,,595,255,1,1,http://wherehouse.it.kr:8186/ChatService/login,142,0,23
+1794458860118,103,등록 가격 구매자 01 로그인,302,,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,,true,,598,256,1,1,http://wherehouse.it.kr:8186/ChatService/login,103,0,0
+1794458860238,103,등록 가격 구매자 02 로그인,302,,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,,true,,598,256,1,1,http://wherehouse.it.kr:8186/ChatService/login,103,0,0
+1794458860343,100,등록 가격 구매자 03 로그인,302,,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,,true,,598,256,1,1,http://wherehouse.it.kr:8186/ChatService/login,100,0,0
+1794458860444,98,등록 가격 구매자 04 로그인,302,,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,,true,,598,256,1,1,http://wherehouse.it.kr:8186/ChatService/login,98,0,0
+1794458860544,101,등록 가격 구매자 05 로그인,302,,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,,true,,598,256,1,1,http://wherehouse.it.kr:8186/ChatService/login,101,0,0
+1794458860647,98,등록 가격 구매자 06 로그인,302,,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,,true,,598,256,1,1,http://wherehouse.it.kr:8186/ChatService/login,98,0,0
+1794458860747,102,등록 가격 구매자 07 로그인,302,,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,,true,,598,256,1,1,http://wherehouse.it.kr:8186/ChatService/login,102,0,0
+1794458860851,98,등록 가격 구매자 08 로그인,302,,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,,true,,598,256,1,1,http://wherehouse.it.kr:8186/ChatService/login,98,0,0
+1794458860951,99,등록 가격 구매자 09 로그인,302,,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,,true,,598,256,1,1,http://wherehouse.it.kr:8186/ChatService/login,99,0,0
+1794458861052,104,등록 가격 구매자 10 로그인,302,,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,,true,,598,256,1,1,http://wherehouse.it.kr:8186/ChatService/login,104,0,0
+1794458861158,99,등록 가격 구매자 11 로그인,302,,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,,true,,598,256,1,1,http://wherehouse.it.kr:8186/ChatService/login,99,0,0
+1794458861258,79,등록 가격 구매자 12 로그인,302,,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,,true,,598,256,1,1,http://wherehouse.it.kr:8186/ChatService/login,79,0,0
+1794458861338,69,등록 가격 구매자 13 로그인,302,,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,,true,,598,256,1,1,http://wherehouse.it.kr:8186/ChatService/login,69,0,0
+1794458861409,65,등록 가격 구매자 14 로그인,302,,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,,true,,598,256,1,1,http://wherehouse.it.kr:8186/ChatService/login,65,0,0
+1794458861476,70,등록 가격 구매자 15 로그인,302,,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,,true,,598,256,1,1,http://wherehouse.it.kr:8186/ChatService/login,70,0,0
+1794458861548,136,등록 가격 구매자 16 로그인,302,,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,,true,,598,256,1,1,http://wherehouse.it.kr:8186/ChatService/login,136,0,0
+1794458861685,67,등록 가격 구매자 17 로그인,302,,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,,true,,598,256,1,1,http://wherehouse.it.kr:8186/ChatService/login,67,0,0
+1794458861753,69,등록 가격 구매자 18 로그인,302,,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,,true,,598,256,1,1,http://wherehouse.it.kr:8186/ChatService/login,69,0,0
+1794459506197,900,"로그인 토큰과 상품 ID 확인, 회원 CSV에서 등록 가격 구매자 18명 읽기, 대화 ID와 결제 금액 정하기",200,"로그인 토큰 없음: 판매자, 등록 가격 구매자 01, 등록 가격 구매자 02, 등록 가격 구매자 03, 등록 가격 구매자 04, 등록 가격 구매자 05, 등록 가격 구매자 06, 등록 가격 구매자 07, 등록 가격 구매자 08, 등록 가격 구매자 09, 등록 가격 구매자 10, 등록 가격 구매자 11, 등록 가격 구매자 12, 등록 가격 구매자 13, 등록 가격 구매자 14, 등록 가격 구매자 15, 등록 가격 구매자 16, 등록 가격 구매자 17, 등록 가격 구매자 18. 같은 JMeter 창에서 「로그인」 그룹을 먼저 실행해야 한다",준비: 요청 전 상태 확인 1-1,text,false,,0,0,1,1,null,0,0,0
+1794459516147,46,회원 CSV에서 판매자와 등록 가격 구매자 18명의 ID와 비밀번호 읽기,200,OK,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,text,true,,62,0,1,1,null,0,0,0
+1794459516232,129,판매자 로그인,302,,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,,true,,595,255,1,1,http://wherehouse.it.kr:8186/ChatService/login,125,0,19
+1794459516397,101,등록 가격 구매자 01 로그인,302,,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,,true,,598,256,1,1,http://wherehouse.it.kr:8186/ChatService/login,101,0,0
+1794459516512,98,등록 가격 구매자 02 로그인,302,,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,,true,,598,256,1,1,http://wherehouse.it.kr:8186/ChatService/login,98,0,0
+1794459516612,98,등록 가격 구매자 03 로그인,302,,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,,true,,598,256,1,1,http://wherehouse.it.kr:8186/ChatService/login,98,0,0
+1794459516712,106,등록 가격 구매자 04 로그인,302,,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,,true,,598,256,1,1,http://wherehouse.it.kr:8186/ChatService/login,106,0,0
+1794459516819,101,등록 가격 구매자 05 로그인,302,,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,,true,,598,256,1,1,http://wherehouse.it.kr:8186/ChatService/login,101,0,0
+1794459516921,99,등록 가격 구매자 06 로그인,302,,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,,true,,598,256,1,1,http://wherehouse.it.kr:8186/ChatService/login,99,0,0
+1794459517022,100,등록 가격 구매자 07 로그인,302,,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,,true,,598,256,1,1,http://wherehouse.it.kr:8186/ChatService/login,100,0,0
+1794459517123,100,등록 가격 구매자 08 로그인,302,,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,,true,,598,256,1,1,http://wherehouse.it.kr:8186/ChatService/login,100,0,0
+1794459517225,97,등록 가격 구매자 09 로그인,302,,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,,true,,598,256,1,1,http://wherehouse.it.kr:8186/ChatService/login,97,0,0
+1794459517323,99,등록 가격 구매자 10 로그인,302,,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,,true,,598,256,1,1,http://wherehouse.it.kr:8186/ChatService/login,99,0,0
+1794459517423,81,등록 가격 구매자 11 로그인,302,,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,,true,,598,256,1,1,http://wherehouse.it.kr:8186/ChatService/login,81,0,0
+1794459517506,65,등록 가격 구매자 12 로그인,302,,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,,true,,598,256,1,1,http://wherehouse.it.kr:8186/ChatService/login,65,0,0
+1794459517573,67,등록 가격 구매자 13 로그인,302,,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,,true,,598,256,1,1,http://wherehouse.it.kr:8186/ChatService/login,67,0,0
+1794459517641,68,등록 가격 구매자 14 로그인,302,,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,,true,,598,256,1,1,http://wherehouse.it.kr:8186/ChatService/login,68,0,0
+1794459517710,70,등록 가격 구매자 15 로그인,302,,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,,true,,598,256,1,1,http://wherehouse.it.kr:8186/ChatService/login,70,0,0
+1794459517782,70,등록 가격 구매자 16 로그인,302,,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,,true,,598,256,1,1,http://wherehouse.it.kr:8186/ChatService/login,70,0,0
+1794459517854,71,등록 가격 구매자 17 로그인,302,,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,,true,,598,256,1,1,http://wherehouse.it.kr:8186/ChatService/login,71,0,0
+1794459517927,73,등록 가격 구매자 18 로그인,302,,로그인: 판매자 1명과 등록 가격 구매자 18명 1-1,,true,,598,256,1,1,http://wherehouse.it.kr:8186/ChatService/login,73,0,0
+1794459521335,50,"로그인 토큰과 상품 ID 확인, 회원 CSV에서 등록 가격 구매자 18명 읽기, 대화 ID와 결제 금액 정하기",200,상품 ID 없음. 같은 JMeter 창에서 「준비: 상품 등록」 그룹을 먼저 실행해야 한다,준비: 요청 전 상태 확인 1-1,text,false,,0,0,1,1,null,0,0,0
+1794459533814,72,"로그인 토큰 확인, 실행 폴더 만들기, 회원 CSV에서 판매자와 등록 가격 구매자 18명 읽기, 실행 ID 정하기",200,OK,준비: 상품 등록 1-1,text,true,,389,0,1,1,null,0,0,0
+1794459533887,37,"판매자 상품 등록(50개, 개당 10,000원)",201,,준비: 상품 등록 1-1,text,true,,696,622,1,1,http://wherehouse.it.kr:8186/ChatService/api/products,37,0,11
+1794459754589,23,로그인 토큰과 상품 ID 확인,200,OK,준비: 대화 시작 18건 1-1,text,true,,12,0,1,1,null,0,0,0
+1794459754623,44,등록 가격 구매자 01 대화 시작,201,,준비: 대화 시작 18건 1-1,text,true,,826,482,1,1,http://wherehouse.it.kr:8186/ChatService/api/products/165/conversations,44,0,11
+1794459754676,33,등록 가격 구매자 02 대화 시작,201,,준비: 대화 시작 18건 1-1,text,true,,826,482,1,1,http://wherehouse.it.kr:8186/ChatService/api/products/165/conversations,33,0,0
+1794459754710,28,등록 가격 구매자 03 대화 시작,201,,준비: 대화 시작 18건 1-1,text,true,,826,482,1,1,http://wherehouse.it.kr:8186/ChatService/api/products/165/conversations,28,0,0
+1794459754740,29,등록 가격 구매자 04 대화 시작,201,,준비: 대화 시작 18건 1-1,text,true,,826,482,1,1,http://wherehouse.it.kr:8186/ChatService/api/products/165/conversations,29,0,0
+1794459754770,28,등록 가격 구매자 05 대화 시작,201,,준비: 대화 시작 18건 1-1,text,true,,826,482,1,1,http://wherehouse.it.kr:8186/ChatService/api/products/165/conversations,28,0,0
+1794459754799,29,등록 가격 구매자 06 대화 시작,201,,준비: 대화 시작 18건 1-1,text,true,,826,482,1,1,http://wherehouse.it.kr:8186/ChatService/api/products/165/conversations,29,0,0
+1794459754830,30,등록 가격 구매자 07 대화 시작,201,,준비: 대화 시작 18건 1-1,text,true,,826,482,1,1,http://wherehouse.it.kr:8186/ChatService/api/products/165/conversations,30,0,0
+1794459754862,37,등록 가격 구매자 08 대화 시작,201,,준비: 대화 시작 18건 1-1,text,true,,826,482,1,1,http://wherehouse.it.kr:8186/ChatService/api/products/165/conversations,36,0,0
+1794459754900,30,등록 가격 구매자 09 대화 시작,201,,준비: 대화 시작 18건 1-1,text,true,,826,482,1,1,http://wherehouse.it.kr:8186/ChatService/api/products/165/conversations,30,0,0
+1794459754932,31,등록 가격 구매자 10 대화 시작,201,,준비: 대화 시작 18건 1-1,text,true,,826,482,1,1,http://wherehouse.it.kr:8186/ChatService/api/products/165/conversations,31,0,0
+1794459754965,32,등록 가격 구매자 11 대화 시작,201,,준비: 대화 시작 18건 1-1,text,true,,826,482,1,1,http://wherehouse.it.kr:8186/ChatService/api/products/165/conversations,31,0,0
+1794459754999,30,등록 가격 구매자 12 대화 시작,201,,준비: 대화 시작 18건 1-1,text,true,,826,482,1,1,http://wherehouse.it.kr:8186/ChatService/api/products/165/conversations,29,0,0
+1794459755030,28,등록 가격 구매자 13 대화 시작,201,,준비: 대화 시작 18건 1-1,text,true,,826,482,1,1,http://wherehouse.it.kr:8186/ChatService/api/products/165/conversations,28,0,0
+1794459755059,25,등록 가격 구매자 14 대화 시작,201,,준비: 대화 시작 18건 1-1,text,true,,826,482,1,1,http://wherehouse.it.kr:8186/ChatService/api/products/165/conversations,25,0,0
+1794459755085,31,등록 가격 구매자 15 대화 시작,201,,준비: 대화 시작 18건 1-1,text,true,,826,482,1,1,http://wherehouse.it.kr:8186/ChatService/api/products/165/conversations,31,0,0
+1794459755117,31,등록 가격 구매자 16 대화 시작,201,,준비: 대화 시작 18건 1-1,text,true,,826,482,1,1,http://wherehouse.it.kr:8186/ChatService/api/products/165/conversations,31,0,0
+1794459755148,25,등록 가격 구매자 17 대화 시작,201,,준비: 대화 시작 18건 1-1,text,true,,826,482,1,1,http://wherehouse.it.kr:8186/ChatService/api/products/165/conversations,25,0,0
+1794459755174,31,등록 가격 구매자 18 대화 시작,201,,준비: 대화 시작 18건 1-1,text,true,,826,482,1,1,http://wherehouse.it.kr:8186/ChatService/api/products/165/conversations,31,0,0
+1794459761893,54,"로그인 토큰과 상품 ID 확인, 회원 CSV에서 등록 가격 구매자 18명 읽기, 대화 ID와 결제 금액 정하기",200,OK,준비: 요청 전 상태 확인 1-1,text,true,,44,0,1,1,null,0,0,0
+1794459761948,33,판매자의 상품 상세 조회(요청 전 상태),200,,준비: 요청 전 상태 확인 1-1,text,true,,696,381,1,1,http://wherehouse.it.kr:8186/ChatService/api/products/165,33,0,13
+1794459762020,38,판매자의 등록 가격 구매자 01 대화 상세 조회(요청 전 상태),200,,준비: 요청 전 상태 확인 1-1,text,true,,827,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/233,38,0,0
+1794459762081,33,판매자의 등록 가격 구매자 02 대화 상세 조회(요청 전 상태),200,,준비: 요청 전 상태 확인 1-1,text,true,,827,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/234,33,0,0
+1794459762116,24,판매자의 등록 가격 구매자 03 대화 상세 조회(요청 전 상태),200,,준비: 요청 전 상태 확인 1-1,text,true,,827,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/235,24,0,0
+1794459762143,29,판매자의 등록 가격 구매자 04 대화 상세 조회(요청 전 상태),200,,준비: 요청 전 상태 확인 1-1,text,true,,827,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/236,29,0,0
+1794459762174,25,판매자의 등록 가격 구매자 05 대화 상세 조회(요청 전 상태),200,,준비: 요청 전 상태 확인 1-1,text,true,,827,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/237,23,0,0
+1794459762219,23,판매자의 등록 가격 구매자 06 대화 상세 조회(요청 전 상태),200,,준비: 요청 전 상태 확인 1-1,text,true,,827,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/238,23,0,0
+1794459762244,23,판매자의 등록 가격 구매자 07 대화 상세 조회(요청 전 상태),200,,준비: 요청 전 상태 확인 1-1,text,true,,827,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/239,23,0,0
+1794459762268,22,판매자의 등록 가격 구매자 08 대화 상세 조회(요청 전 상태),200,,준비: 요청 전 상태 확인 1-1,text,true,,827,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/240,22,0,0
+1794459762292,23,판매자의 등록 가격 구매자 09 대화 상세 조회(요청 전 상태),200,,준비: 요청 전 상태 확인 1-1,text,true,,827,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/241,23,0,0
+1794459762316,25,판매자의 등록 가격 구매자 10 대화 상세 조회(요청 전 상태),200,,준비: 요청 전 상태 확인 1-1,text,true,,827,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/242,25,0,0
+1794459762343,23,판매자의 등록 가격 구매자 11 대화 상세 조회(요청 전 상태),200,,준비: 요청 전 상태 확인 1-1,text,true,,827,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/243,23,0,0
+1794459762368,23,판매자의 등록 가격 구매자 12 대화 상세 조회(요청 전 상태),200,,준비: 요청 전 상태 확인 1-1,text,true,,827,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/244,23,0,0
+1794459762393,22,판매자의 등록 가격 구매자 13 대화 상세 조회(요청 전 상태),200,,준비: 요청 전 상태 확인 1-1,text,true,,827,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/245,22,0,0
+1794459762417,27,판매자의 등록 가격 구매자 14 대화 상세 조회(요청 전 상태),200,,준비: 요청 전 상태 확인 1-1,text,true,,827,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/246,27,0,0
+1794459762445,24,판매자의 등록 가격 구매자 15 대화 상세 조회(요청 전 상태),200,,준비: 요청 전 상태 확인 1-1,text,true,,827,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/247,24,0,0
+1794459762472,28,판매자의 등록 가격 구매자 16 대화 상세 조회(요청 전 상태),200,,준비: 요청 전 상태 확인 1-1,text,true,,827,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/248,28,0,0
+1794459762502,28,판매자의 등록 가격 구매자 17 대화 상세 조회(요청 전 상태),200,,준비: 요청 전 상태 확인 1-1,text,true,,827,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/249,28,0,0
+1794459762532,29,판매자의 등록 가격 구매자 18 대화 상세 조회(요청 전 상태),200,,준비: 요청 전 상태 확인 1-1,text,true,,827,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/250,29,0,0
+1794459762572,18,등록 가격 구매자 01 잔액 조회(요청 전 상태),200,,준비: 요청 전 상태 확인 1-1,text,true,,386,378,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,18,0,0
+1794459762604,16,등록 가격 구매자 02 잔액 조회(요청 전 상태),200,,준비: 요청 전 상태 확인 1-1,text,true,,386,378,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,16,0,0
+1794459762623,16,등록 가격 구매자 03 잔액 조회(요청 전 상태),200,,준비: 요청 전 상태 확인 1-1,text,true,,386,378,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,16,0,0
+1794459762642,18,등록 가격 구매자 04 잔액 조회(요청 전 상태),200,,준비: 요청 전 상태 확인 1-1,text,true,,386,378,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,16,0,0
+1794459762662,18,등록 가격 구매자 05 잔액 조회(요청 전 상태),200,,준비: 요청 전 상태 확인 1-1,text,true,,386,378,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,16,0,0
+1794459762682,14,등록 가격 구매자 06 잔액 조회(요청 전 상태),200,,준비: 요청 전 상태 확인 1-1,text,true,,386,378,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,14,0,0
+1794459762698,14,등록 가격 구매자 07 잔액 조회(요청 전 상태),200,,준비: 요청 전 상태 확인 1-1,text,true,,386,378,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,14,0,0
+1794459762730,16,등록 가격 구매자 08 잔액 조회(요청 전 상태),200,,준비: 요청 전 상태 확인 1-1,text,true,,386,378,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,16,0,0
+1794459762748,17,등록 가격 구매자 09 잔액 조회(요청 전 상태),200,,준비: 요청 전 상태 확인 1-1,text,true,,386,378,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,17,0,0
+1794459762768,17,등록 가격 구매자 10 잔액 조회(요청 전 상태),200,,준비: 요청 전 상태 확인 1-1,text,true,,386,378,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,17,0,0
+1794459762788,15,등록 가격 구매자 11 잔액 조회(요청 전 상태),200,,준비: 요청 전 상태 확인 1-1,text,true,,386,378,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,15,0,0
+1794459762807,15,등록 가격 구매자 12 잔액 조회(요청 전 상태),200,,준비: 요청 전 상태 확인 1-1,text,true,,386,378,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,15,0,0
+1794459762824,18,등록 가격 구매자 13 잔액 조회(요청 전 상태),200,,준비: 요청 전 상태 확인 1-1,text,true,,386,378,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,18,0,0
+1794459762844,14,등록 가격 구매자 14 잔액 조회(요청 전 상태),200,,준비: 요청 전 상태 확인 1-1,text,true,,386,378,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,14,0,0
+1794459762860,17,등록 가격 구매자 15 잔액 조회(요청 전 상태),200,,준비: 요청 전 상태 확인 1-1,text,true,,386,378,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,17,0,0
+1794459762880,29,등록 가격 구매자 16 잔액 조회(요청 전 상태),200,,준비: 요청 전 상태 확인 1-1,text,true,,386,378,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,29,0,0
+1794459762911,16,등록 가격 구매자 17 잔액 조회(요청 전 상태),200,,준비: 요청 전 상태 확인 1-1,text,true,,386,378,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,16,0,0
+1794459762930,15,등록 가격 구매자 18 잔액 조회(요청 전 상태),200,,준비: 요청 전 상태 확인 1-1,text,true,,386,378,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,15,0,0
+1794459762947,68,"요청 전 상태 확인과 구매 경합에 넘길 값 정하기(실행 폴더의 준비_ID와_요청전상태.csv, 준비_요청전상태_요약.csv)",200,요청 전 상태: 기본 구성과 같음,준비: 요청 전 상태 확인 1-1,text,true,,254,0,1,1,null,0,0,0
+1794459875886,248,등록 가격 구매자 05 등록 가격 결제(2개),201,성공,구매 경합: 등록 가격 구매 18건을 같은 순간에 보냄 1-5,text,true,,1264,811,18,18,http://wherehouse.it.kr:8186/ChatService/api/orders,245,0,14
+1794459875887,244,등록 가격 구매자 17 등록 가격 결제(5개),201,성공,구매 경합: 등록 가격 구매 18건을 같은 순간에 보냄 1-17,text,true,,1264,811,18,18,http://wherehouse.it.kr:8186/ChatService/api/orders,243,0,13
+1794459875887,257,등록 가격 구매자 06 등록 가격 결제(2개),201,성공,구매 경합: 등록 가격 구매 18건을 같은 순간에 보냄 1-6,text,true,,1264,811,18,18,http://wherehouse.it.kr:8186/ChatService/api/orders,256,0,13
+1794459875887,245,등록 가격 구매자 02 등록 가격 결제(2개),201,성공,구매 경합: 등록 가격 구매 18건을 같은 순간에 보냄 1-2,text,true,,1264,811,18,18,http://wherehouse.it.kr:8186/ChatService/api/orders,245,0,13
+1794459875886,245,등록 가격 구매자 14 등록 가격 결제(5개),201,성공,구매 경합: 등록 가격 구매 18건을 같은 순간에 보냄 1-14,text,true,,1264,811,18,18,http://wherehouse.it.kr:8186/ChatService/api/orders,244,0,12
+1794459875887,248,등록 가격 구매자 16 등록 가격 결제(5개),201,성공,구매 경합: 등록 가격 구매 18건을 같은 순간에 보냄 1-16,text,true,,1264,811,18,18,http://wherehouse.it.kr:8186/ChatService/api/orders,247,0,11
+1794459875886,282,등록 가격 구매자 12 등록 가격 결제(3개),201,성공,구매 경합: 등록 가격 구매 18건을 같은 순간에 보냄 1-12,text,true,,1264,811,18,18,http://wherehouse.it.kr:8186/ChatService/api/orders,281,0,14
+1794459875887,246,등록 가격 구매자 13 등록 가격 결제(5개),201,성공,구매 경합: 등록 가격 구매 18건을 같은 순간에 보냄 1-13,text,true,,1264,811,18,18,http://wherehouse.it.kr:8186/ChatService/api/orders,244,0,11
+1794459875886,255,등록 가격 구매자 09 등록 가격 결제(3개),201,성공,구매 경합: 등록 가격 구매 18건을 같은 순간에 보냄 1-9,text,true,,1264,811,18,18,http://wherehouse.it.kr:8186/ChatService/api/orders,253,0,14
+1794459875886,252,등록 가격 구매자 03 등록 가격 결제(2개),201,성공,구매 경합: 등록 가격 구매 18건을 같은 순간에 보냄 1-3,text,true,,1264,811,18,18,http://wherehouse.it.kr:8186/ChatService/api/orders,252,0,14
+1794459875887,246,등록 가격 구매자 15 등록 가격 결제(5개),201,성공,구매 경합: 등록 가격 구매 18건을 같은 순간에 보냄 1-15,text,true,,1264,811,18,18,http://wherehouse.it.kr:8186/ChatService/api/orders,245,0,13
+1794459875886,255,등록 가격 구매자 01 등록 가격 결제(2개),201,성공,구매 경합: 등록 가격 구매 18건을 같은 순간에 보냄 1-1,text,true,,1264,811,18,18,http://wherehouse.it.kr:8186/ChatService/api/orders,254,0,14
+1794459875886,250,등록 가격 구매자 11 등록 가격 결제(3개),201,성공,구매 경합: 등록 가격 구매 18건을 같은 순간에 보냄 1-11,text,true,,1264,811,18,18,http://wherehouse.it.kr:8186/ChatService/api/orders,250,0,16
+1794459875887,279,등록 가격 구매자 10 등록 가격 결제(3개),201,성공,구매 경합: 등록 가격 구매 18건을 같은 순간에 보냄 1-10,text,true,,1264,811,18,18,http://wherehouse.it.kr:8186/ChatService/api/orders,279,0,13
+1794459875887,291,등록 가격 구매자 18 등록 가격 결제(5개),201,성공,구매 경합: 등록 가격 구매 18건을 같은 순간에 보냄 1-18,text,true,,1264,811,4,4,http://wherehouse.it.kr:8186/ChatService/api/orders,289,0,13
+1794459875886,294,등록 가격 구매자 04 등록 가격 결제(2개),201,성공,구매 경합: 등록 가격 구매 18건을 같은 순간에 보냄 1-4,text,true,,1264,811,4,4,http://wherehouse.it.kr:8186/ChatService/api/orders,293,0,10
+1794459875887,296,등록 가격 구매자 07 등록 가격 결제(3개),201,성공,구매 경합: 등록 가격 구매 18건을 같은 순간에 보냄 1-7,text,true,,1264,811,3,2,http://wherehouse.it.kr:8186/ChatService/api/orders,296,0,9
+1794459875887,302,등록 가격 구매자 08 등록 가격 결제(3개),201,성공,구매 경합: 등록 가격 구매 18건을 같은 순간에 보냄 1-8,text,true,,1264,811,1,1,http://wherehouse.it.kr:8186/ChatService/api/orders,301,0,13
+1794460340219,23,구매 경합 결과와 확인에 쓸 값 읽기,200,OK,구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회 1-1,text,true,,53,0,1,1,null,0,0,0
+1794460340251,37,판매자의 등록 가격 구매자 01 대화 상세 조회(구매 경합 뒤),200,,구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회 1-1,text,true,,994,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/233,37,0,12
+1794460340321,20,판매자의 등록 가격 구매자 02 대화 상세 조회(구매 경합 뒤),200,,구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회 1-1,text,true,,994,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/234,20,0,0
+1794460340344,24,판매자의 등록 가격 구매자 03 대화 상세 조회(구매 경합 뒤),200,,구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회 1-1,text,true,,994,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/235,24,0,0
+1794460340372,24,판매자의 등록 가격 구매자 04 대화 상세 조회(구매 경합 뒤),200,,구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회 1-1,text,true,,994,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/236,23,0,0
+1794460340399,23,판매자의 등록 가격 구매자 05 대화 상세 조회(구매 경합 뒤),200,,구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회 1-1,text,true,,994,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/237,23,0,0
+1794460340424,22,판매자의 등록 가격 구매자 06 대화 상세 조회(구매 경합 뒤),200,,구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회 1-1,text,true,,994,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/238,22,0,0
+1794460340449,25,판매자의 등록 가격 구매자 07 대화 상세 조회(구매 경합 뒤),200,,구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회 1-1,text,true,,994,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/239,25,0,0
+1794460340482,23,판매자의 등록 가격 구매자 08 대화 상세 조회(구매 경합 뒤),200,,구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회 1-1,text,true,,994,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/240,23,0,0
+1794460340507,23,판매자의 등록 가격 구매자 09 대화 상세 조회(구매 경합 뒤),200,,구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회 1-1,text,true,,994,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/241,22,0,0
+1794460340532,23,판매자의 등록 가격 구매자 10 대화 상세 조회(구매 경합 뒤),200,,구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회 1-1,text,true,,994,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/242,23,0,0
+1794460340557,24,판매자의 등록 가격 구매자 11 대화 상세 조회(구매 경합 뒤),200,,구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회 1-1,text,true,,994,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/243,24,0,0
+1794460340585,21,판매자의 등록 가격 구매자 12 대화 상세 조회(구매 경합 뒤),200,,구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회 1-1,text,true,,994,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/244,21,0,0
+1794460340608,20,판매자의 등록 가격 구매자 13 대화 상세 조회(구매 경합 뒤),200,,구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회 1-1,text,true,,994,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/245,20,0,0
+1794460340631,21,판매자의 등록 가격 구매자 14 대화 상세 조회(구매 경합 뒤),200,,구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회 1-1,text,true,,994,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/246,21,0,0
+1794460340654,20,판매자의 등록 가격 구매자 15 대화 상세 조회(구매 경합 뒤),200,,구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회 1-1,text,true,,994,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/247,20,0,0
+1794460340678,21,판매자의 등록 가격 구매자 16 대화 상세 조회(구매 경합 뒤),200,,구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회 1-1,text,true,,994,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/248,21,0,0
+1794460340702,20,판매자의 등록 가격 구매자 17 대화 상세 조회(구매 경합 뒤),200,,구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회 1-1,text,true,,994,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/249,20,0,0
+1794460340724,21,판매자의 등록 가격 구매자 18 대화 상세 조회(구매 경합 뒤),200,,구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회 1-1,text,true,,994,386,1,1,http://wherehouse.it.kr:8186/ChatService/api/conversations/250,21,0,0
+1794460340753,15,등록 가격 구매자 01 잔액 조회(구매 경합 뒤),200,,구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회 1-1,text,true,,382,378,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,15,0,0
+1794460340780,16,등록 가격 구매자 02 잔액 조회(구매 경합 뒤),200,,구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회 1-1,text,true,,382,378,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,16,0,0
+1794460340798,17,등록 가격 구매자 03 잔액 조회(구매 경합 뒤),200,,구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회 1-1,text,true,,382,378,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,17,0,0
+1794460340817,16,등록 가격 구매자 04 잔액 조회(구매 경합 뒤),200,,구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회 1-1,text,true,,382,378,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,16,0,0
+1794460340834,15,등록 가격 구매자 05 잔액 조회(구매 경합 뒤),200,,구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회 1-1,text,true,,382,378,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,15,0,0
+1794460340852,16,등록 가격 구매자 06 잔액 조회(구매 경합 뒤),200,,구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회 1-1,text,true,,382,378,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,14,0,0
+1794460340870,15,등록 가격 구매자 07 잔액 조회(구매 경합 뒤),200,,구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회 1-1,text,true,,382,378,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,15,0,0
+1794460340887,13,등록 가격 구매자 08 잔액 조회(구매 경합 뒤),200,,구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회 1-1,text,true,,382,378,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,13,0,0
+1794460340902,16,등록 가격 구매자 09 잔액 조회(구매 경합 뒤),200,,구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회 1-1,text,true,,382,378,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,13,0,0
+1794460340921,15,등록 가격 구매자 10 잔액 조회(구매 경합 뒤),200,,구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회 1-1,text,true,,382,378,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,15,0,0
+1794460340938,15,등록 가격 구매자 11 잔액 조회(구매 경합 뒤),200,,구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회 1-1,text,true,,382,378,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,15,0,0
+1794460340955,14,등록 가격 구매자 12 잔액 조회(구매 경합 뒤),200,,구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회 1-1,text,true,,382,378,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,14,0,0
+1794460340981,19,등록 가격 구매자 13 잔액 조회(구매 경합 뒤),200,,구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회 1-1,text,true,,382,378,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,19,0,0
+1794460341003,14,등록 가격 구매자 14 잔액 조회(구매 경합 뒤),200,,구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회 1-1,text,true,,382,378,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,14,0,0
+1794460341019,23,등록 가격 구매자 15 잔액 조회(구매 경합 뒤),200,,구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회 1-1,text,true,,382,378,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,21,0,0
+1794460341044,27,등록 가격 구매자 16 잔액 조회(구매 경합 뒤),200,,구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회 1-1,text,true,,382,378,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,27,0,0
+1794460341074,15,등록 가격 구매자 17 잔액 조회(구매 경합 뒤),200,,구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회 1-1,text,true,,382,378,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,15,0,0
+1794460341091,16,등록 가격 구매자 18 잔액 조회(구매 경합 뒤),200,,구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회 1-1,text,true,,382,378,1,1,http://wherehouse.it.kr:8186/ChatService/api/wallet,16,0,0
+1794460341109,106,요청별종료후확인과 전체종료후확인 쓰기(실행 폴더의 종료후확인.log),200,결과 확인 기준 위반 있음,구매 경합 뒤 저장 상태 확인: 판매자의 대화 상세 18건과 등록 가격 구매자의 잔액 18건 조회 1-1,text,false,,9315,0,1,1,null,0,0,0
