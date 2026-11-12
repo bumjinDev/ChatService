@@ -1,0 +1,19 @@
+﻿role,buyer_no,buyer_id,conversation_id,offer_id,offer_quantity,offer_status,purchase_quantity,payment_amount,balance,offer_count,reservation_id,order_count,request_log_id
+흥정 구매자,01,rsvbuy01offer01,255,157,2,PENDING,0,-,-,1,-,0,accept-01
+흥정 구매자,02,rsvbuy01offer02,256,158,2,PENDING,0,-,-,1,-,0,accept-02
+흥정 구매자,03,rsvbuy01offer03,257,159,2,PENDING,0,-,-,1,-,0,accept-03
+흥정 구매자,04,rsvbuy01offer04,258,160,3,PENDING,0,-,-,1,-,0,accept-04
+흥정 구매자,05,rsvbuy01offer05,259,161,3,PENDING,0,-,-,1,-,0,accept-05
+흥정 구매자,06,rsvbuy01offer06,260,162,3,PENDING,0,-,-,1,-,0,accept-06
+흥정 구매자,07,rsvbuy01offer07,261,163,5,PENDING,0,-,-,1,-,0,accept-07
+흥정 구매자,08,rsvbuy01offer08,262,164,5,PENDING,0,-,-,1,-,0,accept-08
+흥정 구매자,09,rsvbuy01offer09,263,165,5,PENDING,0,-,-,1,-,0,accept-09
+등록 가격 구매자,01,rsvbuy01buy01,264,-,0,-,2,20000,20000,0,-,0,buy-01
+등록 가격 구매자,02,rsvbuy01buy02,265,-,0,-,2,20000,20000,0,-,0,buy-02
+등록 가격 구매자,03,rsvbuy01buy03,266,-,0,-,2,20000,20000,0,-,0,buy-03
+등록 가격 구매자,04,rsvbuy01buy04,267,-,0,-,3,30000,30000,0,-,0,buy-04
+등록 가격 구매자,05,rsvbuy01buy05,268,-,0,-,3,30000,30000,0,-,0,buy-05
+등록 가격 구매자,06,rsvbuy01buy06,269,-,0,-,3,30000,30000,0,-,0,buy-06
+등록 가격 구매자,07,rsvbuy01buy07,270,-,0,-,5,50000,50000,0,-,0,buy-07
+등록 가격 구매자,08,rsvbuy01buy08,271,-,0,-,5,50000,50000,0,-,0,buy-08
+등록 가격 구매자,09,rsvbuy01buy09,272,-,0,-,5,50000,50000,0,-,0,buy-09
