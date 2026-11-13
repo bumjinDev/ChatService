@@ -1,0 +1,199 @@
+{
+    "\uc2e4\ud589 ID": "exrb01-20261113-150201",
+    "\ud68c\uc6d0": {
+        "seller": "exrb01seller",
+        "order": "exrb01order",
+        "rsv": "exrb01rsv",
+        "offer": "exrb01offer",
+        "buy": "exrb01buy"
+    },
+    "\uc0c1\ud488 ID": "44320",
+    "\ub300\ud654 ID": {
+        "order": "281",
+        "rsv": "282",
+        "offer": "283",
+        "buy": "284"
+    },
+    "\uae30\uc874 \uc608\uc57d \uad6c\ub9e4\uc790\uc758 \uc81c\uc548 ID": "181",
+    "\uc0c8 \ud765\uc815 \uad6c\ub9e4\uc790\uc758 \uc81c\uc548 ID": "182",
+    "\uae30\uc874 \uc8fc\ubb38 ID": "221",
+    "\uae30\uc874 \uc608\uc57d ID": "121",
+    "\uc11c\ubc84 \uc2dc\uac01 \uc870\ud68c(API)": {
+        "instant": "2026-11-13T06:04:21.225752Z",
+        "fixed": false
+    },
+    "DB \uc870\ud68c \uc2dc\uac01(UTC)": "2026-11-13T06:04:22.636293Z",
+    "\uae30\uc874 \uc608\uc57d \ub9cc\ub8cc\uae4c\uc9c0(ms, DB \uc2dc\uac01 \uae30\uc900)": 1171776,
+    "\uae30\uc874 \uc8fc\ubb38 \ubc1c\uc1a1 \uae30\ud55c\uae4c\uc9c0(ms, DB \uc2dc\uac01 \uae30\uc900)": 636937363,
+    "DB \uc870\ud68c \uacb0\uacfc": {
+        "db_now": "2026-11-13T06:04:22.636293Z",
+        "version": "Oracle Database 21c Express Edition  21.0.0.0.0",
+        "PRODUCT": [
+            {
+                "PRODUCT_ID": 44320,
+                "SELLER_ID": "exrb01seller",
+                "NAME": "\uae30\uc874 \uac70\ub798 \uc608\uc57d\u2013\ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4 exrb01-20261113-150201",
+                "CATEGORY": "ELECTRONICS",
+                "PRICE": 10000,
+                "INITIAL_QUANTITY": 10,
+                "REMAINING_QUANTITY": 7,
+                "STATUS": "ON_SALE",
+                "CREATED_AT": "2026-11-13T06:03:12.063723Z",
+                "SOLD_AT": null
+            }
+        ],
+        "CONVERSATION": [
+            {
+                "CONVERSATION_ID": 281,
+                "PRODUCT_ID": 44320,
+                "BUYER_ID": "exrb01order",
+                "SELLER_ID": "exrb01seller",
+                "CREATED_BY_SYSTEM": 0,
+                "CREATED_AT": "2026-11-13T06:03:12.268434Z"
+            },
+            {
+                "CONVERSATION_ID": 282,
+                "PRODUCT_ID": 44320,
+                "BUYER_ID": "exrb01rsv",
+                "SELLER_ID": "exrb01seller",
+                "CREATED_BY_SYSTEM": 0,
+                "CREATED_AT": "2026-11-13T06:03:12.364554Z"
+            },
+            {
+                "CONVERSATION_ID": 283,
+                "PRODUCT_ID": 44320,
+                "BUYER_ID": "exrb01offer",
+                "SELLER_ID": "exrb01seller",
+                "CREATED_BY_SYSTEM": 0,
+                "CREATED_AT": "2026-11-13T06:03:12.467400Z"
+            },
+            {
+                "CONVERSATION_ID": 284,
+                "PRODUCT_ID": 44320,
+                "BUYER_ID": "exrb01buy",
+                "SELLER_ID": "exrb01seller",
+                "CREATED_BY_SYSTEM": 0,
+                "CREATED_AT": "2026-11-13T06:03:12.495916Z"
+            }
+        ],
+        "PRICE_OFFER": [
+            {
+                "OFFER_ID": 181,
+                "CONVERSATION_ID": 282,
+                "PRODUCT_ID": 44320,
+                "BUYER_ID": "exrb01rsv",
+                "SELLER_ID": "exrb01seller",
+                "AMOUNT": 9000,
+                "QUANTITY": 4,
+                "STATUS": "ACCEPTED",
+                "REQUEST_ID": "exrb01-20261113-150201-prep-offer-rsv",
+                "CREATED_AT": "2026-11-13T06:03:54.280863Z",
+                "RESPONDED_AT": "2026-11-13T06:03:54.413013Z"
+            },
+            {
+                "OFFER_ID": 182,
+                "CONVERSATION_ID": 283,
+                "PRODUCT_ID": 44320,
+                "BUYER_ID": "exrb01offer",
+                "SELLER_ID": "exrb01seller",
+                "AMOUNT": 9000,
+                "QUANTITY": 2,
+                "STATUS": "PENDING",
+                "REQUEST_ID": "exrb01-20261113-150201-prep-offer-new",
+                "CREATED_AT": "2026-11-13T06:03:59.319520Z",
+                "RESPONDED_AT": null
+            }
+        ],
+        "RESERVATION": [
+            {
+                "RESERVATION_ID": 121,
+                "PRODUCT_ID": 44320,
+                "CONVERSATION_ID": 282,
+                "BUYER_ID": "exrb01rsv",
+                "SELLER_ID": "exrb01seller",
+                "OFFER_ID": 181,
+                "QUANTITY": 4,
+                "STATUS": "ACTIVE",
+                "RESERVED_AT": "2026-11-13T06:03:54.413066Z",
+                "EXPIRES_AT": "2026-11-13T06:23:54.413066Z",
+                "ENDED_AT": null,
+                "RELEASED_BY": null,
+                "FULFILLED_ORDER_ID": null
+            }
+        ],
+        "PURCHASE_ORDER": [
+            {
+                "ORDER_ID": 221,
+                "PRODUCT_ID": 44320,
+                "BUYER_ID": "exrb01order",
+                "SELLER_ID": "exrb01seller",
+                "QUANTITY": 3,
+                "UNIT_PRICE": 10000,
+                "PAID_AMOUNT": 30000,
+                "PRICE_SOURCE": "LISTED",
+                "OFFER_ID": null,
+                "SHIPPING_STATUS": "WAITING_SHIPMENT",
+                "TRADE_STATUS": "IN_PROGRESS",
+                "CONFIRMED_AT": "2026-11-13T06:03:43.782929Z",
+                "SHIP_DEADLINE_AT": "2026-11-20T15:00:00.000000Z",
+                "REQUEST_ID": "exrb01-20261113-150201-prep-order"
+            }
+        ],
+        "WALLET": [
+            {
+                "MEMBER_ID": "exrb01buy",
+                "BALANCE": 20000,
+                "UPDATED_AT": "2026-11-13T06:03:47.924138Z"
+            },
+            {
+                "MEMBER_ID": "exrb01offer",
+                "BALANCE": 0,
+                "UPDATED_AT": "2026-11-13T06:04:21.621232Z"
+            },
+            {
+                "MEMBER_ID": "exrb01order",
+                "BALANCE": 0,
+                "UPDATED_AT": "2026-11-13T06:03:43.782929Z"
+            },
+            {
+                "MEMBER_ID": "exrb01rsv",
+                "BALANCE": 0,
+                "UPDATED_AT": "2026-11-13T06:04:21.600542Z"
+            }
+        ],
+        "BALANCE_TRANSACTION": [
+            {
+                "TRANSACTION_ID": 308,
+                "MEMBER_ID": "exrb01order",
+                "TYPE": "CHARGE",
+                "AMOUNT": 30000,
+                "BALANCE_AFTER": 30000,
+                "ORDER_ID": null,
+                "REQUEST_ID": "exrb01-20261113-150201-prep-charge-order",
+                "CREATED_AT": "2026-11-13T06:03:43.675110Z"
+            },
+            {
+                "TRANSACTION_ID": 309,
+                "MEMBER_ID": "exrb01order",
+                "TYPE": "PURCHASE",
+                "AMOUNT": -30000,
+                "BALANCE_AFTER": 0,
+                "ORDER_ID": 221,
+                "REQUEST_ID": null,
+                "CREATED_AT": "2026-11-13T06:03:43.782929Z"
+            },
+            {
+                "TRANSACTION_ID": 310,
+                "MEMBER_ID": "exrb01buy",
+                "TYPE": "CHARGE",
+                "AMOUNT": 20000,
+                "BALANCE_AFTER": 20000,
+                "ORDER_ID": null,
+                "REQUEST_ID": "exrb01-20261113-150201-prep-charge-buy",
+                "CREATED_AT": "2026-11-13T06:03:47.924138Z"
+            }
+        ],
+        "db_now_end": "2026-11-13T06:04:22.859452Z",
+        "mode": "\uc77d\uae30 \uc804\uc6a9 \ud2b8\ub79c\uc7ad\uc158"
+    }
+}
