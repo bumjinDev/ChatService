@@ -106,6 +106,21 @@ public class JWTUtil {
     }
     
     /**
+     * 같은 클레임과 같은 서명 키로 발급 시각과 만료 시각만 새로 정한 JWT 토큰을 만든다.
+     * 만료 시각은 지금부터 EXPIRATION_TIME(1시간) 뒤로, 처음 로그인할 때 발급하는 JWT 와 같은 길이다.
+     */
+    public String renewExpiration(String token, Key key) {
+        Claims claims = extractAllClaims(token, key);
+        Date now = new Date();
+        return Jwts.builder()
+                .setClaims(claims)
+                .setIssuedAt(now)
+                .setExpiration(new Date(now.getTime() + EXPIRATION_TIME))
+                .signWith(key)
+                .compact();
+    }
+
+    /**
      * JWT 토큰에서 사용자 ID 추출
      */
     public String extractUserId(String token, Key key) {

@@ -12,6 +12,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.chatservice.auth.filter.util.CookieUtil;
 import com.chatservice.auth.filter.util.JWTUtil;
+import com.chatservice.auth.filter.util.JwtExpirationRefresher;
 import com.chatservice.redis.handler.RedisHandler;
 
 import jakarta.servlet.FilterChain;
@@ -28,15 +29,18 @@ public class JwtAuthProcessorFilter extends OncePerRequestFilter {
     private final CookieUtil cookieUtil;
     private final JWTUtil jwtUtil;
     private final RedisHandler redisHandler;
+    private final JwtExpirationRefresher jwtExpirationRefresher;
 
     public JwtAuthProcessorFilter(
     		CookieUtil cookieUtil,
     		JWTUtil jwtUtil,
-    		 RedisHandler redisHandler)
+    		 RedisHandler redisHandler,
+    		JwtExpirationRefresher jwtExpirationRefresher)
     {
         this.cookieUtil = cookieUtil;
         this.jwtUtil = jwtUtil;
         this.redisHandler = redisHandler;
+        this.jwtExpirationRefresher = jwtExpirationRefresher;
     }
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -96,6 +100,9 @@ public class JwtAuthProcessorFilter extends OncePerRequestFilter {
         
         logger.info("JWT 인증 성공: 사용자 ID = {}", userId);
         logger.info("JWT 인증 성공: 사용자 이름 = {}", userName);
+
+        // 6. 인증된 요청이므로 로그인 만료 시각을 지금 시각 기준으로 갱신한다. 새 JWT 쿠키를 넣을 수 있도록 다음 필터로 넘기기 전에 호출한다.
+        jwtExpirationRefresher.refresh(request, response, token, keyValue, key, userId);
 
         // 필터 체인 계속 실행
         filterChain.doFilter(request, response);

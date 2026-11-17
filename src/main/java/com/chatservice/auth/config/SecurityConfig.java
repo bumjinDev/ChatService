@@ -20,6 +20,7 @@ import com.chatservice.auth.filter.customfilter.JwtAuthProcessorFilter;
 import com.chatservice.auth.filter.customfilter.LoginFilter;
 import com.chatservice.auth.filter.util.CookieUtil;
 import com.chatservice.auth.filter.util.JWTUtil;
+import com.chatservice.auth.filter.util.JwtExpirationRefresher;
 import com.chatservice.auth.provider.UserAuthenticationProvider;
 import com.chatservice.auth.repository.UserEntityRepository;
 import com.chatservice.auth.userdetailservice.UserEntityDetailService;
@@ -40,6 +41,7 @@ public class SecurityConfig {
     private final JWTUtil jwtUtil;
     private final CookieUtil cookieUtil;
     private final RedisHandler redisHandler;
+    private final JwtExpirationRefresher jwtExpirationRefresher;
 
     public SecurityConfig(
     		
@@ -48,7 +50,8 @@ public class SecurityConfig {
         UserEntityRepository userEntityRepository,
         JWTUtil jwtUtil,
         CookieUtil cookieUtil,
-        RedisHandler redisHandler
+        RedisHandler redisHandler,
+        JwtExpirationRefresher jwtExpirationRefresher
     ) {
         this.authenticationConfiguration = authenticationConfiguration;
         this.userEntityDetailService = userEntityDetailService;
@@ -56,6 +59,7 @@ public class SecurityConfig {
         this.jwtUtil = jwtUtil;
         this.cookieUtil = cookieUtil;
         this.redisHandler = redisHandler;
+        this.jwtExpirationRefresher = jwtExpirationRefresher;
     }
 
     @Bean
@@ -84,7 +88,7 @@ public class SecurityConfig {
                 .anyRequest().permitAll())
             .csrf(csrf -> csrf.disable())
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .addFilterAt(new IndexFilter(cookieUtil, jwtUtil, redisHandler), UsernamePasswordAuthenticationFilter.class);
+            .addFilterAt(new IndexFilter(cookieUtil, jwtUtil, redisHandler, jwtExpirationRefresher), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
     /* [회원관리 서비스 - 로그인] : 로그인 요청 처리를 처리 - Post 한정임 */
@@ -118,7 +122,7 @@ public class SecurityConfig {
 				.anyRequest().permitAll())
             .csrf(csrf -> csrf.disable())
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .addFilterAt(new JwtAuthProcessorFilter(cookieUtil, jwtUtil, redisHandler), UsernamePasswordAuthenticationFilter.class)
+            .addFilterAt(new JwtAuthProcessorFilter(cookieUtil, jwtUtil, redisHandler, jwtExpirationRefresher), UsernamePasswordAuthenticationFilter.class)
 	        .exceptionHandling(exception ->
 		        exception.authenticationEntryPoint(new JwtAuthenticationFailureHandler()) // JWT 인증 실패 시 실행될 핸들러 등록
 		        		 .accessDeniedHandler(new JwtAccessDeniedHandler()));               // 인가 실패 처리
@@ -144,7 +148,7 @@ public class SecurityConfig {
 				.anyRequest().authenticated())
             .csrf(csrf -> csrf.disable())
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .addFilterAt(new JwtAuthProcessorFilter(cookieUtil, jwtUtil, redisHandler), UsernamePasswordAuthenticationFilter.class)
+            .addFilterAt(new JwtAuthProcessorFilter(cookieUtil, jwtUtil, redisHandler, jwtExpirationRefresher), UsernamePasswordAuthenticationFilter.class)
 	        .exceptionHandling(exception ->
 		        exception.authenticationEntryPoint(new JwtAuthenticationFailureHandler()) 	// JWT 인증 실패 시 실행될 핸들러 등록
 		        		 .accessDeniedHandler(new JwtAccessDeniedHandler()));               // 인가 실패 처리
@@ -157,7 +161,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
             .csrf(csrf -> csrf.disable())
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .addFilterAt(new JwtAuthProcessorFilter(cookieUtil, jwtUtil, redisHandler), UsernamePasswordAuthenticationFilter.class)
+            .addFilterAt(new JwtAuthProcessorFilter(cookieUtil, jwtUtil, redisHandler, jwtExpirationRefresher), UsernamePasswordAuthenticationFilter.class)
             .exceptionHandling(exception ->
                 exception.authenticationEntryPoint(new JwtAuthenticationFailureHandler())
                          .accessDeniedHandler(new JwtAccessDeniedHandler()));
@@ -177,7 +181,7 @@ public class SecurityConfig {
                 .anyRequest().authenticated())
             .csrf(csrf -> csrf.disable())
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .addFilterAt(new JwtAuthProcessorFilter(cookieUtil, jwtUtil, redisHandler), UsernamePasswordAuthenticationFilter.class)
+            .addFilterAt(new JwtAuthProcessorFilter(cookieUtil, jwtUtil, redisHandler, jwtExpirationRefresher), UsernamePasswordAuthenticationFilter.class)
             .exceptionHandling(exception ->
                 exception.authenticationEntryPoint(new ApiAuthenticationEntryPoint(objectMapper))
                          .accessDeniedHandler(new ApiAccessDeniedHandler(objectMapper)));
@@ -191,7 +195,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
             .csrf(csrf -> csrf.disable())
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .addFilterAt(new JwtAuthProcessorFilter(cookieUtil, jwtUtil, redisHandler), UsernamePasswordAuthenticationFilter.class)
+            .addFilterAt(new JwtAuthProcessorFilter(cookieUtil, jwtUtil, redisHandler, jwtExpirationRefresher), UsernamePasswordAuthenticationFilter.class)
             .exceptionHandling(exception ->
                 exception.authenticationEntryPoint(new JwtAuthenticationFailureHandler())
                          .accessDeniedHandler(new JwtAccessDeniedHandler()));
