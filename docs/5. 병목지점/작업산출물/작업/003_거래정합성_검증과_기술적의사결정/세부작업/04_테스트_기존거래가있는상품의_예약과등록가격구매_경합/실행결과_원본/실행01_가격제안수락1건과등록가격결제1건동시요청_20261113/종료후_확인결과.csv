@@ -1,0 +1,54 @@
+﻿구분,항목,허용 결과 A 기대값(새 수락 성공·새 결제 거절),허용 결과 B 기대값(새 수락 거절·새 결제 성공),API 값,DB 값,결과
+기존 주문 전후 대조,ORDER_ID,221,221,해당 없음,221,일치
+기존 주문 전후 대조,PRODUCT_ID,44320,44320,해당 없음,44320,일치
+기존 주문 전후 대조,BUYER_ID,exrb01order,exrb01order,해당 없음,exrb01order,일치
+기존 주문 전후 대조,SELLER_ID,exrb01seller,exrb01seller,해당 없음,exrb01seller,일치
+기존 주문 전후 대조,QUANTITY,3,3,해당 없음,3,일치
+기존 주문 전후 대조,UNIT_PRICE,10000,10000,해당 없음,10000,일치
+기존 주문 전후 대조,PAID_AMOUNT,30000,30000,해당 없음,30000,일치
+기존 주문 전후 대조,PRICE_SOURCE,LISTED,LISTED,해당 없음,LISTED,일치
+기존 주문 전후 대조,OFFER_ID,null,null,해당 없음,null,일치
+기존 주문 전후 대조,SHIPPING_STATUS,WAITING_SHIPMENT,WAITING_SHIPMENT,해당 없음,WAITING_SHIPMENT,일치
+기존 주문 전후 대조,TRADE_STATUS,IN_PROGRESS,IN_PROGRESS,해당 없음,IN_PROGRESS,일치
+기존 주문 전후 대조,CONFIRMED_AT,2026-11-13T06:03:43.782929Z,2026-11-13T06:03:43.782929Z,해당 없음,2026-11-13T06:03:43.782929Z,일치
+기존 주문 전후 대조,SHIP_DEADLINE_AT,2026-11-20T15:00:00.000000Z,2026-11-20T15:00:00.000000Z,해당 없음,2026-11-20T15:00:00.000000Z,일치
+기존 주문 전후 대조,REQUEST_ID,exrb01-20261113-150201-prep-order,exrb01-20261113-150201-prep-order,해당 없음,exrb01-20261113-150201-prep-order,일치
+기존 주문 전후 대조,판매자 대화 상세의 기존 주문(수량·거래 상태·발송 상태),3 IN_PROGRESS WAITING_SHIPMENT,3 IN_PROGRESS WAITING_SHIPMENT,3 IN_PROGRESS WAITING_SHIPMENT,해당 없음,일치
+기존 예약 전후 대조,RESERVATION_ID,121,121,해당 없음,121,일치
+기존 예약 전후 대조,PRODUCT_ID,44320,44320,해당 없음,44320,일치
+기존 예약 전후 대조,CONVERSATION_ID,282,282,해당 없음,282,일치
+기존 예약 전후 대조,BUYER_ID,exrb01rsv,exrb01rsv,해당 없음,exrb01rsv,일치
+기존 예약 전후 대조,SELLER_ID,exrb01seller,exrb01seller,해당 없음,exrb01seller,일치
+기존 예약 전후 대조,OFFER_ID,181,181,해당 없음,181,일치
+기존 예약 전후 대조,QUANTITY,4,4,해당 없음,4,일치
+기존 예약 전후 대조,STATUS,ACTIVE,ACTIVE,해당 없음,ACTIVE,일치
+기존 예약 전후 대조,RESERVED_AT,2026-11-13T06:03:54.413066Z,2026-11-13T06:03:54.413066Z,해당 없음,2026-11-13T06:03:54.413066Z,일치
+기존 예약 전후 대조,EXPIRES_AT,2026-11-13T06:23:54.413066Z,2026-11-13T06:23:54.413066Z,해당 없음,2026-11-13T06:23:54.413066Z,일치
+기존 예약 전후 대조,ENDED_AT,null,null,해당 없음,null,일치
+기존 예약 전후 대조,RELEASED_BY,null,null,해당 없음,null,일치
+기존 예약 전후 대조,FULFILLED_ORDER_ID,null,null,해당 없음,null,일치
+기존 예약 전후 대조,종료 후 DB 조회 시각에 유효,true,true,해당 없음,true,일치
+기존 예약 전후 대조,판매자 대화 상세의 기존 예약(ID·수량·상태),121 4 ACTIVE,121 4 ACTIVE,121 4 ACTIVE,해당 없음,일치
+기존 예약 전후 대조,기존 예약 구매자 제안의 상태,ACCEPTED,ACCEPTED,해당 없음,ACCEPTED,일치
+전체 상태,전체 주문 건수,1,2,해당 없음,2,B
+전체 상태,전체 주문 수량,3,5,해당 없음,5,B
+전체 상태,유효 예약 건수,2,1,해당 없음,2,A
+전체 상태,유효 예약 수량,6,4,해당 없음,6,A
+전체 상태,상품 남은 수량,7,5,5,5,B
+전체 상태,상품 상태,ON_SALE,ON_SALE,ON_SALE,ON_SALE,A·B
+잔액,새 등록 가격 구매자 잔액,20000,0,0,0,B
+잔액,기존 주문 구매자 잔액,0,0,0,0,A·B
+잔액,기존 예약 구매자 잔액,0,0,0,0,A·B
+잔액,새 흥정 구매자 잔액,0,0,0,0,A·B
+구매 가능 수량,기존 예약 구매자가 보는 구매 가능 수량,5,5,3,3,어느 쪽도 아님
+구매 가능 수량,새 등록 가격 구매자가 보는 구매 가능 수량,1,1,-1,-1,어느 쪽도 아님
+새 수락,새 흥정 구매자 제안의 상태,ACCEPTED,PENDING,ACCEPTED,ACCEPTED,A
+새 수락,새 흥정 구매자의 예약,2개 ACTIVE 유효 제안 182 대화 283,없음,해당 없음,2개 ACTIVE 유효 제안 182 대화 283,A
+새 수락,판매자 대화 상세의 새 흥정 구매자 예약(수량·상태),2 ACTIVE,없음,2 ACTIVE,해당 없음,A
+새 결제,새 등록 가격 구매자의 주문,없음,2개 단가 10000 결제 20000 LISTED 제안 null IN_PROGRESS WAITING_SHIPMENT,해당 없음,2개 단가 10000 결제 20000 LISTED 제안 null IN_PROGRESS WAITING_SHIPMENT,B
+새 결제,판매자 대화 상세의 새 등록 가격 구매자 주문 수,0,1,1,해당 없음,B
+새 결제,새 등록 가격 구매자의 잔액 변동 내역,CHARGE 20000 잔액 20000,CHARGE 20000 잔액 20000 / PURCHASE -20000 잔액 0 주문 222,CHARGE 20000 잔액 20000 / PURCHASE -20000 잔액 0 주문 222,CHARGE 20000 잔액 20000 / PURCHASE -20000 잔액 0 주문 222,B
+공통 규칙,전체 주문 수량 + 유효 예약 수량이 판매 수량 10개 이하,true,true,해당 없음,false,불일치
+공통 규칙,상품 남은 수량 = 10 − 전체 주문 수량,true,true,해당 없음,true,일치
+공통 규칙,기존 예약 구매자의 상품 상세 구매 가능 수량 = 정의에 따라 DB로 계산한 값,true,true,해당 없음,true,일치
+공통 규칙,새 등록 가격 구매자의 상품 상세 구매 가능 수량 = 정의에 따라 DB로 계산한 값,true,true,해당 없음,true,일치

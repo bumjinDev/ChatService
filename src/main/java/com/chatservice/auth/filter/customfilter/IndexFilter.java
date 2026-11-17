@@ -12,6 +12,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.chatservice.auth.filter.util.CookieUtil;
 import com.chatservice.auth.filter.util.JWTUtil;
+import com.chatservice.auth.filter.util.JwtExpirationRefresher;
 import com.chatservice.redis.handler.RedisHandler;
 
 import jakarta.servlet.FilterChain;
@@ -28,15 +29,18 @@ public class IndexFilter extends OncePerRequestFilter {
     private final CookieUtil cookieUtil;
     private final JWTUtil jwtUtil;
     private final RedisHandler redisHandler;
+    private final JwtExpirationRefresher jwtExpirationRefresher;
 
     public IndexFilter(
     		CookieUtil cookieUtil,
     		JWTUtil jwtUtil,
-    		RedisHandler redisHandler)
+    		RedisHandler redisHandler,
+    		JwtExpirationRefresher jwtExpirationRefresher)
     {
         this.cookieUtil = cookieUtil;
         this.jwtUtil = jwtUtil;
         this.redisHandler = redisHandler;
+        this.jwtExpirationRefresher = jwtExpirationRefresher;
     }
 
     @Override
@@ -95,6 +99,9 @@ public class IndexFilter extends OncePerRequestFilter {
 
                         logger.info("JWT 인증 성공: 사용자 ID = {}", userId);
                         logger.info("JWT 인증 성공: 사용자 이름 = {}", userName);
+
+                        // 인증된 요청이므로 로그인 만료 시각을 지금 시각 기준으로 갱신한다.
+                        jwtExpirationRefresher.refresh(request, response, token, keyValue, key, userId);
                     }
                 }
             }

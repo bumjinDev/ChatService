@@ -1,0 +1,1 @@
+[{"transactionId":311,"type":"PURCHASE","amount":-20000,"balanceAfter":0,"orderId":222,"createdAt":"2026-11-13T06:13:18.193086Z"},{"transactionId":310,"type":"CHARGE","amount":20000,"balanceAfter":20000,"orderId":null,"createdAt":"2026-11-13T06:03:47.924138Z"}]
