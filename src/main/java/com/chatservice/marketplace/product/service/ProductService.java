@@ -99,6 +99,25 @@ public class ProductService implements IProductService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
     }
 
+    /**
+     * 상품 행에 비관적 쓰기 잠금을 얻어 상품을 조회한다. 판매 종료된 상품도 조회한다.
+     *
+     * 가격 제안 수락과 결제가 상품을 처음 읽을 때 쓴다. 같은 상품의 수락과 결제는 이 조회에서 차례로 기다리고,
+     * 뒤의 요청은 앞의 요청이 커밋되거나 롤백된 뒤에 상품과 예약을 읽는다. 호출하는 쪽의 트랜잭션에서 실행된다.
+     *
+     * @param productId 조회할 상품 ID
+     * @return 조회한 상품
+     * @throws BusinessException {@code PRODUCT_NOT_FOUND}: 상품이 없다
+     */
+    @Override
+    @Transactional
+    public Product getProductForUpdate(Long productId) {
+        // 상품 조회(테이블 "PRODUCT"). 행 잠금을 얻어 조회하며 없으면 PRODUCT_NOT_FOUND
+        // 잠금은 호출하는 쪽의 트랜잭션이 커밋되거나 롤백될 때 풀린다
+        return productRepository.findByIdForUpdate(productId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
+    }
+
     @Override
     @Transactional
     public void deductStock(Product product, long quantity, Instant now) {
