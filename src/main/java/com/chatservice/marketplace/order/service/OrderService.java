@@ -107,8 +107,8 @@ public class OrderService implements IOrderService {
             Instant now = timeRules.now();
             long quantity = request.quantity();
 
-            // 상품 조회. 없으면 PRODUCT_NOT_FOUND
-            Product product = productService.getProduct(request.productId());
+            // 상품 조회. 상품 행에 비관적 쓰기 잠금을 얻어 조회하며, 잠금은 이 결제 처리가 커밋되거나 롤백될 때까지 유지된다. 없으면 PRODUCT_NOT_FOUND
+            Product product = productService.getProductForUpdate(request.productId());
             // 본인 상품은 구매할 수 없다
             if (product.isSoldBy(buyerId)) {
                 throw new BusinessException(ErrorCode.SELF_TRADE_NOT_ALLOWED);
