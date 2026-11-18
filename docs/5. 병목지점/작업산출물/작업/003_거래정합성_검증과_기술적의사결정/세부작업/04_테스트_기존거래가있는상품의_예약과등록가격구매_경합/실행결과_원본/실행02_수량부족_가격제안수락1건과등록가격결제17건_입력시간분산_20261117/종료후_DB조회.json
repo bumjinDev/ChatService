@@ -1,0 +1,996 @@
+{
+    "db_now": "2026-11-17T10:29:55.052880Z",
+    "version": "Oracle Database 21c Express Edition  21.0.0.0.0",
+    "PRODUCT": [
+        {
+            "PRODUCT_ID": 93782,
+            "SELLER_ID": "mpay02sl",
+            "NAME": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58902)",
+            "CATEGORY": "ELECTRONICS",
+            "PRICE": 10000,
+            "INITIAL_QUANTITY": 16,
+            "REMAINING_QUANTITY": 8,
+            "STATUS": "ON_SALE",
+            "CREATED_AT": "2026-11-17T10:04:35.793516Z",
+            "SOLD_AT": null
+        }
+    ],
+    "CONVERSATION": [
+        {
+            "CONVERSATION_ID": 321,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02od",
+            "SELLER_ID": "mpay02sl",
+            "CREATED_BY_SYSTEM": 0,
+            "CREATED_AT": "2026-11-17T10:04:36.087730Z"
+        },
+        {
+            "CONVERSATION_ID": 322,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02rv",
+            "SELLER_ID": "mpay02sl",
+            "CREATED_BY_SYSTEM": 0,
+            "CREATED_AT": "2026-11-17T10:04:36.195448Z"
+        },
+        {
+            "CONVERSATION_ID": 323,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02of",
+            "SELLER_ID": "mpay02sl",
+            "CREATED_BY_SYSTEM": 0,
+            "CREATED_AT": "2026-11-17T10:04:36.221658Z"
+        },
+        {
+            "CONVERSATION_ID": 324,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02p01",
+            "SELLER_ID": "mpay02sl",
+            "CREATED_BY_SYSTEM": 0,
+            "CREATED_AT": "2026-11-17T10:04:36.246892Z"
+        },
+        {
+            "CONVERSATION_ID": 325,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02p02",
+            "SELLER_ID": "mpay02sl",
+            "CREATED_BY_SYSTEM": 0,
+            "CREATED_AT": "2026-11-17T10:04:36.271614Z"
+        },
+        {
+            "CONVERSATION_ID": 326,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02p03",
+            "SELLER_ID": "mpay02sl",
+            "CREATED_BY_SYSTEM": 0,
+            "CREATED_AT": "2026-11-17T10:04:36.296345Z"
+        },
+        {
+            "CONVERSATION_ID": 327,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02p04",
+            "SELLER_ID": "mpay02sl",
+            "CREATED_BY_SYSTEM": 0,
+            "CREATED_AT": "2026-11-17T10:04:36.321640Z"
+        },
+        {
+            "CONVERSATION_ID": 328,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02p05",
+            "SELLER_ID": "mpay02sl",
+            "CREATED_BY_SYSTEM": 0,
+            "CREATED_AT": "2026-11-17T10:04:36.346229Z"
+        },
+        {
+            "CONVERSATION_ID": 329,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02p06",
+            "SELLER_ID": "mpay02sl",
+            "CREATED_BY_SYSTEM": 0,
+            "CREATED_AT": "2026-11-17T10:04:36.372640Z"
+        },
+        {
+            "CONVERSATION_ID": 330,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02p07",
+            "SELLER_ID": "mpay02sl",
+            "CREATED_BY_SYSTEM": 0,
+            "CREATED_AT": "2026-11-17T10:04:36.399869Z"
+        },
+        {
+            "CONVERSATION_ID": 331,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02p08",
+            "SELLER_ID": "mpay02sl",
+            "CREATED_BY_SYSTEM": 0,
+            "CREATED_AT": "2026-11-17T10:04:36.427568Z"
+        },
+        {
+            "CONVERSATION_ID": 332,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02p09",
+            "SELLER_ID": "mpay02sl",
+            "CREATED_BY_SYSTEM": 0,
+            "CREATED_AT": "2026-11-17T10:04:36.451812Z"
+        },
+        {
+            "CONVERSATION_ID": 333,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02p10",
+            "SELLER_ID": "mpay02sl",
+            "CREATED_BY_SYSTEM": 0,
+            "CREATED_AT": "2026-11-17T10:04:36.475663Z"
+        },
+        {
+            "CONVERSATION_ID": 334,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02p11",
+            "SELLER_ID": "mpay02sl",
+            "CREATED_BY_SYSTEM": 0,
+            "CREATED_AT": "2026-11-17T10:04:36.501728Z"
+        },
+        {
+            "CONVERSATION_ID": 335,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02p12",
+            "SELLER_ID": "mpay02sl",
+            "CREATED_BY_SYSTEM": 0,
+            "CREATED_AT": "2026-11-17T10:04:36.525320Z"
+        },
+        {
+            "CONVERSATION_ID": 336,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02p13",
+            "SELLER_ID": "mpay02sl",
+            "CREATED_BY_SYSTEM": 0,
+            "CREATED_AT": "2026-11-17T10:04:36.547383Z"
+        },
+        {
+            "CONVERSATION_ID": 337,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02p14",
+            "SELLER_ID": "mpay02sl",
+            "CREATED_BY_SYSTEM": 0,
+            "CREATED_AT": "2026-11-17T10:04:36.568582Z"
+        },
+        {
+            "CONVERSATION_ID": 338,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02p15",
+            "SELLER_ID": "mpay02sl",
+            "CREATED_BY_SYSTEM": 0,
+            "CREATED_AT": "2026-11-17T10:04:36.592443Z"
+        },
+        {
+            "CONVERSATION_ID": 339,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02p16",
+            "SELLER_ID": "mpay02sl",
+            "CREATED_BY_SYSTEM": 0,
+            "CREATED_AT": "2026-11-17T10:04:36.615973Z"
+        },
+        {
+            "CONVERSATION_ID": 340,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02p17",
+            "SELLER_ID": "mpay02sl",
+            "CREATED_BY_SYSTEM": 0,
+            "CREATED_AT": "2026-11-17T10:04:36.639119Z"
+        }
+    ],
+    "PRICE_OFFER": [
+        {
+            "OFFER_ID": 201,
+            "CONVERSATION_ID": 322,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02rv",
+            "SELLER_ID": "mpay02sl",
+            "AMOUNT": 9000,
+            "QUANTITY": 4,
+            "STATUS": "ACCEPTED",
+            "REQUEST_ID": "mpay02-20261117-190411-prep-offer-rsv",
+            "CREATED_AT": "2026-11-17T10:16:59.804079Z",
+            "RESPONDED_AT": "2026-11-17T10:17:00.007778Z"
+        },
+        {
+            "OFFER_ID": 202,
+            "CONVERSATION_ID": 323,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02of",
+            "SELLER_ID": "mpay02sl",
+            "AMOUNT": 9000,
+            "QUANTITY": 2,
+            "STATUS": "ACCEPTED",
+            "REQUEST_ID": "mpay02-20261117-190411-prep-offer-new",
+            "CREATED_AT": "2026-11-17T10:21:20.917750Z",
+            "RESPONDED_AT": "2026-11-17T10:25:33.374712Z"
+        }
+    ],
+    "RESERVATION": [
+        {
+            "RESERVATION_ID": 161,
+            "PRODUCT_ID": 93782,
+            "CONVERSATION_ID": 322,
+            "BUYER_ID": "mpay02rv",
+            "SELLER_ID": "mpay02sl",
+            "OFFER_ID": 201,
+            "QUANTITY": 4,
+            "STATUS": "ACTIVE",
+            "RESERVED_AT": "2026-11-17T10:17:00.009034Z",
+            "EXPIRES_AT": "2026-11-17T10:37:00.009034Z",
+            "ENDED_AT": null,
+            "RELEASED_BY": null,
+            "FULFILLED_ORDER_ID": null
+        },
+        {
+            "RESERVATION_ID": 162,
+            "PRODUCT_ID": 93782,
+            "CONVERSATION_ID": 323,
+            "BUYER_ID": "mpay02of",
+            "SELLER_ID": "mpay02sl",
+            "OFFER_ID": 202,
+            "QUANTITY": 2,
+            "STATUS": "ACTIVE",
+            "RESERVED_AT": "2026-11-17T10:25:33.374796Z",
+            "EXPIRES_AT": "2026-11-17T10:45:33.374796Z",
+            "ENDED_AT": null,
+            "RELEASED_BY": null,
+            "FULFILLED_ORDER_ID": null
+        }
+    ],
+    "PURCHASE_ORDER": [
+        {
+            "ORDER_ID": 242,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02od",
+            "SELLER_ID": "mpay02sl",
+            "QUANTITY": 3,
+            "UNIT_PRICE": 10000,
+            "PAID_AMOUNT": 30000,
+            "PRICE_SOURCE": "LISTED",
+            "OFFER_ID": null,
+            "SHIPPING_STATUS": "WAITING_SHIPMENT",
+            "TRADE_STATUS": "IN_PROGRESS",
+            "CONFIRMED_AT": "2026-11-17T10:04:46.196103Z",
+            "SHIP_DEADLINE_AT": "2026-11-24T15:00:00.000000Z",
+            "REQUEST_ID": "mpay02-20261117-190411-prep-order"
+        },
+        {
+            "ORDER_ID": 243,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02p01",
+            "SELLER_ID": "mpay02sl",
+            "QUANTITY": 1,
+            "UNIT_PRICE": 10000,
+            "PAID_AMOUNT": 10000,
+            "PRICE_SOURCE": "LISTED",
+            "OFFER_ID": null,
+            "SHIPPING_STATUS": "WAITING_SHIPMENT",
+            "TRADE_STATUS": "IN_PROGRESS",
+            "CONFIRMED_AT": "2026-11-17T10:24:33.366758Z",
+            "SHIP_DEADLINE_AT": "2026-11-24T15:00:00.000000Z",
+            "REQUEST_ID": "mpay02-20261117-190411-pay-01"
+        },
+        {
+            "ORDER_ID": 244,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02p02",
+            "SELLER_ID": "mpay02sl",
+            "QUANTITY": 1,
+            "UNIT_PRICE": 10000,
+            "PAID_AMOUNT": 10000,
+            "PRICE_SOURCE": "LISTED",
+            "OFFER_ID": null,
+            "SHIPPING_STATUS": "WAITING_SHIPMENT",
+            "TRADE_STATUS": "IN_PROGRESS",
+            "CONFIRMED_AT": "2026-11-17T10:24:33.366752Z",
+            "SHIP_DEADLINE_AT": "2026-11-24T15:00:00.000000Z",
+            "REQUEST_ID": "mpay02-20261117-190411-pay-02"
+        },
+        {
+            "ORDER_ID": 245,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02p04",
+            "SELLER_ID": "mpay02sl",
+            "QUANTITY": 1,
+            "UNIT_PRICE": 10000,
+            "PAID_AMOUNT": 10000,
+            "PRICE_SOURCE": "LISTED",
+            "OFFER_ID": null,
+            "SHIPPING_STATUS": "WAITING_SHIPMENT",
+            "TRADE_STATUS": "IN_PROGRESS",
+            "CONFIRMED_AT": "2026-11-17T10:25:03.367407Z",
+            "SHIP_DEADLINE_AT": "2026-11-24T15:00:00.000000Z",
+            "REQUEST_ID": "mpay02-20261117-190411-pay-04"
+        },
+        {
+            "ORDER_ID": 246,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02p05",
+            "SELLER_ID": "mpay02sl",
+            "QUANTITY": 1,
+            "UNIT_PRICE": 10000,
+            "PAID_AMOUNT": 10000,
+            "PRICE_SOURCE": "LISTED",
+            "OFFER_ID": null,
+            "SHIPPING_STATUS": "WAITING_SHIPMENT",
+            "TRADE_STATUS": "IN_PROGRESS",
+            "CONFIRMED_AT": "2026-11-17T10:25:03.367375Z",
+            "SHIP_DEADLINE_AT": "2026-11-24T15:00:00.000000Z",
+            "REQUEST_ID": "mpay02-20261117-190411-pay-05"
+        },
+        {
+            "ORDER_ID": 247,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02p03",
+            "SELLER_ID": "mpay02sl",
+            "QUANTITY": 1,
+            "UNIT_PRICE": 10000,
+            "PAID_AMOUNT": 10000,
+            "PRICE_SOURCE": "LISTED",
+            "OFFER_ID": null,
+            "SHIPPING_STATUS": "WAITING_SHIPMENT",
+            "TRADE_STATUS": "IN_PROGRESS",
+            "CONFIRMED_AT": "2026-11-17T10:25:03.367423Z",
+            "SHIP_DEADLINE_AT": "2026-11-24T15:00:00.000000Z",
+            "REQUEST_ID": "mpay02-20261117-190411-pay-03"
+        },
+        {
+            "ORDER_ID": 248,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02p06",
+            "SELLER_ID": "mpay02sl",
+            "QUANTITY": 1,
+            "UNIT_PRICE": 10000,
+            "PAID_AMOUNT": 10000,
+            "PRICE_SOURCE": "LISTED",
+            "OFFER_ID": null,
+            "SHIPPING_STATUS": "WAITING_SHIPMENT",
+            "TRADE_STATUS": "IN_PROGRESS",
+            "CONFIRMED_AT": "2026-11-17T10:25:03.369667Z",
+            "SHIP_DEADLINE_AT": "2026-11-24T15:00:00.000000Z",
+            "REQUEST_ID": "mpay02-20261117-190411-pay-06"
+        },
+        {
+            "ORDER_ID": 249,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02p09",
+            "SELLER_ID": "mpay02sl",
+            "QUANTITY": 1,
+            "UNIT_PRICE": 10000,
+            "PAID_AMOUNT": 10000,
+            "PRICE_SOURCE": "LISTED",
+            "OFFER_ID": null,
+            "SHIPPING_STATUS": "WAITING_SHIPMENT",
+            "TRADE_STATUS": "IN_PROGRESS",
+            "CONFIRMED_AT": "2026-11-17T10:25:33.371683Z",
+            "SHIP_DEADLINE_AT": "2026-11-24T15:00:00.000000Z",
+            "REQUEST_ID": "mpay02-20261117-190411-pay-09"
+        },
+        {
+            "ORDER_ID": 250,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02p08",
+            "SELLER_ID": "mpay02sl",
+            "QUANTITY": 1,
+            "UNIT_PRICE": 10000,
+            "PAID_AMOUNT": 10000,
+            "PRICE_SOURCE": "LISTED",
+            "OFFER_ID": null,
+            "SHIPPING_STATUS": "WAITING_SHIPMENT",
+            "TRADE_STATUS": "IN_PROGRESS",
+            "CONFIRMED_AT": "2026-11-17T10:25:33.371694Z",
+            "SHIP_DEADLINE_AT": "2026-11-24T15:00:00.000000Z",
+            "REQUEST_ID": "mpay02-20261117-190411-pay-08"
+        },
+        {
+            "ORDER_ID": 251,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02p07",
+            "SELLER_ID": "mpay02sl",
+            "QUANTITY": 1,
+            "UNIT_PRICE": 10000,
+            "PAID_AMOUNT": 10000,
+            "PRICE_SOURCE": "LISTED",
+            "OFFER_ID": null,
+            "SHIPPING_STATUS": "WAITING_SHIPMENT",
+            "TRADE_STATUS": "IN_PROGRESS",
+            "CONFIRMED_AT": "2026-11-17T10:25:33.371751Z",
+            "SHIP_DEADLINE_AT": "2026-11-24T15:00:00.000000Z",
+            "REQUEST_ID": "mpay02-20261117-190411-pay-07"
+        },
+        {
+            "ORDER_ID": 252,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02p10",
+            "SELLER_ID": "mpay02sl",
+            "QUANTITY": 1,
+            "UNIT_PRICE": 10000,
+            "PAID_AMOUNT": 10000,
+            "PRICE_SOURCE": "LISTED",
+            "OFFER_ID": null,
+            "SHIPPING_STATUS": "WAITING_SHIPMENT",
+            "TRADE_STATUS": "IN_PROGRESS",
+            "CONFIRMED_AT": "2026-11-17T10:25:33.371735Z",
+            "SHIP_DEADLINE_AT": "2026-11-24T15:00:00.000000Z",
+            "REQUEST_ID": "mpay02-20261117-190411-pay-10"
+        },
+        {
+            "ORDER_ID": 253,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02p12",
+            "SELLER_ID": "mpay02sl",
+            "QUANTITY": 1,
+            "UNIT_PRICE": 10000,
+            "PAID_AMOUNT": 10000,
+            "PRICE_SOURCE": "LISTED",
+            "OFFER_ID": null,
+            "SHIPPING_STATUS": "WAITING_SHIPMENT",
+            "TRADE_STATUS": "IN_PROGRESS",
+            "CONFIRMED_AT": "2026-11-17T10:25:33.371728Z",
+            "SHIP_DEADLINE_AT": "2026-11-24T15:00:00.000000Z",
+            "REQUEST_ID": "mpay02-20261117-190411-pay-12"
+        },
+        {
+            "ORDER_ID": 254,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02p11",
+            "SELLER_ID": "mpay02sl",
+            "QUANTITY": 1,
+            "UNIT_PRICE": 10000,
+            "PAID_AMOUNT": 10000,
+            "PRICE_SOURCE": "LISTED",
+            "OFFER_ID": null,
+            "SHIPPING_STATUS": "WAITING_SHIPMENT",
+            "TRADE_STATUS": "IN_PROGRESS",
+            "CONFIRMED_AT": "2026-11-17T10:25:33.371780Z",
+            "SHIP_DEADLINE_AT": "2026-11-24T15:00:00.000000Z",
+            "REQUEST_ID": "mpay02-20261117-190411-pay-11"
+        },
+        {
+            "ORDER_ID": 255,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02p13",
+            "SELLER_ID": "mpay02sl",
+            "QUANTITY": 1,
+            "UNIT_PRICE": 10000,
+            "PAID_AMOUNT": 10000,
+            "PRICE_SOURCE": "LISTED",
+            "OFFER_ID": null,
+            "SHIPPING_STATUS": "WAITING_SHIPMENT",
+            "TRADE_STATUS": "IN_PROGRESS",
+            "CONFIRMED_AT": "2026-11-17T10:26:03.368607Z",
+            "SHIP_DEADLINE_AT": "2026-11-24T15:00:00.000000Z",
+            "REQUEST_ID": "mpay02-20261117-190411-pay-13"
+        },
+        {
+            "ORDER_ID": 256,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02p15",
+            "SELLER_ID": "mpay02sl",
+            "QUANTITY": 1,
+            "UNIT_PRICE": 10000,
+            "PAID_AMOUNT": 10000,
+            "PRICE_SOURCE": "LISTED",
+            "OFFER_ID": null,
+            "SHIPPING_STATUS": "WAITING_SHIPMENT",
+            "TRADE_STATUS": "IN_PROGRESS",
+            "CONFIRMED_AT": "2026-11-17T10:26:03.368511Z",
+            "SHIP_DEADLINE_AT": "2026-11-24T15:00:00.000000Z",
+            "REQUEST_ID": "mpay02-20261117-190411-pay-15"
+        },
+        {
+            "ORDER_ID": 257,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02p14",
+            "SELLER_ID": "mpay02sl",
+            "QUANTITY": 1,
+            "UNIT_PRICE": 10000,
+            "PAID_AMOUNT": 10000,
+            "PRICE_SOURCE": "LISTED",
+            "OFFER_ID": null,
+            "SHIPPING_STATUS": "WAITING_SHIPMENT",
+            "TRADE_STATUS": "IN_PROGRESS",
+            "CONFIRMED_AT": "2026-11-17T10:26:03.368516Z",
+            "SHIP_DEADLINE_AT": "2026-11-24T15:00:00.000000Z",
+            "REQUEST_ID": "mpay02-20261117-190411-pay-14"
+        },
+        {
+            "ORDER_ID": 258,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02p17",
+            "SELLER_ID": "mpay02sl",
+            "QUANTITY": 1,
+            "UNIT_PRICE": 10000,
+            "PAID_AMOUNT": 10000,
+            "PRICE_SOURCE": "LISTED",
+            "OFFER_ID": null,
+            "SHIPPING_STATUS": "WAITING_SHIPMENT",
+            "TRADE_STATUS": "IN_PROGRESS",
+            "CONFIRMED_AT": "2026-11-17T10:27:03.372063Z",
+            "SHIP_DEADLINE_AT": "2026-11-24T15:00:00.000000Z",
+            "REQUEST_ID": "mpay02-20261117-190411-pay-17"
+        },
+        {
+            "ORDER_ID": 259,
+            "PRODUCT_ID": 93782,
+            "BUYER_ID": "mpay02p16",
+            "SELLER_ID": "mpay02sl",
+            "QUANTITY": 1,
+            "UNIT_PRICE": 10000,
+            "PAID_AMOUNT": 10000,
+            "PRICE_SOURCE": "LISTED",
+            "OFFER_ID": null,
+            "SHIPPING_STATUS": "WAITING_SHIPMENT",
+            "TRADE_STATUS": "IN_PROGRESS",
+            "CONFIRMED_AT": "2026-11-17T10:27:03.372054Z",
+            "SHIP_DEADLINE_AT": "2026-11-24T15:00:00.000000Z",
+            "REQUEST_ID": "mpay02-20261117-190411-pay-16"
+        }
+    ],
+    "WALLET": [
+        {
+            "MEMBER_ID": "mpay02od",
+            "BALANCE": 0,
+            "UPDATED_AT": "2026-11-17T10:04:46.196103Z"
+        },
+        {
+            "MEMBER_ID": "mpay02of",
+            "BALANCE": 0,
+            "UPDATED_AT": "2026-11-17T10:23:07.813733Z"
+        },
+        {
+            "MEMBER_ID": "mpay02p01",
+            "BALANCE": 0,
+            "UPDATED_AT": "2026-11-17T10:24:33.366758Z"
+        },
+        {
+            "MEMBER_ID": "mpay02p02",
+            "BALANCE": 0,
+            "UPDATED_AT": "2026-11-17T10:24:33.366752Z"
+        },
+        {
+            "MEMBER_ID": "mpay02p03",
+            "BALANCE": 0,
+            "UPDATED_AT": "2026-11-17T10:25:03.367423Z"
+        },
+        {
+            "MEMBER_ID": "mpay02p04",
+            "BALANCE": 0,
+            "UPDATED_AT": "2026-11-17T10:25:03.367407Z"
+        },
+        {
+            "MEMBER_ID": "mpay02p05",
+            "BALANCE": 0,
+            "UPDATED_AT": "2026-11-17T10:25:03.367375Z"
+        },
+        {
+            "MEMBER_ID": "mpay02p06",
+            "BALANCE": 0,
+            "UPDATED_AT": "2026-11-17T10:25:03.369667Z"
+        },
+        {
+            "MEMBER_ID": "mpay02p07",
+            "BALANCE": 0,
+            "UPDATED_AT": "2026-11-17T10:25:33.371751Z"
+        },
+        {
+            "MEMBER_ID": "mpay02p08",
+            "BALANCE": 0,
+            "UPDATED_AT": "2026-11-17T10:25:33.371694Z"
+        },
+        {
+            "MEMBER_ID": "mpay02p09",
+            "BALANCE": 0,
+            "UPDATED_AT": "2026-11-17T10:25:33.371683Z"
+        },
+        {
+            "MEMBER_ID": "mpay02p10",
+            "BALANCE": 0,
+            "UPDATED_AT": "2026-11-17T10:25:33.371735Z"
+        },
+        {
+            "MEMBER_ID": "mpay02p11",
+            "BALANCE": 0,
+            "UPDATED_AT": "2026-11-17T10:25:33.371780Z"
+        },
+        {
+            "MEMBER_ID": "mpay02p12",
+            "BALANCE": 0,
+            "UPDATED_AT": "2026-11-17T10:25:33.371728Z"
+        },
+        {
+            "MEMBER_ID": "mpay02p13",
+            "BALANCE": 0,
+            "UPDATED_AT": "2026-11-17T10:26:03.368607Z"
+        },
+        {
+            "MEMBER_ID": "mpay02p14",
+            "BALANCE": 0,
+            "UPDATED_AT": "2026-11-17T10:26:03.368516Z"
+        },
+        {
+            "MEMBER_ID": "mpay02p15",
+            "BALANCE": 0,
+            "UPDATED_AT": "2026-11-17T10:26:03.368511Z"
+        },
+        {
+            "MEMBER_ID": "mpay02p16",
+            "BALANCE": 0,
+            "UPDATED_AT": "2026-11-17T10:27:03.372054Z"
+        },
+        {
+            "MEMBER_ID": "mpay02p17",
+            "BALANCE": 0,
+            "UPDATED_AT": "2026-11-17T10:27:03.372063Z"
+        },
+        {
+            "MEMBER_ID": "mpay02rv",
+            "BALANCE": 0,
+            "UPDATED_AT": "2026-11-17T10:23:07.733066Z"
+        }
+    ],
+    "BALANCE_TRANSACTION": [
+        {
+            "TRANSACTION_ID": 340,
+            "MEMBER_ID": "mpay02od",
+            "TYPE": "CHARGE",
+            "AMOUNT": 30000,
+            "BALANCE_AFTER": 30000,
+            "ORDER_ID": null,
+            "REQUEST_ID": "mpay02-20261117-190411-prep-charge-order",
+            "CREATED_AT": "2026-11-17T10:04:46.077446Z"
+        },
+        {
+            "TRANSACTION_ID": 341,
+            "MEMBER_ID": "mpay02od",
+            "TYPE": "PURCHASE",
+            "AMOUNT": -30000,
+            "BALANCE_AFTER": 0,
+            "ORDER_ID": 242,
+            "REQUEST_ID": null,
+            "CREATED_AT": "2026-11-17T10:04:46.196103Z"
+        },
+        {
+            "TRANSACTION_ID": 342,
+            "MEMBER_ID": "mpay02p01",
+            "TYPE": "CHARGE",
+            "AMOUNT": 10000,
+            "BALANCE_AFTER": 10000,
+            "ORDER_ID": null,
+            "REQUEST_ID": "mpay02-20261117-190411-prep-charge-pay01",
+            "CREATED_AT": "2026-11-17T10:05:53.286159Z"
+        },
+        {
+            "TRANSACTION_ID": 343,
+            "MEMBER_ID": "mpay02p02",
+            "TYPE": "CHARGE",
+            "AMOUNT": 10000,
+            "BALANCE_AFTER": 10000,
+            "ORDER_ID": null,
+            "REQUEST_ID": "mpay02-20261117-190411-prep-charge-pay02",
+            "CREATED_AT": "2026-11-17T10:05:53.420958Z"
+        },
+        {
+            "TRANSACTION_ID": 344,
+            "MEMBER_ID": "mpay02p03",
+            "TYPE": "CHARGE",
+            "AMOUNT": 10000,
+            "BALANCE_AFTER": 10000,
+            "ORDER_ID": null,
+            "REQUEST_ID": "mpay02-20261117-190411-prep-charge-pay03",
+            "CREATED_AT": "2026-11-17T10:05:53.464718Z"
+        },
+        {
+            "TRANSACTION_ID": 345,
+            "MEMBER_ID": "mpay02p04",
+            "TYPE": "CHARGE",
+            "AMOUNT": 10000,
+            "BALANCE_AFTER": 10000,
+            "ORDER_ID": null,
+            "REQUEST_ID": "mpay02-20261117-190411-prep-charge-pay04",
+            "CREATED_AT": "2026-11-17T10:05:53.503646Z"
+        },
+        {
+            "TRANSACTION_ID": 346,
+            "MEMBER_ID": "mpay02p05",
+            "TYPE": "CHARGE",
+            "AMOUNT": 10000,
+            "BALANCE_AFTER": 10000,
+            "ORDER_ID": null,
+            "REQUEST_ID": "mpay02-20261117-190411-prep-charge-pay05",
+            "CREATED_AT": "2026-11-17T10:05:53.549456Z"
+        },
+        {
+            "TRANSACTION_ID": 347,
+            "MEMBER_ID": "mpay02p06",
+            "TYPE": "CHARGE",
+            "AMOUNT": 10000,
+            "BALANCE_AFTER": 10000,
+            "ORDER_ID": null,
+            "REQUEST_ID": "mpay02-20261117-190411-prep-charge-pay06",
+            "CREATED_AT": "2026-11-17T10:05:53.588732Z"
+        },
+        {
+            "TRANSACTION_ID": 348,
+            "MEMBER_ID": "mpay02p07",
+            "TYPE": "CHARGE",
+            "AMOUNT": 10000,
+            "BALANCE_AFTER": 10000,
+            "ORDER_ID": null,
+            "REQUEST_ID": "mpay02-20261117-190411-prep-charge-pay07",
+            "CREATED_AT": "2026-11-17T10:05:53.629792Z"
+        },
+        {
+            "TRANSACTION_ID": 349,
+            "MEMBER_ID": "mpay02p08",
+            "TYPE": "CHARGE",
+            "AMOUNT": 10000,
+            "BALANCE_AFTER": 10000,
+            "ORDER_ID": null,
+            "REQUEST_ID": "mpay02-20261117-190411-prep-charge-pay08",
+            "CREATED_AT": "2026-11-17T10:05:53.668346Z"
+        },
+        {
+            "TRANSACTION_ID": 350,
+            "MEMBER_ID": "mpay02p09",
+            "TYPE": "CHARGE",
+            "AMOUNT": 10000,
+            "BALANCE_AFTER": 10000,
+            "ORDER_ID": null,
+            "REQUEST_ID": "mpay02-20261117-190411-prep-charge-pay09",
+            "CREATED_AT": "2026-11-17T10:05:53.710107Z"
+        },
+        {
+            "TRANSACTION_ID": 351,
+            "MEMBER_ID": "mpay02p10",
+            "TYPE": "CHARGE",
+            "AMOUNT": 10000,
+            "BALANCE_AFTER": 10000,
+            "ORDER_ID": null,
+            "REQUEST_ID": "mpay02-20261117-190411-prep-charge-pay10",
+            "CREATED_AT": "2026-11-17T10:05:53.749048Z"
+        },
+        {
+            "TRANSACTION_ID": 352,
+            "MEMBER_ID": "mpay02p11",
+            "TYPE": "CHARGE",
+            "AMOUNT": 10000,
+            "BALANCE_AFTER": 10000,
+            "ORDER_ID": null,
+            "REQUEST_ID": "mpay02-20261117-190411-prep-charge-pay11",
+            "CREATED_AT": "2026-11-17T10:05:53.787883Z"
+        },
+        {
+            "TRANSACTION_ID": 353,
+            "MEMBER_ID": "mpay02p12",
+            "TYPE": "CHARGE",
+            "AMOUNT": 10000,
+            "BALANCE_AFTER": 10000,
+            "ORDER_ID": null,
+            "REQUEST_ID": "mpay02-20261117-190411-prep-charge-pay12",
+            "CREATED_AT": "2026-11-17T10:05:53.830773Z"
+        },
+        {
+            "TRANSACTION_ID": 354,
+            "MEMBER_ID": "mpay02p13",
+            "TYPE": "CHARGE",
+            "AMOUNT": 10000,
+            "BALANCE_AFTER": 10000,
+            "ORDER_ID": null,
+            "REQUEST_ID": "mpay02-20261117-190411-prep-charge-pay13",
+            "CREATED_AT": "2026-11-17T10:05:53.870110Z"
+        },
+        {
+            "TRANSACTION_ID": 355,
+            "MEMBER_ID": "mpay02p14",
+            "TYPE": "CHARGE",
+            "AMOUNT": 10000,
+            "BALANCE_AFTER": 10000,
+            "ORDER_ID": null,
+            "REQUEST_ID": "mpay02-20261117-190411-prep-charge-pay14",
+            "CREATED_AT": "2026-11-17T10:05:53.908876Z"
+        },
+        {
+            "TRANSACTION_ID": 356,
+            "MEMBER_ID": "mpay02p15",
+            "TYPE": "CHARGE",
+            "AMOUNT": 10000,
+            "BALANCE_AFTER": 10000,
+            "ORDER_ID": null,
+            "REQUEST_ID": "mpay02-20261117-190411-prep-charge-pay15",
+            "CREATED_AT": "2026-11-17T10:05:53.948738Z"
+        },
+        {
+            "TRANSACTION_ID": 357,
+            "MEMBER_ID": "mpay02p16",
+            "TYPE": "CHARGE",
+            "AMOUNT": 10000,
+            "BALANCE_AFTER": 10000,
+            "ORDER_ID": null,
+            "REQUEST_ID": "mpay02-20261117-190411-prep-charge-pay16",
+            "CREATED_AT": "2026-11-17T10:05:53.990484Z"
+        },
+        {
+            "TRANSACTION_ID": 358,
+            "MEMBER_ID": "mpay02p17",
+            "TYPE": "CHARGE",
+            "AMOUNT": 10000,
+            "BALANCE_AFTER": 10000,
+            "ORDER_ID": null,
+            "REQUEST_ID": "mpay02-20261117-190411-prep-charge-pay17",
+            "CREATED_AT": "2026-11-17T10:05:54.030628Z"
+        },
+        {
+            "TRANSACTION_ID": 359,
+            "MEMBER_ID": "mpay02p01",
+            "TYPE": "PURCHASE",
+            "AMOUNT": -10000,
+            "BALANCE_AFTER": 0,
+            "ORDER_ID": 243,
+            "REQUEST_ID": null,
+            "CREATED_AT": "2026-11-17T10:24:33.366758Z"
+        },
+        {
+            "TRANSACTION_ID": 360,
+            "MEMBER_ID": "mpay02p02",
+            "TYPE": "PURCHASE",
+            "AMOUNT": -10000,
+            "BALANCE_AFTER": 0,
+            "ORDER_ID": 244,
+            "REQUEST_ID": null,
+            "CREATED_AT": "2026-11-17T10:24:33.366752Z"
+        },
+        {
+            "TRANSACTION_ID": 361,
+            "MEMBER_ID": "mpay02p04",
+            "TYPE": "PURCHASE",
+            "AMOUNT": -10000,
+            "BALANCE_AFTER": 0,
+            "ORDER_ID": 245,
+            "REQUEST_ID": null,
+            "CREATED_AT": "2026-11-17T10:25:03.367407Z"
+        },
+        {
+            "TRANSACTION_ID": 362,
+            "MEMBER_ID": "mpay02p03",
+            "TYPE": "PURCHASE",
+            "AMOUNT": -10000,
+            "BALANCE_AFTER": 0,
+            "ORDER_ID": 247,
+            "REQUEST_ID": null,
+            "CREATED_AT": "2026-11-17T10:25:03.367423Z"
+        },
+        {
+            "TRANSACTION_ID": 363,
+            "MEMBER_ID": "mpay02p05",
+            "TYPE": "PURCHASE",
+            "AMOUNT": -10000,
+            "BALANCE_AFTER": 0,
+            "ORDER_ID": 246,
+            "REQUEST_ID": null,
+            "CREATED_AT": "2026-11-17T10:25:03.367375Z"
+        },
+        {
+            "TRANSACTION_ID": 364,
+            "MEMBER_ID": "mpay02p06",
+            "TYPE": "PURCHASE",
+            "AMOUNT": -10000,
+            "BALANCE_AFTER": 0,
+            "ORDER_ID": 248,
+            "REQUEST_ID": null,
+            "CREATED_AT": "2026-11-17T10:25:03.369667Z"
+        },
+        {
+            "TRANSACTION_ID": 365,
+            "MEMBER_ID": "mpay02p08",
+            "TYPE": "PURCHASE",
+            "AMOUNT": -10000,
+            "BALANCE_AFTER": 0,
+            "ORDER_ID": 250,
+            "REQUEST_ID": null,
+            "CREATED_AT": "2026-11-17T10:25:33.371694Z"
+        },
+        {
+            "TRANSACTION_ID": 366,
+            "MEMBER_ID": "mpay02p12",
+            "TYPE": "PURCHASE",
+            "AMOUNT": -10000,
+            "BALANCE_AFTER": 0,
+            "ORDER_ID": 253,
+            "REQUEST_ID": null,
+            "CREATED_AT": "2026-11-17T10:25:33.371728Z"
+        },
+        {
+            "TRANSACTION_ID": 367,
+            "MEMBER_ID": "mpay02p09",
+            "TYPE": "PURCHASE",
+            "AMOUNT": -10000,
+            "BALANCE_AFTER": 0,
+            "ORDER_ID": 249,
+            "REQUEST_ID": null,
+            "CREATED_AT": "2026-11-17T10:25:33.371683Z"
+        },
+        {
+            "TRANSACTION_ID": 368,
+            "MEMBER_ID": "mpay02p10",
+            "TYPE": "PURCHASE",
+            "AMOUNT": -10000,
+            "BALANCE_AFTER": 0,
+            "ORDER_ID": 252,
+            "REQUEST_ID": null,
+            "CREATED_AT": "2026-11-17T10:25:33.371735Z"
+        },
+        {
+            "TRANSACTION_ID": 369,
+            "MEMBER_ID": "mpay02p07",
+            "TYPE": "PURCHASE",
+            "AMOUNT": -10000,
+            "BALANCE_AFTER": 0,
+            "ORDER_ID": 251,
+            "REQUEST_ID": null,
+            "CREATED_AT": "2026-11-17T10:25:33.371751Z"
+        },
+        {
+            "TRANSACTION_ID": 370,
+            "MEMBER_ID": "mpay02p11",
+            "TYPE": "PURCHASE",
+            "AMOUNT": -10000,
+            "BALANCE_AFTER": 0,
+            "ORDER_ID": 254,
+            "REQUEST_ID": null,
+            "CREATED_AT": "2026-11-17T10:25:33.371780Z"
+        },
+        {
+            "TRANSACTION_ID": 371,
+            "MEMBER_ID": "mpay02p14",
+            "TYPE": "PURCHASE",
+            "AMOUNT": -10000,
+            "BALANCE_AFTER": 0,
+            "ORDER_ID": 257,
+            "REQUEST_ID": null,
+            "CREATED_AT": "2026-11-17T10:26:03.368516Z"
+        },
+        {
+            "TRANSACTION_ID": 372,
+            "MEMBER_ID": "mpay02p13",
+            "TYPE": "PURCHASE",
+            "AMOUNT": -10000,
+            "BALANCE_AFTER": 0,
+            "ORDER_ID": 255,
+            "REQUEST_ID": null,
+            "CREATED_AT": "2026-11-17T10:26:03.368607Z"
+        },
+        {
+            "TRANSACTION_ID": 373,
+            "MEMBER_ID": "mpay02p15",
+            "TYPE": "PURCHASE",
+            "AMOUNT": -10000,
+            "BALANCE_AFTER": 0,
+            "ORDER_ID": 256,
+            "REQUEST_ID": null,
+            "CREATED_AT": "2026-11-17T10:26:03.368511Z"
+        },
+        {
+            "TRANSACTION_ID": 374,
+            "MEMBER_ID": "mpay02p17",
+            "TYPE": "PURCHASE",
+            "AMOUNT": -10000,
+            "BALANCE_AFTER": 0,
+            "ORDER_ID": 258,
+            "REQUEST_ID": null,
+            "CREATED_AT": "2026-11-17T10:27:03.372063Z"
+        },
+        {
+            "TRANSACTION_ID": 375,
+            "MEMBER_ID": "mpay02p16",
+            "TYPE": "PURCHASE",
+            "AMOUNT": -10000,
+            "BALANCE_AFTER": 0,
+            "ORDER_ID": 259,
+            "REQUEST_ID": null,
+            "CREATED_AT": "2026-11-17T10:27:03.372054Z"
+        }
+    ],
+    "db_now_end": "2026-11-17T10:29:55.256837Z",
+    "mode": "\uc77d\uae30 \uc804\uc6a9 \ud2b8\ub79c\uc7ad\uc158"
+}
