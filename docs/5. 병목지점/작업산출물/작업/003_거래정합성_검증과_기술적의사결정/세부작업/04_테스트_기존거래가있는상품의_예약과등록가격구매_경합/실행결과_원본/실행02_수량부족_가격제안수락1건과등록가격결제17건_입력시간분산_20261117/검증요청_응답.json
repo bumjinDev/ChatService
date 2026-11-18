@@ -1,0 +1,1231 @@
+{
+    "\uc2e4\ud589 ID": "mpay02-20261117-190411",
+    "\uc694\uccad \ud569\uacc4": 18,
+    "\ucd9c\ubc1c\ud55c \uc694\uccad \uc218": 18,
+    "\uc694\uccad \uc804 \ud655\uc778 \ud30c\uc77c": "\uc694\uccad\uc804",
+    "\uc694\uccad": {
+        "accept": {
+            "\ucd9c\ubc1c \uae30\ub85d": {
+                "\uc694\uccad \ud0a4": "accept",
+                "\uc694\uccad": "\ud310\ub9e4\uc790(\uc0c8 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d)",
+                "\uc11c\ubc84 \ub85c\uadf8 \uc694\uccad ID": "accept-new",
+                "\ucd9c\ubc1c \uc2dc\uc810(\ucd08)": 90,
+                "\ucd9c\ubc1c \uc870\uac74 \ud655\uc778": "\ud1b5\uacfc",
+                "\uc0ac\uc720": "",
+                "\uae30\uc874 \uc608\uc57d \ub9cc\ub8cc\uae4c\uc9c0 \ub0a8\uc740 \uc2dc\uac04(\ucd08, DB \uc2dc\uac01 \uae30\uc900 \ucd94\uc815)": 776,
+                "\uae30\uc874 \uc8fc\ubb38 \ubc1c\uc1a1 \uae30\ud55c\uae4c\uc9c0 \ub0a8\uc740 \uc2dc\uac04(\ubd84, \ucd94\uc815)": 10355,
+                "\ucd9c\ubc1c \ub9de\ucd94\uae30 \uc2dc\uc791(ms)": 1794911042721,
+                "\ubaa8\ub4e0 \uc694\uccad \uc900\ube44 \ud655\uc778(ms)": 1794911042725,
+                "\ucd9c\ubc1c(ms)": 1794911132726,
+                "\ucd9c\ubc1c \uc2dc\uc810 \ub9de\ucd94\uae30": "\uac19\uc740 \ucd9c\ubc1c \uc2dc\uc810\uc758 \uc694\uccad\uacfc \ud568\uaed8 \ucd9c\ubc1c",
+                "\uacb0\uacfc": "\ucd9c\ubc1c"
+            },
+            "\uc751\ub2f5": {
+                "HTTP \uc751\ub2f5": "200",
+                "\uc624\ub958 \ucf54\ub4dc": "-",
+                "\uc751\ub2f5 \ubd84\ub958": "\uc131\uacf5",
+                "\ubd84\ub958 \uc0ac\uc720": "-",
+                "\uc804\uc1a1 \uc2dc\uc791(ms)": 1794911132727,
+                "\uc751\ub2f5 \uc218\uc2e0 \uc644\ub8cc(ms)": 1794911132814,
+                "\uac78\ub9b0 \uc2dc\uac04(ms)": 87,
+                "\uc5f0\uacb0 \uc2dc\uac04(ms)": 10,
+                "\uccab \ubc14\uc774\ud2b8\uae4c\uc9c0(ms)": 87,
+                "\uc751\ub2f5 \ubcf8\ubb38": {
+                    "offerId": 202,
+                    "conversationId": 323,
+                    "amount": 9000,
+                    "quantity": 2,
+                    "status": "ACCEPTED",
+                    "createdAt": "2026-11-17T10:21:20.917750Z",
+                    "respondedAt": "2026-11-17T10:25:33.374712Z",
+                    "reservation": {
+                        "reservationId": 162,
+                        "conversationId": 323,
+                        "productId": 93782,
+                        "offerId": 202,
+                        "quantity": 2,
+                        "status": "ACTIVE",
+                        "reservedAt": "2026-11-17T10:25:33.374796Z",
+                        "expiresAt": "2026-11-17T10:45:33.374796Z",
+                        "endedAt": null,
+                        "releasedBy": null,
+                        "fulfilledOrderId": null
+                    }
+                }
+            }
+        },
+        "pay01": {
+            "\ucd9c\ubc1c \uae30\ub85d": {
+                "\uc694\uccad \ud0a4": "pay01",
+                "\uc694\uccad": "\uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 01",
+                "\uc11c\ubc84 \ub85c\uadf8 \uc694\uccad ID": "pay-01",
+                "\ucd9c\ubc1c \uc2dc\uc810(\ucd08)": 30,
+                "\ucd9c\ubc1c \uc870\uac74 \ud655\uc778": "\ud1b5\uacfc",
+                "\uc0ac\uc720": "",
+                "\uae30\uc874 \uc608\uc57d \ub9cc\ub8cc\uae4c\uc9c0 \ub0a8\uc740 \uc2dc\uac04(\ucd08, DB \uc2dc\uac01 \uae30\uc900 \ucd94\uc815)": 776,
+                "\uae30\uc874 \uc8fc\ubb38 \ubc1c\uc1a1 \uae30\ud55c\uae4c\uc9c0 \ub0a8\uc740 \uc2dc\uac04(\ubd84, \ucd94\uc815)": 10355,
+                "\ucd9c\ubc1c \ub9de\ucd94\uae30 \uc2dc\uc791(ms)": 1794911042721,
+                "\ubaa8\ub4e0 \uc694\uccad \uc900\ube44 \ud655\uc778(ms)": 1794911042725,
+                "\ucd9c\ubc1c(ms)": 1794911072725,
+                "\ucd9c\ubc1c \uc2dc\uc810 \ub9de\ucd94\uae30": "\uac19\uc740 \ucd9c\ubc1c \uc2dc\uc810\uc758 \uc694\uccad\uacfc \ud568\uaed8 \ucd9c\ubc1c",
+                "\uacb0\uacfc": "\ucd9c\ubc1c"
+            },
+            "\uc751\ub2f5": {
+                "HTTP \uc751\ub2f5": "201",
+                "\uc624\ub958 \ucf54\ub4dc": "-",
+                "\uc751\ub2f5 \ubd84\ub958": "\uc131\uacf5",
+                "\ubd84\ub958 \uc0ac\uc720": "-",
+                "\uc804\uc1a1 \uc2dc\uc791(ms)": 1794911072725,
+                "\uc751\ub2f5 \uc218\uc2e0 \uc644\ub8cc(ms)": 1794911072802,
+                "\uac78\ub9b0 \uc2dc\uac04(ms)": 77,
+                "\uc5f0\uacb0 \uc2dc\uac04(ms)": 9,
+                "\uccab \ubc14\uc774\ud2b8\uae4c\uc9c0(ms)": 75,
+                "\uc751\ub2f5 \ubcf8\ubb38": {
+                    "orderId": 243,
+                    "product": {
+                        "productId": 93782,
+                        "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58902)",
+                        "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+                        "category": "ELECTRONICS",
+                        "price": 10000
+                    },
+                    "buyerNickname": "mpay02p01",
+                    "sellerNickname": "mpay02sl",
+                    "myRole": "BUYER",
+                    "quantity": 1,
+                    "unitPrice": 10000,
+                    "paidAmount": 10000,
+                    "priceSource": "LISTED",
+                    "offerId": null,
+                    "recipientName": "\ud14c\uc2a4\ud2b8 \uc218\ub839\uc778 pay-01",
+                    "shippingAddress": "\uc11c\uc6b8\ud2b9\ubcc4\uc2dc \ud14c\uc2a4\ud2b8\uad6c \ud14c\uc2a4\ud2b8\ub85c 1, 101\ud638",
+                    "shippingStatus": "WAITING_SHIPMENT",
+                    "tradeStatus": "IN_PROGRESS",
+                    "completionCause": null,
+                    "confirmedAt": "2026-11-17T10:24:33.366758Z",
+                    "shipDeadlineAt": "2026-11-24T15:00:00Z",
+                    "shipment": null,
+                    "deliveredAt": null,
+                    "inspectionDeadlineAt": null,
+                    "cancellation": null,
+                    "refundRequest": null,
+                    "finalizedAt": null,
+                    "myBalanceTransactions": [
+                        {
+                            "transactionId": 359,
+                            "type": "PURCHASE",
+                            "amount": -10000,
+                            "balanceAfter": 0,
+                            "orderId": 243,
+                            "createdAt": "2026-11-17T10:24:33.366758Z"
+                        }
+                    ]
+                }
+            }
+        },
+        "pay02": {
+            "\ucd9c\ubc1c \uae30\ub85d": {
+                "\uc694\uccad \ud0a4": "pay02",
+                "\uc694\uccad": "\uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 02",
+                "\uc11c\ubc84 \ub85c\uadf8 \uc694\uccad ID": "pay-02",
+                "\ucd9c\ubc1c \uc2dc\uc810(\ucd08)": 30,
+                "\ucd9c\ubc1c \uc870\uac74 \ud655\uc778": "\ud1b5\uacfc",
+                "\uc0ac\uc720": "",
+                "\uae30\uc874 \uc608\uc57d \ub9cc\ub8cc\uae4c\uc9c0 \ub0a8\uc740 \uc2dc\uac04(\ucd08, DB \uc2dc\uac01 \uae30\uc900 \ucd94\uc815)": 776,
+                "\uae30\uc874 \uc8fc\ubb38 \ubc1c\uc1a1 \uae30\ud55c\uae4c\uc9c0 \ub0a8\uc740 \uc2dc\uac04(\ubd84, \ucd94\uc815)": 10355,
+                "\ucd9c\ubc1c \ub9de\ucd94\uae30 \uc2dc\uc791(ms)": 1794911042721,
+                "\ubaa8\ub4e0 \uc694\uccad \uc900\ube44 \ud655\uc778(ms)": 1794911042725,
+                "\ucd9c\ubc1c(ms)": 1794911072725,
+                "\ucd9c\ubc1c \uc2dc\uc810 \ub9de\ucd94\uae30": "\uac19\uc740 \ucd9c\ubc1c \uc2dc\uc810\uc758 \uc694\uccad\uacfc \ud568\uaed8 \ucd9c\ubc1c",
+                "\uacb0\uacfc": "\ucd9c\ubc1c"
+            },
+            "\uc751\ub2f5": {
+                "HTTP \uc751\ub2f5": "201",
+                "\uc624\ub958 \ucf54\ub4dc": "-",
+                "\uc751\ub2f5 \ubd84\ub958": "\uc131\uacf5",
+                "\ubd84\ub958 \uc0ac\uc720": "-",
+                "\uc804\uc1a1 \uc2dc\uc791(ms)": 1794911072725,
+                "\uc751\ub2f5 \uc218\uc2e0 \uc644\ub8cc(ms)": 1794911072842,
+                "\uac78\ub9b0 \uc2dc\uac04(ms)": 117,
+                "\uc5f0\uacb0 \uc2dc\uac04(ms)": 11,
+                "\uccab \ubc14\uc774\ud2b8\uae4c\uc9c0(ms)": 117,
+                "\uc751\ub2f5 \ubcf8\ubb38": {
+                    "orderId": 244,
+                    "product": {
+                        "productId": 93782,
+                        "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58902)",
+                        "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+                        "category": "ELECTRONICS",
+                        "price": 10000
+                    },
+                    "buyerNickname": "mpay02p02",
+                    "sellerNickname": "mpay02sl",
+                    "myRole": "BUYER",
+                    "quantity": 1,
+                    "unitPrice": 10000,
+                    "paidAmount": 10000,
+                    "priceSource": "LISTED",
+                    "offerId": null,
+                    "recipientName": "\ud14c\uc2a4\ud2b8 \uc218\ub839\uc778 pay-02",
+                    "shippingAddress": "\uc11c\uc6b8\ud2b9\ubcc4\uc2dc \ud14c\uc2a4\ud2b8\uad6c \ud14c\uc2a4\ud2b8\ub85c 1, 101\ud638",
+                    "shippingStatus": "WAITING_SHIPMENT",
+                    "tradeStatus": "IN_PROGRESS",
+                    "completionCause": null,
+                    "confirmedAt": "2026-11-17T10:24:33.366752Z",
+                    "shipDeadlineAt": "2026-11-24T15:00:00Z",
+                    "shipment": null,
+                    "deliveredAt": null,
+                    "inspectionDeadlineAt": null,
+                    "cancellation": null,
+                    "refundRequest": null,
+                    "finalizedAt": null,
+                    "myBalanceTransactions": [
+                        {
+                            "transactionId": 360,
+                            "type": "PURCHASE",
+                            "amount": -10000,
+                            "balanceAfter": 0,
+                            "orderId": 244,
+                            "createdAt": "2026-11-17T10:24:33.366752Z"
+                        }
+                    ]
+                }
+            }
+        },
+        "pay03": {
+            "\ucd9c\ubc1c \uae30\ub85d": {
+                "\uc694\uccad \ud0a4": "pay03",
+                "\uc694\uccad": "\uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 03",
+                "\uc11c\ubc84 \ub85c\uadf8 \uc694\uccad ID": "pay-03",
+                "\ucd9c\ubc1c \uc2dc\uc810(\ucd08)": 60,
+                "\ucd9c\ubc1c \uc870\uac74 \ud655\uc778": "\ud1b5\uacfc",
+                "\uc0ac\uc720": "",
+                "\uae30\uc874 \uc608\uc57d \ub9cc\ub8cc\uae4c\uc9c0 \ub0a8\uc740 \uc2dc\uac04(\ucd08, DB \uc2dc\uac01 \uae30\uc900 \ucd94\uc815)": 776,
+                "\uae30\uc874 \uc8fc\ubb38 \ubc1c\uc1a1 \uae30\ud55c\uae4c\uc9c0 \ub0a8\uc740 \uc2dc\uac04(\ubd84, \ucd94\uc815)": 10355,
+                "\ucd9c\ubc1c \ub9de\ucd94\uae30 \uc2dc\uc791(ms)": 1794911042721,
+                "\ubaa8\ub4e0 \uc694\uccad \uc900\ube44 \ud655\uc778(ms)": 1794911042725,
+                "\ucd9c\ubc1c(ms)": 1794911102725,
+                "\ucd9c\ubc1c \uc2dc\uc810 \ub9de\ucd94\uae30": "\uac19\uc740 \ucd9c\ubc1c \uc2dc\uc810\uc758 \uc694\uccad\uacfc \ud568\uaed8 \ucd9c\ubc1c",
+                "\uacb0\uacfc": "\ucd9c\ubc1c"
+            },
+            "\uc751\ub2f5": {
+                "HTTP \uc751\ub2f5": "201",
+                "\uc624\ub958 \ucf54\ub4dc": "-",
+                "\uc751\ub2f5 \ubd84\ub958": "\uc131\uacf5",
+                "\ubd84\ub958 \uc0ac\uc720": "-",
+                "\uc804\uc1a1 \uc2dc\uc791(ms)": 1794911102727,
+                "\uc751\ub2f5 \uc218\uc2e0 \uc644\ub8cc(ms)": 1794911102790,
+                "\uac78\ub9b0 \uc2dc\uac04(ms)": 63,
+                "\uc5f0\uacb0 \uc2dc\uac04(ms)": 7,
+                "\uccab \ubc14\uc774\ud2b8\uae4c\uc9c0(ms)": 63,
+                "\uc751\ub2f5 \ubcf8\ubb38": {
+                    "orderId": 247,
+                    "product": {
+                        "productId": 93782,
+                        "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58902)",
+                        "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+                        "category": "ELECTRONICS",
+                        "price": 10000
+                    },
+                    "buyerNickname": "mpay02p03",
+                    "sellerNickname": "mpay02sl",
+                    "myRole": "BUYER",
+                    "quantity": 1,
+                    "unitPrice": 10000,
+                    "paidAmount": 10000,
+                    "priceSource": "LISTED",
+                    "offerId": null,
+                    "recipientName": "\ud14c\uc2a4\ud2b8 \uc218\ub839\uc778 pay-03",
+                    "shippingAddress": "\uc11c\uc6b8\ud2b9\ubcc4\uc2dc \ud14c\uc2a4\ud2b8\uad6c \ud14c\uc2a4\ud2b8\ub85c 1, 101\ud638",
+                    "shippingStatus": "WAITING_SHIPMENT",
+                    "tradeStatus": "IN_PROGRESS",
+                    "completionCause": null,
+                    "confirmedAt": "2026-11-17T10:25:03.367423Z",
+                    "shipDeadlineAt": "2026-11-24T15:00:00Z",
+                    "shipment": null,
+                    "deliveredAt": null,
+                    "inspectionDeadlineAt": null,
+                    "cancellation": null,
+                    "refundRequest": null,
+                    "finalizedAt": null,
+                    "myBalanceTransactions": [
+                        {
+                            "transactionId": 362,
+                            "type": "PURCHASE",
+                            "amount": -10000,
+                            "balanceAfter": 0,
+                            "orderId": 247,
+                            "createdAt": "2026-11-17T10:25:03.367423Z"
+                        }
+                    ]
+                }
+            }
+        },
+        "pay04": {
+            "\ucd9c\ubc1c \uae30\ub85d": {
+                "\uc694\uccad \ud0a4": "pay04",
+                "\uc694\uccad": "\uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 04",
+                "\uc11c\ubc84 \ub85c\uadf8 \uc694\uccad ID": "pay-04",
+                "\ucd9c\ubc1c \uc2dc\uc810(\ucd08)": 60,
+                "\ucd9c\ubc1c \uc870\uac74 \ud655\uc778": "\ud1b5\uacfc",
+                "\uc0ac\uc720": "",
+                "\uae30\uc874 \uc608\uc57d \ub9cc\ub8cc\uae4c\uc9c0 \ub0a8\uc740 \uc2dc\uac04(\ucd08, DB \uc2dc\uac01 \uae30\uc900 \ucd94\uc815)": 776,
+                "\uae30\uc874 \uc8fc\ubb38 \ubc1c\uc1a1 \uae30\ud55c\uae4c\uc9c0 \ub0a8\uc740 \uc2dc\uac04(\ubd84, \ucd94\uc815)": 10355,
+                "\ucd9c\ubc1c \ub9de\ucd94\uae30 \uc2dc\uc791(ms)": 1794911042721,
+                "\ubaa8\ub4e0 \uc694\uccad \uc900\ube44 \ud655\uc778(ms)": 1794911042725,
+                "\ucd9c\ubc1c(ms)": 1794911102725,
+                "\ucd9c\ubc1c \uc2dc\uc810 \ub9de\ucd94\uae30": "\uac19\uc740 \ucd9c\ubc1c \uc2dc\uc810\uc758 \uc694\uccad\uacfc \ud568\uaed8 \ucd9c\ubc1c",
+                "\uacb0\uacfc": "\ucd9c\ubc1c"
+            },
+            "\uc751\ub2f5": {
+                "HTTP \uc751\ub2f5": "201",
+                "\uc624\ub958 \ucf54\ub4dc": "-",
+                "\uc751\ub2f5 \ubd84\ub958": "\uc131\uacf5",
+                "\ubd84\ub958 \uc0ac\uc720": "-",
+                "\uc804\uc1a1 \uc2dc\uc791(ms)": 1794911102727,
+                "\uc751\ub2f5 \uc218\uc2e0 \uc644\ub8cc(ms)": 1794911102790,
+                "\uac78\ub9b0 \uc2dc\uac04(ms)": 63,
+                "\uc5f0\uacb0 \uc2dc\uac04(ms)": 7,
+                "\uccab \ubc14\uc774\ud2b8\uae4c\uc9c0(ms)": 62,
+                "\uc751\ub2f5 \ubcf8\ubb38": {
+                    "orderId": 245,
+                    "product": {
+                        "productId": 93782,
+                        "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58902)",
+                        "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+                        "category": "ELECTRONICS",
+                        "price": 10000
+                    },
+                    "buyerNickname": "mpay02p04",
+                    "sellerNickname": "mpay02sl",
+                    "myRole": "BUYER",
+                    "quantity": 1,
+                    "unitPrice": 10000,
+                    "paidAmount": 10000,
+                    "priceSource": "LISTED",
+                    "offerId": null,
+                    "recipientName": "\ud14c\uc2a4\ud2b8 \uc218\ub839\uc778 pay-04",
+                    "shippingAddress": "\uc11c\uc6b8\ud2b9\ubcc4\uc2dc \ud14c\uc2a4\ud2b8\uad6c \ud14c\uc2a4\ud2b8\ub85c 1, 101\ud638",
+                    "shippingStatus": "WAITING_SHIPMENT",
+                    "tradeStatus": "IN_PROGRESS",
+                    "completionCause": null,
+                    "confirmedAt": "2026-11-17T10:25:03.367407Z",
+                    "shipDeadlineAt": "2026-11-24T15:00:00Z",
+                    "shipment": null,
+                    "deliveredAt": null,
+                    "inspectionDeadlineAt": null,
+                    "cancellation": null,
+                    "refundRequest": null,
+                    "finalizedAt": null,
+                    "myBalanceTransactions": [
+                        {
+                            "transactionId": 361,
+                            "type": "PURCHASE",
+                            "amount": -10000,
+                            "balanceAfter": 0,
+                            "orderId": 245,
+                            "createdAt": "2026-11-17T10:25:03.367407Z"
+                        }
+                    ]
+                }
+            }
+        },
+        "pay05": {
+            "\ucd9c\ubc1c \uae30\ub85d": {
+                "\uc694\uccad \ud0a4": "pay05",
+                "\uc694\uccad": "\uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 05",
+                "\uc11c\ubc84 \ub85c\uadf8 \uc694\uccad ID": "pay-05",
+                "\ucd9c\ubc1c \uc2dc\uc810(\ucd08)": 60,
+                "\ucd9c\ubc1c \uc870\uac74 \ud655\uc778": "\ud1b5\uacfc",
+                "\uc0ac\uc720": "",
+                "\uae30\uc874 \uc608\uc57d \ub9cc\ub8cc\uae4c\uc9c0 \ub0a8\uc740 \uc2dc\uac04(\ucd08, DB \uc2dc\uac01 \uae30\uc900 \ucd94\uc815)": 776,
+                "\uae30\uc874 \uc8fc\ubb38 \ubc1c\uc1a1 \uae30\ud55c\uae4c\uc9c0 \ub0a8\uc740 \uc2dc\uac04(\ubd84, \ucd94\uc815)": 10355,
+                "\ucd9c\ubc1c \ub9de\ucd94\uae30 \uc2dc\uc791(ms)": 1794911042721,
+                "\ubaa8\ub4e0 \uc694\uccad \uc900\ube44 \ud655\uc778(ms)": 1794911042725,
+                "\ucd9c\ubc1c(ms)": 1794911102725,
+                "\ucd9c\ubc1c \uc2dc\uc810 \ub9de\ucd94\uae30": "\uac19\uc740 \ucd9c\ubc1c \uc2dc\uc810\uc758 \uc694\uccad\uacfc \ud568\uaed8 \ucd9c\ubc1c",
+                "\uacb0\uacfc": "\ucd9c\ubc1c"
+            },
+            "\uc751\ub2f5": {
+                "HTTP \uc751\ub2f5": "201",
+                "\uc624\ub958 \ucf54\ub4dc": "-",
+                "\uc751\ub2f5 \ubd84\ub958": "\uc131\uacf5",
+                "\ubd84\ub958 \uc0ac\uc720": "-",
+                "\uc804\uc1a1 \uc2dc\uc791(ms)": 1794911102727,
+                "\uc751\ub2f5 \uc218\uc2e0 \uc644\ub8cc(ms)": 1794911102790,
+                "\uac78\ub9b0 \uc2dc\uac04(ms)": 63,
+                "\uc5f0\uacb0 \uc2dc\uac04(ms)": 8,
+                "\uccab \ubc14\uc774\ud2b8\uae4c\uc9c0(ms)": 63,
+                "\uc751\ub2f5 \ubcf8\ubb38": {
+                    "orderId": 246,
+                    "product": {
+                        "productId": 93782,
+                        "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58902)",
+                        "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+                        "category": "ELECTRONICS",
+                        "price": 10000
+                    },
+                    "buyerNickname": "mpay02p05",
+                    "sellerNickname": "mpay02sl",
+                    "myRole": "BUYER",
+                    "quantity": 1,
+                    "unitPrice": 10000,
+                    "paidAmount": 10000,
+                    "priceSource": "LISTED",
+                    "offerId": null,
+                    "recipientName": "\ud14c\uc2a4\ud2b8 \uc218\ub839\uc778 pay-05",
+                    "shippingAddress": "\uc11c\uc6b8\ud2b9\ubcc4\uc2dc \ud14c\uc2a4\ud2b8\uad6c \ud14c\uc2a4\ud2b8\ub85c 1, 101\ud638",
+                    "shippingStatus": "WAITING_SHIPMENT",
+                    "tradeStatus": "IN_PROGRESS",
+                    "completionCause": null,
+                    "confirmedAt": "2026-11-17T10:25:03.367375Z",
+                    "shipDeadlineAt": "2026-11-24T15:00:00Z",
+                    "shipment": null,
+                    "deliveredAt": null,
+                    "inspectionDeadlineAt": null,
+                    "cancellation": null,
+                    "refundRequest": null,
+                    "finalizedAt": null,
+                    "myBalanceTransactions": [
+                        {
+                            "transactionId": 363,
+                            "type": "PURCHASE",
+                            "amount": -10000,
+                            "balanceAfter": 0,
+                            "orderId": 246,
+                            "createdAt": "2026-11-17T10:25:03.367375Z"
+                        }
+                    ]
+                }
+            }
+        },
+        "pay06": {
+            "\ucd9c\ubc1c \uae30\ub85d": {
+                "\uc694\uccad \ud0a4": "pay06",
+                "\uc694\uccad": "\uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 06",
+                "\uc11c\ubc84 \ub85c\uadf8 \uc694\uccad ID": "pay-06",
+                "\ucd9c\ubc1c \uc2dc\uc810(\ucd08)": 60,
+                "\ucd9c\ubc1c \uc870\uac74 \ud655\uc778": "\ud1b5\uacfc",
+                "\uc0ac\uc720": "",
+                "\uae30\uc874 \uc608\uc57d \ub9cc\ub8cc\uae4c\uc9c0 \ub0a8\uc740 \uc2dc\uac04(\ucd08, DB \uc2dc\uac01 \uae30\uc900 \ucd94\uc815)": 776,
+                "\uae30\uc874 \uc8fc\ubb38 \ubc1c\uc1a1 \uae30\ud55c\uae4c\uc9c0 \ub0a8\uc740 \uc2dc\uac04(\ubd84, \ucd94\uc815)": 10355,
+                "\ucd9c\ubc1c \ub9de\ucd94\uae30 \uc2dc\uc791(ms)": 1794911042721,
+                "\ubaa8\ub4e0 \uc694\uccad \uc900\ube44 \ud655\uc778(ms)": 1794911042725,
+                "\ucd9c\ubc1c(ms)": 1794911102725,
+                "\ucd9c\ubc1c \uc2dc\uc810 \ub9de\ucd94\uae30": "\uac19\uc740 \ucd9c\ubc1c \uc2dc\uc810\uc758 \uc694\uccad\uacfc \ud568\uaed8 \ucd9c\ubc1c",
+                "\uacb0\uacfc": "\ucd9c\ubc1c"
+            },
+            "\uc751\ub2f5": {
+                "HTTP \uc751\ub2f5": "201",
+                "\uc624\ub958 \ucf54\ub4dc": "-",
+                "\uc751\ub2f5 \ubd84\ub958": "\uc131\uacf5",
+                "\ubd84\ub958 \uc0ac\uc720": "-",
+                "\uc804\uc1a1 \uc2dc\uc791(ms)": 1794911102727,
+                "\uc751\ub2f5 \uc218\uc2e0 \uc644\ub8cc(ms)": 1794911102790,
+                "\uac78\ub9b0 \uc2dc\uac04(ms)": 63,
+                "\uc5f0\uacb0 \uc2dc\uac04(ms)": 7,
+                "\uccab \ubc14\uc774\ud2b8\uae4c\uc9c0(ms)": 63,
+                "\uc751\ub2f5 \ubcf8\ubb38": {
+                    "orderId": 248,
+                    "product": {
+                        "productId": 93782,
+                        "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58902)",
+                        "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+                        "category": "ELECTRONICS",
+                        "price": 10000
+                    },
+                    "buyerNickname": "mpay02p06",
+                    "sellerNickname": "mpay02sl",
+                    "myRole": "BUYER",
+                    "quantity": 1,
+                    "unitPrice": 10000,
+                    "paidAmount": 10000,
+                    "priceSource": "LISTED",
+                    "offerId": null,
+                    "recipientName": "\ud14c\uc2a4\ud2b8 \uc218\ub839\uc778 pay-06",
+                    "shippingAddress": "\uc11c\uc6b8\ud2b9\ubcc4\uc2dc \ud14c\uc2a4\ud2b8\uad6c \ud14c\uc2a4\ud2b8\ub85c 1, 101\ud638",
+                    "shippingStatus": "WAITING_SHIPMENT",
+                    "tradeStatus": "IN_PROGRESS",
+                    "completionCause": null,
+                    "confirmedAt": "2026-11-17T10:25:03.369667Z",
+                    "shipDeadlineAt": "2026-11-24T15:00:00Z",
+                    "shipment": null,
+                    "deliveredAt": null,
+                    "inspectionDeadlineAt": null,
+                    "cancellation": null,
+                    "refundRequest": null,
+                    "finalizedAt": null,
+                    "myBalanceTransactions": [
+                        {
+                            "transactionId": 364,
+                            "type": "PURCHASE",
+                            "amount": -10000,
+                            "balanceAfter": 0,
+                            "orderId": 248,
+                            "createdAt": "2026-11-17T10:25:03.369667Z"
+                        }
+                    ]
+                }
+            }
+        },
+        "pay07": {
+            "\ucd9c\ubc1c \uae30\ub85d": {
+                "\uc694\uccad \ud0a4": "pay07",
+                "\uc694\uccad": "\uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 07",
+                "\uc11c\ubc84 \ub85c\uadf8 \uc694\uccad ID": "pay-07",
+                "\ucd9c\ubc1c \uc2dc\uc810(\ucd08)": 90,
+                "\ucd9c\ubc1c \uc870\uac74 \ud655\uc778": "\ud1b5\uacfc",
+                "\uc0ac\uc720": "",
+                "\uae30\uc874 \uc608\uc57d \ub9cc\ub8cc\uae4c\uc9c0 \ub0a8\uc740 \uc2dc\uac04(\ucd08, DB \uc2dc\uac01 \uae30\uc900 \ucd94\uc815)": 776,
+                "\uae30\uc874 \uc8fc\ubb38 \ubc1c\uc1a1 \uae30\ud55c\uae4c\uc9c0 \ub0a8\uc740 \uc2dc\uac04(\ubd84, \ucd94\uc815)": 10355,
+                "\ucd9c\ubc1c \ub9de\ucd94\uae30 \uc2dc\uc791(ms)": 1794911042721,
+                "\ubaa8\ub4e0 \uc694\uccad \uc900\ube44 \ud655\uc778(ms)": 1794911042725,
+                "\ucd9c\ubc1c(ms)": 1794911132726,
+                "\ucd9c\ubc1c \uc2dc\uc810 \ub9de\ucd94\uae30": "\uac19\uc740 \ucd9c\ubc1c \uc2dc\uc810\uc758 \uc694\uccad\uacfc \ud568\uaed8 \ucd9c\ubc1c",
+                "\uacb0\uacfc": "\ucd9c\ubc1c"
+            },
+            "\uc751\ub2f5": {
+                "HTTP \uc751\ub2f5": "201",
+                "\uc624\ub958 \ucf54\ub4dc": "-",
+                "\uc751\ub2f5 \ubd84\ub958": "\uc131\uacf5",
+                "\ubd84\ub958 \uc0ac\uc720": "-",
+                "\uc804\uc1a1 \uc2dc\uc791(ms)": 1794911132727,
+                "\uc751\ub2f5 \uc218\uc2e0 \uc644\ub8cc(ms)": 1794911132848,
+                "\uac78\ub9b0 \uc2dc\uac04(ms)": 121,
+                "\uc5f0\uacb0 \uc2dc\uac04(ms)": 10,
+                "\uccab \ubc14\uc774\ud2b8\uae4c\uc9c0(ms)": 121,
+                "\uc751\ub2f5 \ubcf8\ubb38": {
+                    "orderId": 251,
+                    "product": {
+                        "productId": 93782,
+                        "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58902)",
+                        "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+                        "category": "ELECTRONICS",
+                        "price": 10000
+                    },
+                    "buyerNickname": "mpay02p07",
+                    "sellerNickname": "mpay02sl",
+                    "myRole": "BUYER",
+                    "quantity": 1,
+                    "unitPrice": 10000,
+                    "paidAmount": 10000,
+                    "priceSource": "LISTED",
+                    "offerId": null,
+                    "recipientName": "\ud14c\uc2a4\ud2b8 \uc218\ub839\uc778 pay-07",
+                    "shippingAddress": "\uc11c\uc6b8\ud2b9\ubcc4\uc2dc \ud14c\uc2a4\ud2b8\uad6c \ud14c\uc2a4\ud2b8\ub85c 1, 101\ud638",
+                    "shippingStatus": "WAITING_SHIPMENT",
+                    "tradeStatus": "IN_PROGRESS",
+                    "completionCause": null,
+                    "confirmedAt": "2026-11-17T10:25:33.371751Z",
+                    "shipDeadlineAt": "2026-11-24T15:00:00Z",
+                    "shipment": null,
+                    "deliveredAt": null,
+                    "inspectionDeadlineAt": null,
+                    "cancellation": null,
+                    "refundRequest": null,
+                    "finalizedAt": null,
+                    "myBalanceTransactions": [
+                        {
+                            "transactionId": 369,
+                            "type": "PURCHASE",
+                            "amount": -10000,
+                            "balanceAfter": 0,
+                            "orderId": 251,
+                            "createdAt": "2026-11-17T10:25:33.371751Z"
+                        }
+                    ]
+                }
+            }
+        },
+        "pay08": {
+            "\ucd9c\ubc1c \uae30\ub85d": {
+                "\uc694\uccad \ud0a4": "pay08",
+                "\uc694\uccad": "\uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 08",
+                "\uc11c\ubc84 \ub85c\uadf8 \uc694\uccad ID": "pay-08",
+                "\ucd9c\ubc1c \uc2dc\uc810(\ucd08)": 90,
+                "\ucd9c\ubc1c \uc870\uac74 \ud655\uc778": "\ud1b5\uacfc",
+                "\uc0ac\uc720": "",
+                "\uae30\uc874 \uc608\uc57d \ub9cc\ub8cc\uae4c\uc9c0 \ub0a8\uc740 \uc2dc\uac04(\ucd08, DB \uc2dc\uac01 \uae30\uc900 \ucd94\uc815)": 776,
+                "\uae30\uc874 \uc8fc\ubb38 \ubc1c\uc1a1 \uae30\ud55c\uae4c\uc9c0 \ub0a8\uc740 \uc2dc\uac04(\ubd84, \ucd94\uc815)": 10355,
+                "\ucd9c\ubc1c \ub9de\ucd94\uae30 \uc2dc\uc791(ms)": 1794911042721,
+                "\ubaa8\ub4e0 \uc694\uccad \uc900\ube44 \ud655\uc778(ms)": 1794911042725,
+                "\ucd9c\ubc1c(ms)": 1794911132726,
+                "\ucd9c\ubc1c \uc2dc\uc810 \ub9de\ucd94\uae30": "\uac19\uc740 \ucd9c\ubc1c \uc2dc\uc810\uc758 \uc694\uccad\uacfc \ud568\uaed8 \ucd9c\ubc1c",
+                "\uacb0\uacfc": "\ucd9c\ubc1c"
+            },
+            "\uc751\ub2f5": {
+                "HTTP \uc751\ub2f5": "201",
+                "\uc624\ub958 \ucf54\ub4dc": "-",
+                "\uc751\ub2f5 \ubd84\ub958": "\uc131\uacf5",
+                "\ubd84\ub958 \uc0ac\uc720": "-",
+                "\uc804\uc1a1 \uc2dc\uc791(ms)": 1794911132727,
+                "\uc751\ub2f5 \uc218\uc2e0 \uc644\ub8cc(ms)": 1794911132848,
+                "\uac78\ub9b0 \uc2dc\uac04(ms)": 121,
+                "\uc5f0\uacb0 \uc2dc\uac04(ms)": 10,
+                "\uccab \ubc14\uc774\ud2b8\uae4c\uc9c0(ms)": 121,
+                "\uc751\ub2f5 \ubcf8\ubb38": {
+                    "orderId": 250,
+                    "product": {
+                        "productId": 93782,
+                        "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58902)",
+                        "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+                        "category": "ELECTRONICS",
+                        "price": 10000
+                    },
+                    "buyerNickname": "mpay02p08",
+                    "sellerNickname": "mpay02sl",
+                    "myRole": "BUYER",
+                    "quantity": 1,
+                    "unitPrice": 10000,
+                    "paidAmount": 10000,
+                    "priceSource": "LISTED",
+                    "offerId": null,
+                    "recipientName": "\ud14c\uc2a4\ud2b8 \uc218\ub839\uc778 pay-08",
+                    "shippingAddress": "\uc11c\uc6b8\ud2b9\ubcc4\uc2dc \ud14c\uc2a4\ud2b8\uad6c \ud14c\uc2a4\ud2b8\ub85c 1, 101\ud638",
+                    "shippingStatus": "WAITING_SHIPMENT",
+                    "tradeStatus": "IN_PROGRESS",
+                    "completionCause": null,
+                    "confirmedAt": "2026-11-17T10:25:33.371694Z",
+                    "shipDeadlineAt": "2026-11-24T15:00:00Z",
+                    "shipment": null,
+                    "deliveredAt": null,
+                    "inspectionDeadlineAt": null,
+                    "cancellation": null,
+                    "refundRequest": null,
+                    "finalizedAt": null,
+                    "myBalanceTransactions": [
+                        {
+                            "transactionId": 365,
+                            "type": "PURCHASE",
+                            "amount": -10000,
+                            "balanceAfter": 0,
+                            "orderId": 250,
+                            "createdAt": "2026-11-17T10:25:33.371694Z"
+                        }
+                    ]
+                }
+            }
+        },
+        "pay09": {
+            "\ucd9c\ubc1c \uae30\ub85d": {
+                "\uc694\uccad \ud0a4": "pay09",
+                "\uc694\uccad": "\uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 09",
+                "\uc11c\ubc84 \ub85c\uadf8 \uc694\uccad ID": "pay-09",
+                "\ucd9c\ubc1c \uc2dc\uc810(\ucd08)": 90,
+                "\ucd9c\ubc1c \uc870\uac74 \ud655\uc778": "\ud1b5\uacfc",
+                "\uc0ac\uc720": "",
+                "\uae30\uc874 \uc608\uc57d \ub9cc\ub8cc\uae4c\uc9c0 \ub0a8\uc740 \uc2dc\uac04(\ucd08, DB \uc2dc\uac01 \uae30\uc900 \ucd94\uc815)": 776,
+                "\uae30\uc874 \uc8fc\ubb38 \ubc1c\uc1a1 \uae30\ud55c\uae4c\uc9c0 \ub0a8\uc740 \uc2dc\uac04(\ubd84, \ucd94\uc815)": 10355,
+                "\ucd9c\ubc1c \ub9de\ucd94\uae30 \uc2dc\uc791(ms)": 1794911042721,
+                "\ubaa8\ub4e0 \uc694\uccad \uc900\ube44 \ud655\uc778(ms)": 1794911042725,
+                "\ucd9c\ubc1c(ms)": 1794911132726,
+                "\ucd9c\ubc1c \uc2dc\uc810 \ub9de\ucd94\uae30": "\uac19\uc740 \ucd9c\ubc1c \uc2dc\uc810\uc758 \uc694\uccad\uacfc \ud568\uaed8 \ucd9c\ubc1c",
+                "\uacb0\uacfc": "\ucd9c\ubc1c"
+            },
+            "\uc751\ub2f5": {
+                "HTTP \uc751\ub2f5": "201",
+                "\uc624\ub958 \ucf54\ub4dc": "-",
+                "\uc751\ub2f5 \ubd84\ub958": "\uc131\uacf5",
+                "\ubd84\ub958 \uc0ac\uc720": "-",
+                "\uc804\uc1a1 \uc2dc\uc791(ms)": 1794911132727,
+                "\uc751\ub2f5 \uc218\uc2e0 \uc644\ub8cc(ms)": 1794911132849,
+                "\uac78\ub9b0 \uc2dc\uac04(ms)": 122,
+                "\uc5f0\uacb0 \uc2dc\uac04(ms)": 10,
+                "\uccab \ubc14\uc774\ud2b8\uae4c\uc9c0(ms)": 121,
+                "\uc751\ub2f5 \ubcf8\ubb38": {
+                    "orderId": 249,
+                    "product": {
+                        "productId": 93782,
+                        "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58902)",
+                        "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+                        "category": "ELECTRONICS",
+                        "price": 10000
+                    },
+                    "buyerNickname": "mpay02p09",
+                    "sellerNickname": "mpay02sl",
+                    "myRole": "BUYER",
+                    "quantity": 1,
+                    "unitPrice": 10000,
+                    "paidAmount": 10000,
+                    "priceSource": "LISTED",
+                    "offerId": null,
+                    "recipientName": "\ud14c\uc2a4\ud2b8 \uc218\ub839\uc778 pay-09",
+                    "shippingAddress": "\uc11c\uc6b8\ud2b9\ubcc4\uc2dc \ud14c\uc2a4\ud2b8\uad6c \ud14c\uc2a4\ud2b8\ub85c 1, 101\ud638",
+                    "shippingStatus": "WAITING_SHIPMENT",
+                    "tradeStatus": "IN_PROGRESS",
+                    "completionCause": null,
+                    "confirmedAt": "2026-11-17T10:25:33.371683Z",
+                    "shipDeadlineAt": "2026-11-24T15:00:00Z",
+                    "shipment": null,
+                    "deliveredAt": null,
+                    "inspectionDeadlineAt": null,
+                    "cancellation": null,
+                    "refundRequest": null,
+                    "finalizedAt": null,
+                    "myBalanceTransactions": [
+                        {
+                            "transactionId": 367,
+                            "type": "PURCHASE",
+                            "amount": -10000,
+                            "balanceAfter": 0,
+                            "orderId": 249,
+                            "createdAt": "2026-11-17T10:25:33.371683Z"
+                        }
+                    ]
+                }
+            }
+        },
+        "pay10": {
+            "\ucd9c\ubc1c \uae30\ub85d": {
+                "\uc694\uccad \ud0a4": "pay10",
+                "\uc694\uccad": "\uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 10",
+                "\uc11c\ubc84 \ub85c\uadf8 \uc694\uccad ID": "pay-10",
+                "\ucd9c\ubc1c \uc2dc\uc810(\ucd08)": 90,
+                "\ucd9c\ubc1c \uc870\uac74 \ud655\uc778": "\ud1b5\uacfc",
+                "\uc0ac\uc720": "",
+                "\uae30\uc874 \uc608\uc57d \ub9cc\ub8cc\uae4c\uc9c0 \ub0a8\uc740 \uc2dc\uac04(\ucd08, DB \uc2dc\uac01 \uae30\uc900 \ucd94\uc815)": 776,
+                "\uae30\uc874 \uc8fc\ubb38 \ubc1c\uc1a1 \uae30\ud55c\uae4c\uc9c0 \ub0a8\uc740 \uc2dc\uac04(\ubd84, \ucd94\uc815)": 10355,
+                "\ucd9c\ubc1c \ub9de\ucd94\uae30 \uc2dc\uc791(ms)": 1794911042721,
+                "\ubaa8\ub4e0 \uc694\uccad \uc900\ube44 \ud655\uc778(ms)": 1794911042725,
+                "\ucd9c\ubc1c(ms)": 1794911132726,
+                "\ucd9c\ubc1c \uc2dc\uc810 \ub9de\ucd94\uae30": "\uac19\uc740 \ucd9c\ubc1c \uc2dc\uc810\uc758 \uc694\uccad\uacfc \ud568\uaed8 \ucd9c\ubc1c",
+                "\uacb0\uacfc": "\ucd9c\ubc1c"
+            },
+            "\uc751\ub2f5": {
+                "HTTP \uc751\ub2f5": "201",
+                "\uc624\ub958 \ucf54\ub4dc": "-",
+                "\uc751\ub2f5 \ubd84\ub958": "\uc131\uacf5",
+                "\ubd84\ub958 \uc0ac\uc720": "-",
+                "\uc804\uc1a1 \uc2dc\uc791(ms)": 1794911132727,
+                "\uc751\ub2f5 \uc218\uc2e0 \uc644\ub8cc(ms)": 1794911132857,
+                "\uac78\ub9b0 \uc2dc\uac04(ms)": 130,
+                "\uc5f0\uacb0 \uc2dc\uac04(ms)": 10,
+                "\uccab \ubc14\uc774\ud2b8\uae4c\uc9c0(ms)": 130,
+                "\uc751\ub2f5 \ubcf8\ubb38": {
+                    "orderId": 252,
+                    "product": {
+                        "productId": 93782,
+                        "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58902)",
+                        "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+                        "category": "ELECTRONICS",
+                        "price": 10000
+                    },
+                    "buyerNickname": "mpay02p10",
+                    "sellerNickname": "mpay02sl",
+                    "myRole": "BUYER",
+                    "quantity": 1,
+                    "unitPrice": 10000,
+                    "paidAmount": 10000,
+                    "priceSource": "LISTED",
+                    "offerId": null,
+                    "recipientName": "\ud14c\uc2a4\ud2b8 \uc218\ub839\uc778 pay-10",
+                    "shippingAddress": "\uc11c\uc6b8\ud2b9\ubcc4\uc2dc \ud14c\uc2a4\ud2b8\uad6c \ud14c\uc2a4\ud2b8\ub85c 1, 101\ud638",
+                    "shippingStatus": "WAITING_SHIPMENT",
+                    "tradeStatus": "IN_PROGRESS",
+                    "completionCause": null,
+                    "confirmedAt": "2026-11-17T10:25:33.371735Z",
+                    "shipDeadlineAt": "2026-11-24T15:00:00Z",
+                    "shipment": null,
+                    "deliveredAt": null,
+                    "inspectionDeadlineAt": null,
+                    "cancellation": null,
+                    "refundRequest": null,
+                    "finalizedAt": null,
+                    "myBalanceTransactions": [
+                        {
+                            "transactionId": 368,
+                            "type": "PURCHASE",
+                            "amount": -10000,
+                            "balanceAfter": 0,
+                            "orderId": 252,
+                            "createdAt": "2026-11-17T10:25:33.371735Z"
+                        }
+                    ]
+                }
+            }
+        },
+        "pay11": {
+            "\ucd9c\ubc1c \uae30\ub85d": {
+                "\uc694\uccad \ud0a4": "pay11",
+                "\uc694\uccad": "\uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 11",
+                "\uc11c\ubc84 \ub85c\uadf8 \uc694\uccad ID": "pay-11",
+                "\ucd9c\ubc1c \uc2dc\uc810(\ucd08)": 90,
+                "\ucd9c\ubc1c \uc870\uac74 \ud655\uc778": "\ud1b5\uacfc",
+                "\uc0ac\uc720": "",
+                "\uae30\uc874 \uc608\uc57d \ub9cc\ub8cc\uae4c\uc9c0 \ub0a8\uc740 \uc2dc\uac04(\ucd08, DB \uc2dc\uac01 \uae30\uc900 \ucd94\uc815)": 776,
+                "\uae30\uc874 \uc8fc\ubb38 \ubc1c\uc1a1 \uae30\ud55c\uae4c\uc9c0 \ub0a8\uc740 \uc2dc\uac04(\ubd84, \ucd94\uc815)": 10355,
+                "\ucd9c\ubc1c \ub9de\ucd94\uae30 \uc2dc\uc791(ms)": 1794911042721,
+                "\ubaa8\ub4e0 \uc694\uccad \uc900\ube44 \ud655\uc778(ms)": 1794911042725,
+                "\ucd9c\ubc1c(ms)": 1794911132726,
+                "\ucd9c\ubc1c \uc2dc\uc810 \ub9de\ucd94\uae30": "\uac19\uc740 \ucd9c\ubc1c \uc2dc\uc810\uc758 \uc694\uccad\uacfc \ud568\uaed8 \ucd9c\ubc1c",
+                "\uacb0\uacfc": "\ucd9c\ubc1c"
+            },
+            "\uc751\ub2f5": {
+                "HTTP \uc751\ub2f5": "201",
+                "\uc624\ub958 \ucf54\ub4dc": "-",
+                "\uc751\ub2f5 \ubd84\ub958": "\uc131\uacf5",
+                "\ubd84\ub958 \uc0ac\uc720": "-",
+                "\uc804\uc1a1 \uc2dc\uc791(ms)": 1794911132727,
+                "\uc751\ub2f5 \uc218\uc2e0 \uc644\ub8cc(ms)": 1794911132858,
+                "\uac78\ub9b0 \uc2dc\uac04(ms)": 131,
+                "\uc5f0\uacb0 \uc2dc\uac04(ms)": 10,
+                "\uccab \ubc14\uc774\ud2b8\uae4c\uc9c0(ms)": 131,
+                "\uc751\ub2f5 \ubcf8\ubb38": {
+                    "orderId": 254,
+                    "product": {
+                        "productId": 93782,
+                        "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58902)",
+                        "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+                        "category": "ELECTRONICS",
+                        "price": 10000
+                    },
+                    "buyerNickname": "mpay02p11",
+                    "sellerNickname": "mpay02sl",
+                    "myRole": "BUYER",
+                    "quantity": 1,
+                    "unitPrice": 10000,
+                    "paidAmount": 10000,
+                    "priceSource": "LISTED",
+                    "offerId": null,
+                    "recipientName": "\ud14c\uc2a4\ud2b8 \uc218\ub839\uc778 pay-11",
+                    "shippingAddress": "\uc11c\uc6b8\ud2b9\ubcc4\uc2dc \ud14c\uc2a4\ud2b8\uad6c \ud14c\uc2a4\ud2b8\ub85c 1, 101\ud638",
+                    "shippingStatus": "WAITING_SHIPMENT",
+                    "tradeStatus": "IN_PROGRESS",
+                    "completionCause": null,
+                    "confirmedAt": "2026-11-17T10:25:33.371780Z",
+                    "shipDeadlineAt": "2026-11-24T15:00:00Z",
+                    "shipment": null,
+                    "deliveredAt": null,
+                    "inspectionDeadlineAt": null,
+                    "cancellation": null,
+                    "refundRequest": null,
+                    "finalizedAt": null,
+                    "myBalanceTransactions": [
+                        {
+                            "transactionId": 370,
+                            "type": "PURCHASE",
+                            "amount": -10000,
+                            "balanceAfter": 0,
+                            "orderId": 254,
+                            "createdAt": "2026-11-17T10:25:33.371780Z"
+                        }
+                    ]
+                }
+            }
+        },
+        "pay12": {
+            "\ucd9c\ubc1c \uae30\ub85d": {
+                "\uc694\uccad \ud0a4": "pay12",
+                "\uc694\uccad": "\uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 12",
+                "\uc11c\ubc84 \ub85c\uadf8 \uc694\uccad ID": "pay-12",
+                "\ucd9c\ubc1c \uc2dc\uc810(\ucd08)": 90,
+                "\ucd9c\ubc1c \uc870\uac74 \ud655\uc778": "\ud1b5\uacfc",
+                "\uc0ac\uc720": "",
+                "\uae30\uc874 \uc608\uc57d \ub9cc\ub8cc\uae4c\uc9c0 \ub0a8\uc740 \uc2dc\uac04(\ucd08, DB \uc2dc\uac01 \uae30\uc900 \ucd94\uc815)": 776,
+                "\uae30\uc874 \uc8fc\ubb38 \ubc1c\uc1a1 \uae30\ud55c\uae4c\uc9c0 \ub0a8\uc740 \uc2dc\uac04(\ubd84, \ucd94\uc815)": 10355,
+                "\ucd9c\ubc1c \ub9de\ucd94\uae30 \uc2dc\uc791(ms)": 1794911042721,
+                "\ubaa8\ub4e0 \uc694\uccad \uc900\ube44 \ud655\uc778(ms)": 1794911042725,
+                "\ucd9c\ubc1c(ms)": 1794911132726,
+                "\ucd9c\ubc1c \uc2dc\uc810 \ub9de\ucd94\uae30": "\uac19\uc740 \ucd9c\ubc1c \uc2dc\uc810\uc758 \uc694\uccad\uacfc \ud568\uaed8 \ucd9c\ubc1c",
+                "\uacb0\uacfc": "\ucd9c\ubc1c"
+            },
+            "\uc751\ub2f5": {
+                "HTTP \uc751\ub2f5": "201",
+                "\uc624\ub958 \ucf54\ub4dc": "-",
+                "\uc751\ub2f5 \ubd84\ub958": "\uc131\uacf5",
+                "\ubd84\ub958 \uc0ac\uc720": "-",
+                "\uc804\uc1a1 \uc2dc\uc791(ms)": 1794911132727,
+                "\uc751\ub2f5 \uc218\uc2e0 \uc644\ub8cc(ms)": 1794911132853,
+                "\uac78\ub9b0 \uc2dc\uac04(ms)": 126,
+                "\uc5f0\uacb0 \uc2dc\uac04(ms)": 10,
+                "\uccab \ubc14\uc774\ud2b8\uae4c\uc9c0(ms)": 125,
+                "\uc751\ub2f5 \ubcf8\ubb38": {
+                    "orderId": 253,
+                    "product": {
+                        "productId": 93782,
+                        "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58902)",
+                        "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+                        "category": "ELECTRONICS",
+                        "price": 10000
+                    },
+                    "buyerNickname": "mpay02p12",
+                    "sellerNickname": "mpay02sl",
+                    "myRole": "BUYER",
+                    "quantity": 1,
+                    "unitPrice": 10000,
+                    "paidAmount": 10000,
+                    "priceSource": "LISTED",
+                    "offerId": null,
+                    "recipientName": "\ud14c\uc2a4\ud2b8 \uc218\ub839\uc778 pay-12",
+                    "shippingAddress": "\uc11c\uc6b8\ud2b9\ubcc4\uc2dc \ud14c\uc2a4\ud2b8\uad6c \ud14c\uc2a4\ud2b8\ub85c 1, 101\ud638",
+                    "shippingStatus": "WAITING_SHIPMENT",
+                    "tradeStatus": "IN_PROGRESS",
+                    "completionCause": null,
+                    "confirmedAt": "2026-11-17T10:25:33.371728Z",
+                    "shipDeadlineAt": "2026-11-24T15:00:00Z",
+                    "shipment": null,
+                    "deliveredAt": null,
+                    "inspectionDeadlineAt": null,
+                    "cancellation": null,
+                    "refundRequest": null,
+                    "finalizedAt": null,
+                    "myBalanceTransactions": [
+                        {
+                            "transactionId": 366,
+                            "type": "PURCHASE",
+                            "amount": -10000,
+                            "balanceAfter": 0,
+                            "orderId": 253,
+                            "createdAt": "2026-11-17T10:25:33.371728Z"
+                        }
+                    ]
+                }
+            }
+        },
+        "pay13": {
+            "\ucd9c\ubc1c \uae30\ub85d": {
+                "\uc694\uccad \ud0a4": "pay13",
+                "\uc694\uccad": "\uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 13",
+                "\uc11c\ubc84 \ub85c\uadf8 \uc694\uccad ID": "pay-13",
+                "\ucd9c\ubc1c \uc2dc\uc810(\ucd08)": 120,
+                "\ucd9c\ubc1c \uc870\uac74 \ud655\uc778": "\ud1b5\uacfc",
+                "\uc0ac\uc720": "",
+                "\uae30\uc874 \uc608\uc57d \ub9cc\ub8cc\uae4c\uc9c0 \ub0a8\uc740 \uc2dc\uac04(\ucd08, DB \uc2dc\uac01 \uae30\uc900 \ucd94\uc815)": 776,
+                "\uae30\uc874 \uc8fc\ubb38 \ubc1c\uc1a1 \uae30\ud55c\uae4c\uc9c0 \ub0a8\uc740 \uc2dc\uac04(\ubd84, \ucd94\uc815)": 10355,
+                "\ucd9c\ubc1c \ub9de\ucd94\uae30 \uc2dc\uc791(ms)": 1794911042721,
+                "\ubaa8\ub4e0 \uc694\uccad \uc900\ube44 \ud655\uc778(ms)": 1794911042725,
+                "\ucd9c\ubc1c(ms)": 1794911162725,
+                "\ucd9c\ubc1c \uc2dc\uc810 \ub9de\ucd94\uae30": "\uac19\uc740 \ucd9c\ubc1c \uc2dc\uc810\uc758 \uc694\uccad\uacfc \ud568\uaed8 \ucd9c\ubc1c",
+                "\uacb0\uacfc": "\ucd9c\ubc1c"
+            },
+            "\uc751\ub2f5": {
+                "HTTP \uc751\ub2f5": "201",
+                "\uc624\ub958 \ucf54\ub4dc": "-",
+                "\uc751\ub2f5 \ubd84\ub958": "\uc131\uacf5",
+                "\ubd84\ub958 \uc0ac\uc720": "-",
+                "\uc804\uc1a1 \uc2dc\uc791(ms)": 1794911162725,
+                "\uc751\ub2f5 \uc218\uc2e0 \uc644\ub8cc(ms)": 1794911162793,
+                "\uac78\ub9b0 \uc2dc\uac04(ms)": 68,
+                "\uc5f0\uacb0 \uc2dc\uac04(ms)": 8,
+                "\uccab \ubc14\uc774\ud2b8\uae4c\uc9c0(ms)": 67,
+                "\uc751\ub2f5 \ubcf8\ubb38": {
+                    "orderId": 255,
+                    "product": {
+                        "productId": 93782,
+                        "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58902)",
+                        "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+                        "category": "ELECTRONICS",
+                        "price": 10000
+                    },
+                    "buyerNickname": "mpay02p13",
+                    "sellerNickname": "mpay02sl",
+                    "myRole": "BUYER",
+                    "quantity": 1,
+                    "unitPrice": 10000,
+                    "paidAmount": 10000,
+                    "priceSource": "LISTED",
+                    "offerId": null,
+                    "recipientName": "\ud14c\uc2a4\ud2b8 \uc218\ub839\uc778 pay-13",
+                    "shippingAddress": "\uc11c\uc6b8\ud2b9\ubcc4\uc2dc \ud14c\uc2a4\ud2b8\uad6c \ud14c\uc2a4\ud2b8\ub85c 1, 101\ud638",
+                    "shippingStatus": "WAITING_SHIPMENT",
+                    "tradeStatus": "IN_PROGRESS",
+                    "completionCause": null,
+                    "confirmedAt": "2026-11-17T10:26:03.368607Z",
+                    "shipDeadlineAt": "2026-11-24T15:00:00Z",
+                    "shipment": null,
+                    "deliveredAt": null,
+                    "inspectionDeadlineAt": null,
+                    "cancellation": null,
+                    "refundRequest": null,
+                    "finalizedAt": null,
+                    "myBalanceTransactions": [
+                        {
+                            "transactionId": 372,
+                            "type": "PURCHASE",
+                            "amount": -10000,
+                            "balanceAfter": 0,
+                            "orderId": 255,
+                            "createdAt": "2026-11-17T10:26:03.368607Z"
+                        }
+                    ]
+                }
+            }
+        },
+        "pay14": {
+            "\ucd9c\ubc1c \uae30\ub85d": {
+                "\uc694\uccad \ud0a4": "pay14",
+                "\uc694\uccad": "\uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 14",
+                "\uc11c\ubc84 \ub85c\uadf8 \uc694\uccad ID": "pay-14",
+                "\ucd9c\ubc1c \uc2dc\uc810(\ucd08)": 120,
+                "\ucd9c\ubc1c \uc870\uac74 \ud655\uc778": "\ud1b5\uacfc",
+                "\uc0ac\uc720": "",
+                "\uae30\uc874 \uc608\uc57d \ub9cc\ub8cc\uae4c\uc9c0 \ub0a8\uc740 \uc2dc\uac04(\ucd08, DB \uc2dc\uac01 \uae30\uc900 \ucd94\uc815)": 776,
+                "\uae30\uc874 \uc8fc\ubb38 \ubc1c\uc1a1 \uae30\ud55c\uae4c\uc9c0 \ub0a8\uc740 \uc2dc\uac04(\ubd84, \ucd94\uc815)": 10355,
+                "\ucd9c\ubc1c \ub9de\ucd94\uae30 \uc2dc\uc791(ms)": 1794911042721,
+                "\ubaa8\ub4e0 \uc694\uccad \uc900\ube44 \ud655\uc778(ms)": 1794911042725,
+                "\ucd9c\ubc1c(ms)": 1794911162725,
+                "\ucd9c\ubc1c \uc2dc\uc810 \ub9de\ucd94\uae30": "\uac19\uc740 \ucd9c\ubc1c \uc2dc\uc810\uc758 \uc694\uccad\uacfc \ud568\uaed8 \ucd9c\ubc1c",
+                "\uacb0\uacfc": "\ucd9c\ubc1c"
+            },
+            "\uc751\ub2f5": {
+                "HTTP \uc751\ub2f5": "201",
+                "\uc624\ub958 \ucf54\ub4dc": "-",
+                "\uc751\ub2f5 \ubd84\ub958": "\uc131\uacf5",
+                "\ubd84\ub958 \uc0ac\uc720": "-",
+                "\uc804\uc1a1 \uc2dc\uc791(ms)": 1794911162725,
+                "\uc751\ub2f5 \uc218\uc2e0 \uc644\ub8cc(ms)": 1794911162793,
+                "\uac78\ub9b0 \uc2dc\uac04(ms)": 68,
+                "\uc5f0\uacb0 \uc2dc\uac04(ms)": 8,
+                "\uccab \ubc14\uc774\ud2b8\uae4c\uc9c0(ms)": 68,
+                "\uc751\ub2f5 \ubcf8\ubb38": {
+                    "orderId": 257,
+                    "product": {
+                        "productId": 93782,
+                        "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58902)",
+                        "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+                        "category": "ELECTRONICS",
+                        "price": 10000
+                    },
+                    "buyerNickname": "mpay02p14",
+                    "sellerNickname": "mpay02sl",
+                    "myRole": "BUYER",
+                    "quantity": 1,
+                    "unitPrice": 10000,
+                    "paidAmount": 10000,
+                    "priceSource": "LISTED",
+                    "offerId": null,
+                    "recipientName": "\ud14c\uc2a4\ud2b8 \uc218\ub839\uc778 pay-14",
+                    "shippingAddress": "\uc11c\uc6b8\ud2b9\ubcc4\uc2dc \ud14c\uc2a4\ud2b8\uad6c \ud14c\uc2a4\ud2b8\ub85c 1, 101\ud638",
+                    "shippingStatus": "WAITING_SHIPMENT",
+                    "tradeStatus": "IN_PROGRESS",
+                    "completionCause": null,
+                    "confirmedAt": "2026-11-17T10:26:03.368516Z",
+                    "shipDeadlineAt": "2026-11-24T15:00:00Z",
+                    "shipment": null,
+                    "deliveredAt": null,
+                    "inspectionDeadlineAt": null,
+                    "cancellation": null,
+                    "refundRequest": null,
+                    "finalizedAt": null,
+                    "myBalanceTransactions": [
+                        {
+                            "transactionId": 371,
+                            "type": "PURCHASE",
+                            "amount": -10000,
+                            "balanceAfter": 0,
+                            "orderId": 257,
+                            "createdAt": "2026-11-17T10:26:03.368516Z"
+                        }
+                    ]
+                }
+            }
+        },
+        "pay15": {
+            "\ucd9c\ubc1c \uae30\ub85d": {
+                "\uc694\uccad \ud0a4": "pay15",
+                "\uc694\uccad": "\uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 15",
+                "\uc11c\ubc84 \ub85c\uadf8 \uc694\uccad ID": "pay-15",
+                "\ucd9c\ubc1c \uc2dc\uc810(\ucd08)": 120,
+                "\ucd9c\ubc1c \uc870\uac74 \ud655\uc778": "\ud1b5\uacfc",
+                "\uc0ac\uc720": "",
+                "\uae30\uc874 \uc608\uc57d \ub9cc\ub8cc\uae4c\uc9c0 \ub0a8\uc740 \uc2dc\uac04(\ucd08, DB \uc2dc\uac01 \uae30\uc900 \ucd94\uc815)": 776,
+                "\uae30\uc874 \uc8fc\ubb38 \ubc1c\uc1a1 \uae30\ud55c\uae4c\uc9c0 \ub0a8\uc740 \uc2dc\uac04(\ubd84, \ucd94\uc815)": 10355,
+                "\ucd9c\ubc1c \ub9de\ucd94\uae30 \uc2dc\uc791(ms)": 1794911042721,
+                "\ubaa8\ub4e0 \uc694\uccad \uc900\ube44 \ud655\uc778(ms)": 1794911042725,
+                "\ucd9c\ubc1c(ms)": 1794911162725,
+                "\ucd9c\ubc1c \uc2dc\uc810 \ub9de\ucd94\uae30": "\uac19\uc740 \ucd9c\ubc1c \uc2dc\uc810\uc758 \uc694\uccad\uacfc \ud568\uaed8 \ucd9c\ubc1c",
+                "\uacb0\uacfc": "\ucd9c\ubc1c"
+            },
+            "\uc751\ub2f5": {
+                "HTTP \uc751\ub2f5": "201",
+                "\uc624\ub958 \ucf54\ub4dc": "-",
+                "\uc751\ub2f5 \ubd84\ub958": "\uc131\uacf5",
+                "\ubd84\ub958 \uc0ac\uc720": "-",
+                "\uc804\uc1a1 \uc2dc\uc791(ms)": 1794911162725,
+                "\uc751\ub2f5 \uc218\uc2e0 \uc644\ub8cc(ms)": 1794911162793,
+                "\uac78\ub9b0 \uc2dc\uac04(ms)": 68,
+                "\uc5f0\uacb0 \uc2dc\uac04(ms)": 6,
+                "\uccab \ubc14\uc774\ud2b8\uae4c\uc9c0(ms)": 68,
+                "\uc751\ub2f5 \ubcf8\ubb38": {
+                    "orderId": 256,
+                    "product": {
+                        "productId": 93782,
+                        "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58902)",
+                        "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+                        "category": "ELECTRONICS",
+                        "price": 10000
+                    },
+                    "buyerNickname": "mpay02p15",
+                    "sellerNickname": "mpay02sl",
+                    "myRole": "BUYER",
+                    "quantity": 1,
+                    "unitPrice": 10000,
+                    "paidAmount": 10000,
+                    "priceSource": "LISTED",
+                    "offerId": null,
+                    "recipientName": "\ud14c\uc2a4\ud2b8 \uc218\ub839\uc778 pay-15",
+                    "shippingAddress": "\uc11c\uc6b8\ud2b9\ubcc4\uc2dc \ud14c\uc2a4\ud2b8\uad6c \ud14c\uc2a4\ud2b8\ub85c 1, 101\ud638",
+                    "shippingStatus": "WAITING_SHIPMENT",
+                    "tradeStatus": "IN_PROGRESS",
+                    "completionCause": null,
+                    "confirmedAt": "2026-11-17T10:26:03.368511Z",
+                    "shipDeadlineAt": "2026-11-24T15:00:00Z",
+                    "shipment": null,
+                    "deliveredAt": null,
+                    "inspectionDeadlineAt": null,
+                    "cancellation": null,
+                    "refundRequest": null,
+                    "finalizedAt": null,
+                    "myBalanceTransactions": [
+                        {
+                            "transactionId": 373,
+                            "type": "PURCHASE",
+                            "amount": -10000,
+                            "balanceAfter": 0,
+                            "orderId": 256,
+                            "createdAt": "2026-11-17T10:26:03.368511Z"
+                        }
+                    ]
+                }
+            }
+        },
+        "pay16": {
+            "\ucd9c\ubc1c \uae30\ub85d": {
+                "\uc694\uccad \ud0a4": "pay16",
+                "\uc694\uccad": "\uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 16",
+                "\uc11c\ubc84 \ub85c\uadf8 \uc694\uccad ID": "pay-16",
+                "\ucd9c\ubc1c \uc2dc\uc810(\ucd08)": 180,
+                "\ucd9c\ubc1c \uc870\uac74 \ud655\uc778": "\ud1b5\uacfc",
+                "\uc0ac\uc720": "",
+                "\uae30\uc874 \uc608\uc57d \ub9cc\ub8cc\uae4c\uc9c0 \ub0a8\uc740 \uc2dc\uac04(\ucd08, DB \uc2dc\uac01 \uae30\uc900 \ucd94\uc815)": 776,
+                "\uae30\uc874 \uc8fc\ubb38 \ubc1c\uc1a1 \uae30\ud55c\uae4c\uc9c0 \ub0a8\uc740 \uc2dc\uac04(\ubd84, \ucd94\uc815)": 10355,
+                "\ucd9c\ubc1c \ub9de\ucd94\uae30 \uc2dc\uc791(ms)": 1794911042721,
+                "\ubaa8\ub4e0 \uc694\uccad \uc900\ube44 \ud655\uc778(ms)": 1794911042725,
+                "\ucd9c\ubc1c(ms)": 1794911222725,
+                "\ucd9c\ubc1c \uc2dc\uc810 \ub9de\ucd94\uae30": "\uac19\uc740 \ucd9c\ubc1c \uc2dc\uc810\uc758 \uc694\uccad\uacfc \ud568\uaed8 \ucd9c\ubc1c",
+                "\uacb0\uacfc": "\ucd9c\ubc1c"
+            },
+            "\uc751\ub2f5": {
+                "HTTP \uc751\ub2f5": "201",
+                "\uc624\ub958 \ucf54\ub4dc": "-",
+                "\uc751\ub2f5 \ubd84\ub958": "\uc131\uacf5",
+                "\ubd84\ub958 \uc0ac\uc720": "-",
+                "\uc804\uc1a1 \uc2dc\uc791(ms)": 1794911222726,
+                "\uc751\ub2f5 \uc218\uc2e0 \uc644\ub8cc(ms)": 1794911222786,
+                "\uac78\ub9b0 \uc2dc\uac04(ms)": 60,
+                "\uc5f0\uacb0 \uc2dc\uac04(ms)": 9,
+                "\uccab \ubc14\uc774\ud2b8\uae4c\uc9c0(ms)": 58,
+                "\uc751\ub2f5 \ubcf8\ubb38": {
+                    "orderId": 259,
+                    "product": {
+                        "productId": 93782,
+                        "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58902)",
+                        "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+                        "category": "ELECTRONICS",
+                        "price": 10000
+                    },
+                    "buyerNickname": "mpay02p16",
+                    "sellerNickname": "mpay02sl",
+                    "myRole": "BUYER",
+                    "quantity": 1,
+                    "unitPrice": 10000,
+                    "paidAmount": 10000,
+                    "priceSource": "LISTED",
+                    "offerId": null,
+                    "recipientName": "\ud14c\uc2a4\ud2b8 \uc218\ub839\uc778 pay-16",
+                    "shippingAddress": "\uc11c\uc6b8\ud2b9\ubcc4\uc2dc \ud14c\uc2a4\ud2b8\uad6c \ud14c\uc2a4\ud2b8\ub85c 1, 101\ud638",
+                    "shippingStatus": "WAITING_SHIPMENT",
+                    "tradeStatus": "IN_PROGRESS",
+                    "completionCause": null,
+                    "confirmedAt": "2026-11-17T10:27:03.372054Z",
+                    "shipDeadlineAt": "2026-11-24T15:00:00Z",
+                    "shipment": null,
+                    "deliveredAt": null,
+                    "inspectionDeadlineAt": null,
+                    "cancellation": null,
+                    "refundRequest": null,
+                    "finalizedAt": null,
+                    "myBalanceTransactions": [
+                        {
+                            "transactionId": 375,
+                            "type": "PURCHASE",
+                            "amount": -10000,
+                            "balanceAfter": 0,
+                            "orderId": 259,
+                            "createdAt": "2026-11-17T10:27:03.372054Z"
+                        }
+                    ]
+                }
+            }
+        },
+        "pay17": {
+            "\ucd9c\ubc1c \uae30\ub85d": {
+                "\uc694\uccad \ud0a4": "pay17",
+                "\uc694\uccad": "\uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 17",
+                "\uc11c\ubc84 \ub85c\uadf8 \uc694\uccad ID": "pay-17",
+                "\ucd9c\ubc1c \uc2dc\uc810(\ucd08)": 180,
+                "\ucd9c\ubc1c \uc870\uac74 \ud655\uc778": "\ud1b5\uacfc",
+                "\uc0ac\uc720": "",
+                "\uae30\uc874 \uc608\uc57d \ub9cc\ub8cc\uae4c\uc9c0 \ub0a8\uc740 \uc2dc\uac04(\ucd08, DB \uc2dc\uac01 \uae30\uc900 \ucd94\uc815)": 776,
+                "\uae30\uc874 \uc8fc\ubb38 \ubc1c\uc1a1 \uae30\ud55c\uae4c\uc9c0 \ub0a8\uc740 \uc2dc\uac04(\ubd84, \ucd94\uc815)": 10355,
+                "\ucd9c\ubc1c \ub9de\ucd94\uae30 \uc2dc\uc791(ms)": 1794911042721,
+                "\ubaa8\ub4e0 \uc694\uccad \uc900\ube44 \ud655\uc778(ms)": 1794911042725,
+                "\ucd9c\ubc1c(ms)": 1794911222725,
+                "\ucd9c\ubc1c \uc2dc\uc810 \ub9de\ucd94\uae30": "\uac19\uc740 \ucd9c\ubc1c \uc2dc\uc810\uc758 \uc694\uccad\uacfc \ud568\uaed8 \ucd9c\ubc1c",
+                "\uacb0\uacfc": "\ucd9c\ubc1c"
+            },
+            "\uc751\ub2f5": {
+                "HTTP \uc751\ub2f5": "201",
+                "\uc624\ub958 \ucf54\ub4dc": "-",
+                "\uc751\ub2f5 \ubd84\ub958": "\uc131\uacf5",
+                "\ubd84\ub958 \uc0ac\uc720": "-",
+                "\uc804\uc1a1 \uc2dc\uc791(ms)": 1794911222726,
+                "\uc751\ub2f5 \uc218\uc2e0 \uc644\ub8cc(ms)": 1794911222784,
+                "\uac78\ub9b0 \uc2dc\uac04(ms)": 58,
+                "\uc5f0\uacb0 \uc2dc\uac04(ms)": 9,
+                "\uccab \ubc14\uc774\ud2b8\uae4c\uc9c0(ms)": 58,
+                "\uc751\ub2f5 \ubcf8\ubb38": {
+                    "orderId": 258,
+                    "product": {
+                        "productId": 93782,
+                        "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58902)",
+                        "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+                        "category": "ELECTRONICS",
+                        "price": 10000
+                    },
+                    "buyerNickname": "mpay02p17",
+                    "sellerNickname": "mpay02sl",
+                    "myRole": "BUYER",
+                    "quantity": 1,
+                    "unitPrice": 10000,
+                    "paidAmount": 10000,
+                    "priceSource": "LISTED",
+                    "offerId": null,
+                    "recipientName": "\ud14c\uc2a4\ud2b8 \uc218\ub839\uc778 pay-17",
+                    "shippingAddress": "\uc11c\uc6b8\ud2b9\ubcc4\uc2dc \ud14c\uc2a4\ud2b8\uad6c \ud14c\uc2a4\ud2b8\ub85c 1, 101\ud638",
+                    "shippingStatus": "WAITING_SHIPMENT",
+                    "tradeStatus": "IN_PROGRESS",
+                    "completionCause": null,
+                    "confirmedAt": "2026-11-17T10:27:03.372063Z",
+                    "shipDeadlineAt": "2026-11-24T15:00:00Z",
+                    "shipment": null,
+                    "deliveredAt": null,
+                    "inspectionDeadlineAt": null,
+                    "cancellation": null,
+                    "refundRequest": null,
+                    "finalizedAt": null,
+                    "myBalanceTransactions": [
+                        {
+                            "transactionId": 374,
+                            "type": "PURCHASE",
+                            "amount": -10000,
+                            "balanceAfter": 0,
+                            "orderId": 258,
+                            "createdAt": "2026-11-17T10:27:03.372063Z"
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}

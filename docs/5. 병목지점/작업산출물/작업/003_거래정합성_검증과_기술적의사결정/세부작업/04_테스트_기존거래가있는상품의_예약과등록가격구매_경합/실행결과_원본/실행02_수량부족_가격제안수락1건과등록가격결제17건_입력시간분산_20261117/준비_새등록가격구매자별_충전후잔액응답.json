@@ -1,0 +1,70 @@
+{
+    "pay01": {
+        "memberId": "mpay02p01",
+        "balance": 10000
+    },
+    "pay02": {
+        "memberId": "mpay02p02",
+        "balance": 10000
+    },
+    "pay03": {
+        "memberId": "mpay02p03",
+        "balance": 10000
+    },
+    "pay04": {
+        "memberId": "mpay02p04",
+        "balance": 10000
+    },
+    "pay05": {
+        "memberId": "mpay02p05",
+        "balance": 10000
+    },
+    "pay06": {
+        "memberId": "mpay02p06",
+        "balance": 10000
+    },
+    "pay07": {
+        "memberId": "mpay02p07",
+        "balance": 10000
+    },
+    "pay08": {
+        "memberId": "mpay02p08",
+        "balance": 10000
+    },
+    "pay09": {
+        "memberId": "mpay02p09",
+        "balance": 10000
+    },
+    "pay10": {
+        "memberId": "mpay02p10",
+        "balance": 10000
+    },
+    "pay11": {
+        "memberId": "mpay02p11",
+        "balance": 10000
+    },
+    "pay12": {
+        "memberId": "mpay02p12",
+        "balance": 10000
+    },
+    "pay13": {
+        "memberId": "mpay02p13",
+        "balance": 10000
+    },
+    "pay14": {
+        "memberId": "mpay02p14",
+        "balance": 10000
+    },
+    "pay15": {
+        "memberId": "mpay02p15",
+        "balance": 10000
+    },
+    "pay16": {
+        "memberId": "mpay02p16",
+        "balance": 10000
+    },
+    "pay17": {
+        "memberId": "mpay02p17",
+        "balance": 10000
+    }
+}
