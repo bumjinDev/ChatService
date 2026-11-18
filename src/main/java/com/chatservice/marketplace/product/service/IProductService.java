@@ -23,6 +23,9 @@ public interface IProductService {
     /** 다른 기능이 상품을 판매 상태와 관계없이 읽을 때 쓴다. 없으면 PRODUCT_NOT_FOUND. */
     Product getProduct(Long productId);
 
+    /** 가격 제안 수락과 결제가 상품을 처음 읽을 때 쓴다. 상품 행에 비관적 쓰기 잠금을 얻어 조회하며, 잠금은 호출하는 쪽의 트랜잭션이 커밋되거나 롤백될 때까지 유지된다. 없으면 PRODUCT_NOT_FOUND. */
+    Product getProductForUpdate(Long productId);
+
     /** 결제 성공 시 주문 수량만 차감하고 남은 수량이 0 이면 판매 종료한다(F-010). 호출하는 쪽의 트랜잭션에서 실행된다. */
     void deductStock(Product product, long quantity, Instant now);
 

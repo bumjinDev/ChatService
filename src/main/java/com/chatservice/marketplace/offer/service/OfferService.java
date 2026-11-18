@@ -138,8 +138,8 @@ public class OfferService implements IOfferService {
             if (!offer.getSellerId().equals(memberId)) {
                 throw new BusinessException(ErrorCode.NOT_SELLER);
             }
-            // 상품 조회(테이블 "PRODUCT"). 없으면 PRODUCT_NOT_FOUND
-            Product product = productService.getProduct(offer.getProductId());
+            // 상품 조회(테이블 "PRODUCT"). 상품 행에 비관적 쓰기 잠금을 얻어 조회하며, 잠금은 이 수락 처리가 커밋되거나 롤백될 때까지 유지된다. 없으면 PRODUCT_NOT_FOUND
+            Product product = productService.getProductForUpdate(offer.getProductId());
             // 판매 종료 상품의 가격 제안에는 응답할 수 없다
             if (!product.isOnSale()) {
                 throw new BusinessException(ErrorCode.PRODUCT_NOT_ON_SALE);
