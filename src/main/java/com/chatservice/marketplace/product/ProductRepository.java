@@ -23,8 +23,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByStatusAndRemainingQuantityGreaterThanAndCategoryOrderByCreatedAtDescProductIdDesc(
             ProductStatus status, long remainingQuantity, ProductCategory category);
 
-    /* 상품 한 행을 비관적 쓰기 잠금으로 조회한다(SELECT ... FOR UPDATE). 다른 트랜잭션이 같은 행의 잠금을 가지고 있으면 그 트랜잭션이 커밋되거나 롤백될 때까지 기다린다. 잠금 대기 제한 시간은 두지 않는다 */
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    /* 상품 한 행을 낙관적 락으로 조회한다. 조회할 때 행 잠금을 얻지 않는다. 이 쿼리로 조회한 상품은 트랜잭션이 상품의 값을 바꾸지 않아도 커밋 직전에 버전이 1 올라간다. 조회한 다음에 다른 트랜잭션이 상품의 버전을 바꿨으면 커밋하지 못하고 예외가 난다 */
+    @Lock(LockModeType.OPTIMISTIC_FORCE_INCREMENT)
     @Query("select p from Product p where p.productId = :productId")
-    Optional<Product> findByIdForUpdate(@Param("productId") Long productId);
+    Optional<Product> findByIdWithOptimisticLock(@Param("productId") Long productId);
 }

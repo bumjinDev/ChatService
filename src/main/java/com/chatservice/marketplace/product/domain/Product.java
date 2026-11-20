@@ -11,6 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -64,6 +65,11 @@ public class Product {
 
     @Column(name = "SOLD_AT")
     private Instant soldAt;
+
+    /* 낙관적 락에 쓰는 버전. 상품 행을 수정하는 UPDATE 문마다 Hibernate 가 조회했을 때의 버전을 조건에 넣고 버전을 1 올린다. 코드에서 이 값을 직접 바꾸지 않는다 */
+    @Version
+    @Column(name = "VERSION", nullable = false)
+    private long version;
 
     public static Product register(String sellerId, String name, String description, ProductCategory category,
                                    long price, long quantity, Instant now) {

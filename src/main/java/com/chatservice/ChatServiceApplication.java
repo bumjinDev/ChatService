@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.TypeExcludeFilter;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /*
@@ -16,6 +17,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  * 덧붙이면 두 스캔 설정이 함께 적용될 수 있으므로 스캔 설정을 하나로 둔다.
  * 제외한 패키지의 파일은 수정하지 않고 그대로 남긴다.
  */
+@EnableRetry
 @EnableScheduling
 @SpringBootConfiguration
 @EnableAutoConfiguration

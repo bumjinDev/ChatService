@@ -4,6 +4,9 @@ import java.time.Instant;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -86,6 +89,8 @@ public class OrderService implements IOrderService {
      *           - {@code INSUFFICIENT_BALANCE}: 잔액이 총 결제액보다 적다
      */
     @Override
+    // 조회한 다음에 상품의 버전이 달라져 커밋하지 못하면 이 메서드를 처음부터 다시 실행한다. 첫 실행을 포함해 최대 7번 실행한다
+    @Retryable(retryFor = OptimisticLockingFailureException.class, maxAttempts = 7, backoff = @Backoff(delay = 1))
     @Transactional
     public Long placeOrder(String buyerId, PlaceOrderRequest request) {
         TradeTestLog.registerTransactionEnd(logger, "결제", "OrderService.java", "placeOrder",
@@ -107,8 +112,8 @@ public class OrderService implements IOrderService {
             Instant now = timeRules.now();
             long quantity = request.quantity();
 
-            // 상품 조회. 상품 행에 비관적 쓰기 잠금을 얻어 조회하며, 잠금은 이 결제 처리가 커밋되거나 롤백될 때까지 유지된다. 없으면 PRODUCT_NOT_FOUND
-            Product product = productService.getProductForUpdate(request.productId());
+            // 상품 조회. 잠금 없이 조회한다. 이 결제가 상품의 남은 수량을 줄이면 커밋하기 직전의 상품 UPDATE 문에서 버전을 확인받고 버전이 1 올라간다. 없으면 PRODUCT_NOT_FOUND
+            Product product = productService.getProduct(request.productId());
             // 본인 상품은 구매할 수 없다
             if (product.isSoldBy(buyerId)) {
                 throw new BusinessException(ErrorCode.SELF_TRADE_NOT_ALLOWED);
@@ -197,8 +202,10 @@ public class OrderService implements IOrderService {
             TradeTestLog.event(logger, "결제", "OrderService.java", "placeOrder", "주문저장처리완료",
                     "주문ID", order.getOrderId(), "상품ID", product.getProductId(), "구매자ID", buyerId,
                     "주문수량", quantity, "결제금액", paidAmount);
+
             // 구매자의 잔액 차감(테이블 "WALLET") : 잔액 차감과 PURCHASE 내역 기록. 내역이 주문 ID 를 참조하므로 주문 생성 뒤에 호출한다
             walletService.debitForPurchase(buyerId, paidAmount, order.getOrderId(), now);
+
             /*
              * [검토 메모] 상품 모듈과의 결합
              * - 같은 서비스 계층의 도메인 간 의존이다. 결제와 재고 차감을 함께 반영해야 하므로 호출 자체는 필요하다.
