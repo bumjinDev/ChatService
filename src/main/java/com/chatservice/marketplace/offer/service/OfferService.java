@@ -2,6 +2,9 @@ package com.chatservice.marketplace.offer.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -118,6 +121,8 @@ public class OfferService implements IOfferService {
      *           - {@code RESERVATION_QUANTITY_EXCEEDED}: 수락하려는데 제안 수량이 더 걸 수 있는 예약 수량보다 많다
      */
     @Override
+    // 조회한 다음에 상품의 버전이 달라져 커밋하지 못하면 이 메서드를 처음부터 다시 실행한다. 첫 실행을 포함해 최대 7번 실행한다
+    @Retryable(retryFor = OptimisticLockingFailureException.class, maxAttempts = 7, backoff = @Backoff(delay = 1))
     @Transactional
     public OfferResponse respond(String memberId, Long offerId, boolean accept) {
         if (accept) {
@@ -138,8 +143,8 @@ public class OfferService implements IOfferService {
             if (!offer.getSellerId().equals(memberId)) {
                 throw new BusinessException(ErrorCode.NOT_SELLER);
             }
-            // 상품 조회(테이블 "PRODUCT"). 상품 행에 비관적 쓰기 잠금을 얻어 조회하며, 잠금은 이 수락 처리가 커밋되거나 롤백될 때까지 유지된다. 없으면 PRODUCT_NOT_FOUND
-            Product product = productService.getProductForUpdate(offer.getProductId());
+            // 상품 조회(테이블 "PRODUCT"). 낙관적 락으로 조회하며 행 잠금을 얻지 않는다. 이 응답 처리가 커밋하기 직전에 상품의 버전이 1 올라간다. 없으면 PRODUCT_NOT_FOUND
+            Product product = productService.getProductWithOptimisticLock(offer.getProductId());
             // 판매 종료 상품의 가격 제안에는 응답할 수 없다
             if (!product.isOnSale()) {
                 throw new BusinessException(ErrorCode.PRODUCT_NOT_ON_SALE);
