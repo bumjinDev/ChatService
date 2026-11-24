@@ -1,0 +1,1462 @@
+{
+    "conv_rsv": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "conversationId": 342,
+            "product": {
+                "productId": 257018,
+                "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58903)",
+                "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+                "category": "ELECTRONICS",
+                "price": 10000,
+                "initialQuantity": 16,
+                "remainingQuantity": 13,
+                "availableQuantity": 9,
+                "status": "ON_SALE"
+            },
+            "buyer": {
+                "nickname": "mpay03rv"
+            },
+            "seller": {
+                "nickname": "mpay03sl"
+            },
+            "myRole": "SELLER",
+            "writable": true,
+            "readOnlyReason": null,
+            "offers": [
+                {
+                    "offerId": 221,
+                    "amount": 9000,
+                    "quantity": 4,
+                    "status": "ACCEPTED",
+                    "agreementStatus": "RESERVED",
+                    "createdAt": "2026-11-19T02:38:44.527109Z",
+                    "respondedAt": "2026-11-19T02:38:44.722437Z"
+                }
+            ],
+            "orders": [
+                
+            ],
+            "reservation": {
+                "reservationId": 181,
+                "conversationId": 342,
+                "productId": 257018,
+                "offerId": 221,
+                "quantity": 4,
+                "status": "ACTIVE",
+                "reservedAt": "2026-11-19T02:38:44.723625Z",
+                "expiresAt": "2026-11-19T02:58:44.723625Z",
+                "endedAt": null,
+                "releasedBy": null,
+                "fulfilledOrderId": null
+            }
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:39.203+09:00",
+        "label": "\uc694\uccad\uc804 \ud310\ub9e4\uc790\uc758 \uae30\uc874 \uc608\uc57d \uad6c\ub9e4\uc790 \ub300\ud654 \uc0c1\uc138"
+    },
+    "conv_pay03": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "conversationId": 346,
+            "product": {
+                "productId": 257018,
+                "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58903)",
+                "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+                "category": "ELECTRONICS",
+                "price": 10000,
+                "initialQuantity": 16,
+                "remainingQuantity": 13,
+                "availableQuantity": 9,
+                "status": "ON_SALE"
+            },
+            "buyer": {
+                "nickname": "mpay03p03"
+            },
+            "seller": {
+                "nickname": "mpay03sl"
+            },
+            "myRole": "SELLER",
+            "writable": true,
+            "readOnlyReason": null,
+            "offers": [
+                
+            ],
+            "orders": [
+                
+            ],
+            "reservation": null
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:39.959+09:00",
+        "label": "\uc694\uccad\uc804 \ud310\ub9e4\uc790\uc758 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 03 \ub300\ud654 \uc0c1\uc138"
+    },
+    "conv_pay04": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "conversationId": 347,
+            "product": {
+                "productId": 257018,
+                "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58903)",
+                "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+                "category": "ELECTRONICS",
+                "price": 10000,
+                "initialQuantity": 16,
+                "remainingQuantity": 13,
+                "availableQuantity": 9,
+                "status": "ON_SALE"
+            },
+            "buyer": {
+                "nickname": "mpay03p04"
+            },
+            "seller": {
+                "nickname": "mpay03sl"
+            },
+            "myRole": "SELLER",
+            "writable": true,
+            "readOnlyReason": null,
+            "offers": [
+                
+            ],
+            "orders": [
+                
+            ],
+            "reservation": null
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:40.162+09:00",
+        "label": "\uc694\uccad\uc804 \ud310\ub9e4\uc790\uc758 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 04 \ub300\ud654 \uc0c1\uc138"
+    },
+    "conv_pay05": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "conversationId": 348,
+            "product": {
+                "productId": 257018,
+                "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58903)",
+                "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+                "category": "ELECTRONICS",
+                "price": 10000,
+                "initialQuantity": 16,
+                "remainingQuantity": 13,
+                "availableQuantity": 9,
+                "status": "ON_SALE"
+            },
+            "buyer": {
+                "nickname": "mpay03p05"
+            },
+            "seller": {
+                "nickname": "mpay03sl"
+            },
+            "myRole": "SELLER",
+            "writable": true,
+            "readOnlyReason": null,
+            "offers": [
+                
+            ],
+            "orders": [
+                
+            ],
+            "reservation": null
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:40.289+09:00",
+        "label": "\uc694\uccad\uc804 \ud310\ub9e4\uc790\uc758 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 05 \ub300\ud654 \uc0c1\uc138"
+    },
+    "conv_pay06": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "conversationId": 349,
+            "product": {
+                "productId": 257018,
+                "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58903)",
+                "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+                "category": "ELECTRONICS",
+                "price": 10000,
+                "initialQuantity": 16,
+                "remainingQuantity": 13,
+                "availableQuantity": 9,
+                "status": "ON_SALE"
+            },
+            "buyer": {
+                "nickname": "mpay03p06"
+            },
+            "seller": {
+                "nickname": "mpay03sl"
+            },
+            "myRole": "SELLER",
+            "writable": true,
+            "readOnlyReason": null,
+            "offers": [
+                
+            ],
+            "orders": [
+                
+            ],
+            "reservation": null
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:40.668+09:00",
+        "label": "\uc694\uccad\uc804 \ud310\ub9e4\uc790\uc758 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 06 \ub300\ud654 \uc0c1\uc138"
+    },
+    "conv_pay07": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "conversationId": 350,
+            "product": {
+                "productId": 257018,
+                "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58903)",
+                "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+                "category": "ELECTRONICS",
+                "price": 10000,
+                "initialQuantity": 16,
+                "remainingQuantity": 13,
+                "availableQuantity": 9,
+                "status": "ON_SALE"
+            },
+            "buyer": {
+                "nickname": "mpay03p07"
+            },
+            "seller": {
+                "nickname": "mpay03sl"
+            },
+            "myRole": "SELLER",
+            "writable": true,
+            "readOnlyReason": null,
+            "offers": [
+                
+            ],
+            "orders": [
+                
+            ],
+            "reservation": null
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:40.809+09:00",
+        "label": "\uc694\uccad\uc804 \ud310\ub9e4\uc790\uc758 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 07 \ub300\ud654 \uc0c1\uc138"
+    },
+    "conv_pay08": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "conversationId": 351,
+            "product": {
+                "productId": 257018,
+                "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58903)",
+                "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+                "category": "ELECTRONICS",
+                "price": 10000,
+                "initialQuantity": 16,
+                "remainingQuantity": 13,
+                "availableQuantity": 9,
+                "status": "ON_SALE"
+            },
+            "buyer": {
+                "nickname": "mpay03p08"
+            },
+            "seller": {
+                "nickname": "mpay03sl"
+            },
+            "myRole": "SELLER",
+            "writable": true,
+            "readOnlyReason": null,
+            "offers": [
+                
+            ],
+            "orders": [
+                
+            ],
+            "reservation": null
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:40.901+09:00",
+        "label": "\uc694\uccad\uc804 \ud310\ub9e4\uc790\uc758 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 08 \ub300\ud654 \uc0c1\uc138"
+    },
+    "conv_pay09": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "conversationId": 352,
+            "product": {
+                "productId": 257018,
+                "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58903)",
+                "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+                "category": "ELECTRONICS",
+                "price": 10000,
+                "initialQuantity": 16,
+                "remainingQuantity": 13,
+                "availableQuantity": 9,
+                "status": "ON_SALE"
+            },
+            "buyer": {
+                "nickname": "mpay03p09"
+            },
+            "seller": {
+                "nickname": "mpay03sl"
+            },
+            "myRole": "SELLER",
+            "writable": true,
+            "readOnlyReason": null,
+            "offers": [
+                
+            ],
+            "orders": [
+                
+            ],
+            "reservation": null
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:40.963+09:00",
+        "label": "\uc694\uccad\uc804 \ud310\ub9e4\uc790\uc758 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 09 \ub300\ud654 \uc0c1\uc138"
+    },
+    "pauses": {
+        "code": "200",
+        "failed": false,
+        "body": [
+            
+        ],
+        "error": null,
+        "at": "2026-11-19T11:39:38.896+09:00",
+        "label": "\uc694\uccad\uc804 \uc77c\uc2dc \uc911\uc9c0\ub85c \uba48\ucd98 \uc694\uccad \uc870\ud68c"
+    },
+    "conv_pay10": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "conversationId": 353,
+            "product": {
+                "productId": 257018,
+                "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58903)",
+                "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+                "category": "ELECTRONICS",
+                "price": 10000,
+                "initialQuantity": 16,
+                "remainingQuantity": 13,
+                "availableQuantity": 9,
+                "status": "ON_SALE"
+            },
+            "buyer": {
+                "nickname": "mpay03p10"
+            },
+            "seller": {
+                "nickname": "mpay03sl"
+            },
+            "myRole": "SELLER",
+            "writable": true,
+            "readOnlyReason": null,
+            "offers": [
+                
+            ],
+            "orders": [
+                
+            ],
+            "reservation": null
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:41.029+09:00",
+        "label": "\uc694\uccad\uc804 \ud310\ub9e4\uc790\uc758 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 10 \ub300\ud654 \uc0c1\uc138"
+    },
+    "wallet_rsv": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "memberId": "mpay03rv",
+            "balance": 0
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:39.234+09:00",
+        "label": "\uc694\uccad\uc804 \uae30\uc874 \uc608\uc57d \uad6c\ub9e4\uc790 \uc794\uc561"
+    },
+    "conv_pay11": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "conversationId": 354,
+            "product": {
+                "productId": 257018,
+                "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58903)",
+                "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+                "category": "ELECTRONICS",
+                "price": 10000,
+                "initialQuantity": 16,
+                "remainingQuantity": 13,
+                "availableQuantity": 9,
+                "status": "ON_SALE"
+            },
+            "buyer": {
+                "nickname": "mpay03p11"
+            },
+            "seller": {
+                "nickname": "mpay03sl"
+            },
+            "myRole": "SELLER",
+            "writable": true,
+            "readOnlyReason": null,
+            "offers": [
+                
+            ],
+            "orders": [
+                
+            ],
+            "reservation": null
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:41.094+09:00",
+        "label": "\uc694\uccad\uc804 \ud310\ub9e4\uc790\uc758 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 11 \ub300\ud654 \uc0c1\uc138"
+    },
+    "conv_pay12": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "conversationId": 355,
+            "product": {
+                "productId": 257018,
+                "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58903)",
+                "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+                "category": "ELECTRONICS",
+                "price": 10000,
+                "initialQuantity": 16,
+                "remainingQuantity": 13,
+                "availableQuantity": 9,
+                "status": "ON_SALE"
+            },
+            "buyer": {
+                "nickname": "mpay03p12"
+            },
+            "seller": {
+                "nickname": "mpay03sl"
+            },
+            "myRole": "SELLER",
+            "writable": true,
+            "readOnlyReason": null,
+            "offers": [
+                
+            ],
+            "orders": [
+                
+            ],
+            "reservation": null
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:41.161+09:00",
+        "label": "\uc694\uccad\uc804 \ud310\ub9e4\uc790\uc758 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 12 \ub300\ud654 \uc0c1\uc138"
+    },
+    "conv_pay13": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "conversationId": 356,
+            "product": {
+                "productId": 257018,
+                "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58903)",
+                "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+                "category": "ELECTRONICS",
+                "price": 10000,
+                "initialQuantity": 16,
+                "remainingQuantity": 13,
+                "availableQuantity": 9,
+                "status": "ON_SALE"
+            },
+            "buyer": {
+                "nickname": "mpay03p13"
+            },
+            "seller": {
+                "nickname": "mpay03sl"
+            },
+            "myRole": "SELLER",
+            "writable": true,
+            "readOnlyReason": null,
+            "offers": [
+                
+            ],
+            "orders": [
+                
+            ],
+            "reservation": null
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:41.225+09:00",
+        "label": "\uc694\uccad\uc804 \ud310\ub9e4\uc790\uc758 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 13 \ub300\ud654 \uc0c1\uc138"
+    },
+    "product_rsv": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "productId": 257018,
+            "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58903)",
+            "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+            "category": "ELECTRONICS",
+            "price": 10000,
+            "initialQuantity": 16,
+            "remainingQuantity": 13,
+            "availableQuantity": 13,
+            "status": "ON_SALE",
+            "sellerNickname": "mpay03sl",
+            "createdAt": "2026-11-19T02:25:05.697289Z"
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:38.915+09:00",
+        "label": "\uc694\uccad\uc804 \uae30\uc874 \uc608\uc57d \uad6c\ub9e4\uc790\uc758 \uc0c1\ud488 \uc0c1\uc138"
+    },
+    "tx_rsv": {
+        "code": "200",
+        "failed": false,
+        "body": [
+            
+        ],
+        "error": null,
+        "at": "2026-11-19T11:39:39.401+09:00",
+        "label": "\uc694\uccad\uc804 \uae30\uc874 \uc608\uc57d \uad6c\ub9e4\uc790 \uc794\uc561 \ubcc0\ub3d9 \ub0b4\uc5ed"
+    },
+    "tx_pay10": {
+        "code": "200",
+        "failed": false,
+        "body": [
+            {
+                "transactionId": 412,
+                "type": "CHARGE",
+                "amount": 10000,
+                "balanceAfter": 10000,
+                "orderId": null,
+                "createdAt": "2026-11-19T02:38:07.750709Z"
+            }
+        ],
+        "error": null,
+        "at": "2026-11-19T11:39:41.074+09:00",
+        "label": "\uc694\uccad\uc804 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 10 \uc794\uc561 \ubcc0\ub3d9 \ub0b4\uc5ed"
+    },
+    "wallet_order": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "memberId": "mpay03od",
+            "balance": 0
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:39.015+09:00",
+        "label": "\uc694\uccad\uc804 \uae30\uc874 \uc8fc\ubb38 \uad6c\ub9e4\uc790 \uc794\uc561"
+    },
+    "tx_pay11": {
+        "code": "200",
+        "failed": false,
+        "body": [
+            {
+                "transactionId": 413,
+                "type": "CHARGE",
+                "amount": 10000,
+                "balanceAfter": 10000,
+                "orderId": null,
+                "createdAt": "2026-11-19T02:38:07.801891Z"
+            }
+        ],
+        "error": null,
+        "at": "2026-11-19T11:39:41.139+09:00",
+        "label": "\uc694\uccad\uc804 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 11 \uc794\uc561 \ubcc0\ub3d9 \ub0b4\uc5ed"
+    },
+    "tx_pay12": {
+        "code": "200",
+        "failed": false,
+        "body": [
+            {
+                "transactionId": 414,
+                "type": "CHARGE",
+                "amount": 10000,
+                "balanceAfter": 10000,
+                "orderId": null,
+                "createdAt": "2026-11-19T02:38:07.936308Z"
+            }
+        ],
+        "error": null,
+        "at": "2026-11-19T11:39:41.205+09:00",
+        "label": "\uc694\uccad\uc804 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 12 \uc794\uc561 \ubcc0\ub3d9 \ub0b4\uc5ed"
+    },
+    "tx_pay13": {
+        "code": "200",
+        "failed": false,
+        "body": [
+            {
+                "transactionId": 415,
+                "type": "CHARGE",
+                "amount": 10000,
+                "balanceAfter": 10000,
+                "orderId": null,
+                "createdAt": "2026-11-19T02:38:07.980483Z"
+            }
+        ],
+        "error": null,
+        "at": "2026-11-19T11:39:41.266+09:00",
+        "label": "\uc694\uccad\uc804 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 13 \uc794\uc561 \ubcc0\ub3d9 \ub0b4\uc5ed"
+    },
+    "clock": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "instant": "2026-11-19T02:39:41.216539Z",
+            "fixed": false
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:38.803+09:00",
+        "label": "\uc694\uccad\uc804 \uc11c\ubc84 \ucc98\ub9ac \uae30\uc900 \uc2dc\uac01\uc774 \uace0\uc815\ub418\uc5b4 \uc788\uc9c0 \uc54a\uc740\uc9c0 \uc870\ud68c"
+    },
+    "wallet_pay13": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "memberId": "mpay03p13",
+            "balance": 10000
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:41.250+09:00",
+        "label": "\uc694\uccad\uc804 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 13 \uc794\uc561"
+    },
+    "tx_order": {
+        "code": "200",
+        "failed": false,
+        "body": [
+            {
+                "transactionId": 402,
+                "type": "PURCHASE",
+                "amount": -30000,
+                "balanceAfter": 0,
+                "orderId": 261,
+                "createdAt": "2026-11-19T02:30:10.113365Z"
+            },
+            {
+                "transactionId": 401,
+                "type": "CHARGE",
+                "amount": 30000,
+                "balanceAfter": 30000,
+                "orderId": null,
+                "createdAt": "2026-11-19T02:30:09.967364Z"
+            }
+        ],
+        "error": null,
+        "at": "2026-11-19T11:39:39.039+09:00",
+        "label": "\uc694\uccad\uc804 \uae30\uc874 \uc8fc\ubb38 \uad6c\ub9e4\uc790 \uc794\uc561 \ubcc0\ub3d9 \ub0b4\uc5ed"
+    },
+    "wallet_pay14": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "memberId": "mpay03p14",
+            "balance": 10000
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:41.312+09:00",
+        "label": "\uc694\uccad\uc804 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 14 \uc794\uc561"
+    },
+    "wallet_pay15": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "memberId": "mpay03p15",
+            "balance": 10000
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:41.380+09:00",
+        "label": "\uc694\uccad\uc804 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 15 \uc794\uc561"
+    },
+    "wallet_pay16": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "memberId": "mpay03p16",
+            "balance": 10000
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:41.439+09:00",
+        "label": "\uc694\uccad\uc804 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 16 \uc794\uc561"
+    },
+    "wallet_pay10": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "memberId": "mpay03p10",
+            "balance": 10000
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:41.057+09:00",
+        "label": "\uc694\uccad\uc804 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 10 \uc794\uc561"
+    },
+    "conv_pay01": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "conversationId": 344,
+            "product": {
+                "productId": 257018,
+                "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58903)",
+                "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+                "category": "ELECTRONICS",
+                "price": 10000,
+                "initialQuantity": 16,
+                "remainingQuantity": 13,
+                "availableQuantity": 9,
+                "status": "ON_SALE"
+            },
+            "buyer": {
+                "nickname": "mpay03p01"
+            },
+            "seller": {
+                "nickname": "mpay03sl"
+            },
+            "myRole": "SELLER",
+            "writable": true,
+            "readOnlyReason": null,
+            "offers": [
+                
+            ],
+            "orders": [
+                
+            ],
+            "reservation": null
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:39.673+09:00",
+        "label": "\uc694\uccad\uc804 \ud310\ub9e4\uc790\uc758 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 01 \ub300\ud654 \uc0c1\uc138"
+    },
+    "wallet_pay11": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "memberId": "mpay03p11",
+            "balance": 10000
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:41.121+09:00",
+        "label": "\uc694\uccad\uc804 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 11 \uc794\uc561"
+    },
+    "conv_pay02": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "conversationId": 345,
+            "product": {
+                "productId": 257018,
+                "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58903)",
+                "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+                "category": "ELECTRONICS",
+                "price": 10000,
+                "initialQuantity": 16,
+                "remainingQuantity": 13,
+                "availableQuantity": 9,
+                "status": "ON_SALE"
+            },
+            "buyer": {
+                "nickname": "mpay03p02"
+            },
+            "seller": {
+                "nickname": "mpay03sl"
+            },
+            "myRole": "SELLER",
+            "writable": true,
+            "readOnlyReason": null,
+            "offers": [
+                
+            ],
+            "orders": [
+                
+            ],
+            "reservation": null
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:39.869+09:00",
+        "label": "\uc694\uccad\uc804 \ud310\ub9e4\uc790\uc758 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 02 \ub300\ud654 \uc0c1\uc138"
+    },
+    "wallet_pay12": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "memberId": "mpay03p12",
+            "balance": 10000
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:41.186+09:00",
+        "label": "\uc694\uccad\uc804 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 12 \uc794\uc561"
+    },
+    "tx_pay14": {
+        "code": "200",
+        "failed": false,
+        "body": [
+            {
+                "transactionId": 416,
+                "type": "CHARGE",
+                "amount": 10000,
+                "balanceAfter": 10000,
+                "orderId": null,
+                "createdAt": "2026-11-19T02:38:08.052850Z"
+            }
+        ],
+        "error": null,
+        "at": "2026-11-19T11:39:41.329+09:00",
+        "label": "\uc694\uccad\uc804 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 14 \uc794\uc561 \ubcc0\ub3d9 \ub0b4\uc5ed"
+    },
+    "tx_pay15": {
+        "code": "200",
+        "failed": false,
+        "body": [
+            {
+                "transactionId": 417,
+                "type": "CHARGE",
+                "amount": 10000,
+                "balanceAfter": 10000,
+                "orderId": null,
+                "createdAt": "2026-11-19T02:38:08.087988Z"
+            }
+        ],
+        "error": null,
+        "at": "2026-11-19T11:39:41.398+09:00",
+        "label": "\uc694\uccad\uc804 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 15 \uc794\uc561 \ubcc0\ub3d9 \ub0b4\uc5ed"
+    },
+    "tx_pay16": {
+        "code": "200",
+        "failed": false,
+        "body": [
+            {
+                "transactionId": 418,
+                "type": "CHARGE",
+                "amount": 10000,
+                "balanceAfter": 10000,
+                "orderId": null,
+                "createdAt": "2026-11-19T02:38:08.128595Z"
+            }
+        ],
+        "error": null,
+        "at": "2026-11-19T11:39:41.458+09:00",
+        "label": "\uc694\uccad\uc804 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 16 \uc794\uc561 \ubcc0\ub3d9 \ub0b4\uc5ed"
+    },
+    "tx_pay17": {
+        "code": "200",
+        "failed": false,
+        "body": [
+            {
+                "transactionId": 419,
+                "type": "CHARGE",
+                "amount": 10000,
+                "balanceAfter": 10000,
+                "orderId": null,
+                "createdAt": "2026-11-19T02:38:08.162742Z"
+            }
+        ],
+        "error": null,
+        "at": "2026-11-19T11:39:41.517+09:00",
+        "label": "\uc694\uccad\uc804 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 17 \uc794\uc561 \ubcc0\ub3d9 \ub0b4\uc5ed"
+    },
+    "wallet_pay17": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "memberId": "mpay03p17",
+            "balance": 10000
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:41.500+09:00",
+        "label": "\uc694\uccad\uc804 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 17 \uc794\uc561"
+    },
+    "tx_offer": {
+        "code": "200",
+        "failed": false,
+        "body": [
+            
+        ],
+        "error": null,
+        "at": "2026-11-19T11:39:39.655+09:00",
+        "label": "\uc694\uccad\uc804 \uc0c8 \ud765\uc815 \uad6c\ub9e4\uc790 \uc794\uc561 \ubcc0\ub3d9 \ub0b4\uc5ed"
+    },
+    "wallet_offer": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "memberId": "mpay03of",
+            "balance": 0
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:39.632+09:00",
+        "label": "\uc694\uccad\uc804 \uc0c8 \ud765\uc815 \uad6c\ub9e4\uc790 \uc794\uc561"
+    },
+    "product_pay": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "productId": 257018,
+            "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58903)",
+            "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+            "category": "ELECTRONICS",
+            "price": 10000,
+            "initialQuantity": 16,
+            "remainingQuantity": 13,
+            "availableQuantity": 9,
+            "status": "ON_SALE",
+            "sellerNickname": "mpay03sl",
+            "createdAt": "2026-11-19T02:25:05.697289Z"
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:38.962+09:00",
+        "label": "\uc694\uccad\uc804 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 01\uc758 \uc0c1\ud488 \uc0c1\uc138"
+    },
+    "tx_pay01": {
+        "code": "200",
+        "failed": false,
+        "body": [
+            {
+                "transactionId": 403,
+                "type": "CHARGE",
+                "amount": 10000,
+                "balanceAfter": 10000,
+                "orderId": null,
+                "createdAt": "2026-11-19T02:38:06.651405Z"
+            }
+        ],
+        "error": null,
+        "at": "2026-11-19T11:39:39.849+09:00",
+        "label": "\uc694\uccad\uc804 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 01 \uc794\uc561 \ubcc0\ub3d9 \ub0b4\uc5ed"
+    },
+    "tx_pay02": {
+        "code": "200",
+        "failed": false,
+        "body": [
+            {
+                "transactionId": 404,
+                "type": "CHARGE",
+                "amount": 10000,
+                "balanceAfter": 10000,
+                "orderId": null,
+                "createdAt": "2026-11-19T02:38:06.913547Z"
+            }
+        ],
+        "error": null,
+        "at": "2026-11-19T11:39:39.939+09:00",
+        "label": "\uc694\uccad\uc804 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 02 \uc794\uc561 \ubcc0\ub3d9 \ub0b4\uc5ed"
+    },
+    "conv_offer": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "conversationId": 343,
+            "product": {
+                "productId": 257018,
+                "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58903)",
+                "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+                "category": "ELECTRONICS",
+                "price": 10000,
+                "initialQuantity": 16,
+                "remainingQuantity": 13,
+                "availableQuantity": 9,
+                "status": "ON_SALE"
+            },
+            "buyer": {
+                "nickname": "mpay03of"
+            },
+            "seller": {
+                "nickname": "mpay03sl"
+            },
+            "myRole": "SELLER",
+            "writable": true,
+            "readOnlyReason": null,
+            "offers": [
+                {
+                    "offerId": 222,
+                    "amount": 9000,
+                    "quantity": 2,
+                    "status": "PENDING",
+                    "agreementStatus": null,
+                    "createdAt": "2026-11-19T02:39:23.753855Z",
+                    "respondedAt": null
+                }
+            ],
+            "orders": [
+                
+            ],
+            "reservation": null
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:39.428+09:00",
+        "label": "\uc694\uccad\uc804 \ud310\ub9e4\uc790\uc758 \uc0c8 \ud765\uc815 \uad6c\ub9e4\uc790 \ub300\ud654 \uc0c1\uc138"
+    },
+    "wallet_pay02": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "memberId": "mpay03p02",
+            "balance": 10000
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:39.919+09:00",
+        "label": "\uc694\uccad\uc804 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 02 \uc794\uc561"
+    },
+    "wallet_pay03": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "memberId": "mpay03p03",
+            "balance": 10000
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:40.119+09:00",
+        "label": "\uc694\uccad\uc804 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 03 \uc794\uc561"
+    },
+    "product_offer": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "productId": 257018,
+            "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58903)",
+            "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+            "category": "ELECTRONICS",
+            "price": 10000,
+            "initialQuantity": 16,
+            "remainingQuantity": 13,
+            "availableQuantity": 9,
+            "status": "ON_SALE",
+            "sellerNickname": "mpay03sl",
+            "createdAt": "2026-11-19T02:25:05.697289Z"
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:38.940+09:00",
+        "label": "\uc694\uccad\uc804 \uc0c8 \ud765\uc815 \uad6c\ub9e4\uc790\uc758 \uc0c1\ud488 \uc0c1\uc138"
+    },
+    "wallet_pay04": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "memberId": "mpay03p04",
+            "balance": 10000
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:40.239+09:00",
+        "label": "\uc694\uccad\uc804 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 04 \uc794\uc561"
+    },
+    "wallet_pay05": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "memberId": "mpay03p05",
+            "balance": 10000
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:40.319+09:00",
+        "label": "\uc694\uccad\uc804 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 05 \uc794\uc561"
+    },
+    "wallet_pay01": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "memberId": "mpay03p01",
+            "balance": 10000
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:39.822+09:00",
+        "label": "\uc694\uccad\uc804 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 01 \uc794\uc561"
+    },
+    "tx_pay03": {
+        "code": "200",
+        "failed": false,
+        "body": [
+            {
+                "transactionId": 405,
+                "type": "CHARGE",
+                "amount": 10000,
+                "balanceAfter": 10000,
+                "orderId": null,
+                "createdAt": "2026-11-19T02:38:06.953357Z"
+            }
+        ],
+        "error": null,
+        "at": "2026-11-19T11:39:40.141+09:00",
+        "label": "\uc694\uccad\uc804 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 03 \uc794\uc561 \ubcc0\ub3d9 \ub0b4\uc5ed"
+    },
+    "tx_pay04": {
+        "code": "200",
+        "failed": false,
+        "body": [
+            {
+                "transactionId": 406,
+                "type": "CHARGE",
+                "amount": 10000,
+                "balanceAfter": 10000,
+                "orderId": null,
+                "createdAt": "2026-11-19T02:38:07.274288Z"
+            }
+        ],
+        "error": null,
+        "at": "2026-11-19T11:39:40.264+09:00",
+        "label": "\uc694\uccad\uc804 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 04 \uc794\uc561 \ubcc0\ub3d9 \ub0b4\uc5ed"
+    },
+    "tx_pay05": {
+        "code": "200",
+        "failed": false,
+        "body": [
+            {
+                "transactionId": 407,
+                "type": "CHARGE",
+                "amount": 10000,
+                "balanceAfter": 10000,
+                "orderId": null,
+                "createdAt": "2026-11-19T02:38:07.319205Z"
+            }
+        ],
+        "error": null,
+        "at": "2026-11-19T11:39:40.642+09:00",
+        "label": "\uc694\uccad\uc804 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 05 \uc794\uc561 \ubcc0\ub3d9 \ub0b4\uc5ed"
+    },
+    "tx_pay06": {
+        "code": "200",
+        "failed": false,
+        "body": [
+            {
+                "transactionId": 408,
+                "type": "CHARGE",
+                "amount": 10000,
+                "balanceAfter": 10000,
+                "orderId": null,
+                "createdAt": "2026-11-19T02:38:07.368353Z"
+            }
+        ],
+        "error": null,
+        "at": "2026-11-19T11:39:40.789+09:00",
+        "label": "\uc694\uccad\uc804 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 06 \uc794\uc561 \ubcc0\ub3d9 \ub0b4\uc5ed"
+    },
+    "wallet_pay06": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "memberId": "mpay03p06",
+            "balance": 10000
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:40.770+09:00",
+        "label": "\uc694\uccad\uc804 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 06 \uc794\uc561"
+    },
+    "tx_pay07": {
+        "code": "200",
+        "failed": false,
+        "body": [
+            {
+                "transactionId": 409,
+                "type": "CHARGE",
+                "amount": 10000,
+                "balanceAfter": 10000,
+                "orderId": null,
+                "createdAt": "2026-11-19T02:38:07.408038Z"
+            }
+        ],
+        "error": null,
+        "at": "2026-11-19T11:39:40.881+09:00",
+        "label": "\uc694\uccad\uc804 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 07 \uc794\uc561 \ubcc0\ub3d9 \ub0b4\uc5ed"
+    },
+    "wallet_pay07": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "memberId": "mpay03p07",
+            "balance": 10000
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:40.863+09:00",
+        "label": "\uc694\uccad\uc804 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 07 \uc794\uc561"
+    },
+    "tx_pay08": {
+        "code": "200",
+        "failed": false,
+        "body": [
+            {
+                "transactionId": 410,
+                "type": "CHARGE",
+                "amount": 10000,
+                "balanceAfter": 10000,
+                "orderId": null,
+                "createdAt": "2026-11-19T02:38:07.627157Z"
+            }
+        ],
+        "error": null,
+        "at": "2026-11-19T11:39:40.943+09:00",
+        "label": "\uc694\uccad\uc804 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 08 \uc794\uc561 \ubcc0\ub3d9 \ub0b4\uc5ed"
+    },
+    "wallet_pay08": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "memberId": "mpay03p08",
+            "balance": 10000
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:40.925+09:00",
+        "label": "\uc694\uccad\uc804 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 08 \uc794\uc561"
+    },
+    "tx_pay09": {
+        "code": "200",
+        "failed": false,
+        "body": [
+            {
+                "transactionId": 411,
+                "type": "CHARGE",
+                "amount": 10000,
+                "balanceAfter": 10000,
+                "orderId": null,
+                "createdAt": "2026-11-19T02:38:07.711515Z"
+            }
+        ],
+        "error": null,
+        "at": "2026-11-19T11:39:41.008+09:00",
+        "label": "\uc694\uccad\uc804 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 09 \uc794\uc561 \ubcc0\ub3d9 \ub0b4\uc5ed"
+    },
+    "wallet_pay09": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "memberId": "mpay03p09",
+            "balance": 10000
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:40.988+09:00",
+        "label": "\uc694\uccad\uc804 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 09 \uc794\uc561"
+    },
+    "conv_order": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "conversationId": 341,
+            "product": {
+                "productId": 257018,
+                "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58903)",
+                "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+                "category": "ELECTRONICS",
+                "price": 10000,
+                "initialQuantity": 16,
+                "remainingQuantity": 13,
+                "availableQuantity": 9,
+                "status": "ON_SALE"
+            },
+            "buyer": {
+                "nickname": "mpay03od"
+            },
+            "seller": {
+                "nickname": "mpay03sl"
+            },
+            "myRole": "SELLER",
+            "writable": true,
+            "readOnlyReason": null,
+            "offers": [
+                
+            ],
+            "orders": [
+                {
+                    "orderId": 261,
+                    "quantity": 3,
+                    "unitPrice": 10000,
+                    "paidAmount": 30000,
+                    "priceSource": "LISTED",
+                    "offerId": null,
+                    "tradeStatus": "IN_PROGRESS",
+                    "shippingStatus": "WAITING_SHIPMENT"
+                }
+            ],
+            "reservation": null
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:38.985+09:00",
+        "label": "\uc694\uccad\uc804 \ud310\ub9e4\uc790\uc758 \uae30\uc874 \uc8fc\ubb38 \uad6c\ub9e4\uc790 \ub300\ud654 \uc0c1\uc138"
+    },
+    "conv_pay14": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "conversationId": 357,
+            "product": {
+                "productId": 257018,
+                "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58903)",
+                "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+                "category": "ELECTRONICS",
+                "price": 10000,
+                "initialQuantity": 16,
+                "remainingQuantity": 13,
+                "availableQuantity": 9,
+                "status": "ON_SALE"
+            },
+            "buyer": {
+                "nickname": "mpay03p14"
+            },
+            "seller": {
+                "nickname": "mpay03sl"
+            },
+            "myRole": "SELLER",
+            "writable": true,
+            "readOnlyReason": null,
+            "offers": [
+                
+            ],
+            "orders": [
+                
+            ],
+            "reservation": null
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:41.286+09:00",
+        "label": "\uc694\uccad\uc804 \ud310\ub9e4\uc790\uc758 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 14 \ub300\ud654 \uc0c1\uc138"
+    },
+    "conv_pay15": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "conversationId": 358,
+            "product": {
+                "productId": 257018,
+                "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58903)",
+                "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+                "category": "ELECTRONICS",
+                "price": 10000,
+                "initialQuantity": 16,
+                "remainingQuantity": 13,
+                "availableQuantity": 9,
+                "status": "ON_SALE"
+            },
+            "buyer": {
+                "nickname": "mpay03p15"
+            },
+            "seller": {
+                "nickname": "mpay03sl"
+            },
+            "myRole": "SELLER",
+            "writable": true,
+            "readOnlyReason": null,
+            "offers": [
+                
+            ],
+            "orders": [
+                
+            ],
+            "reservation": null
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:41.356+09:00",
+        "label": "\uc694\uccad\uc804 \ud310\ub9e4\uc790\uc758 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 15 \ub300\ud654 \uc0c1\uc138"
+    },
+    "conv_pay16": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "conversationId": 359,
+            "product": {
+                "productId": 257018,
+                "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58903)",
+                "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+                "category": "ELECTRONICS",
+                "price": 10000,
+                "initialQuantity": 16,
+                "remainingQuantity": 13,
+                "availableQuantity": 9,
+                "status": "ON_SALE"
+            },
+            "buyer": {
+                "nickname": "mpay03p16"
+            },
+            "seller": {
+                "nickname": "mpay03sl"
+            },
+            "myRole": "SELLER",
+            "writable": true,
+            "readOnlyReason": null,
+            "offers": [
+                
+            ],
+            "orders": [
+                
+            ],
+            "reservation": null
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:41.416+09:00",
+        "label": "\uc694\uccad\uc804 \ud310\ub9e4\uc790\uc758 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 16 \ub300\ud654 \uc0c1\uc138"
+    },
+    "order_existing": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "orderId": 261,
+            "product": {
+                "productId": 257018,
+                "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58903)",
+                "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+                "category": "ELECTRONICS",
+                "price": 10000
+            },
+            "buyerNickname": "mpay03od",
+            "sellerNickname": "mpay03sl",
+            "myRole": "BUYER",
+            "quantity": 3,
+            "unitPrice": 10000,
+            "paidAmount": 30000,
+            "priceSource": "LISTED",
+            "offerId": null,
+            "recipientName": "\ud14c\uc2a4\ud2b8 \uc218\ub839\uc778 \uae30\uc874\uc8fc\ubb38",
+            "shippingAddress": "\uc11c\uc6b8\ud2b9\ubcc4\uc2dc \ud14c\uc2a4\ud2b8\uad6c \ud14c\uc2a4\ud2b8\ub85c 1, 101\ud638",
+            "shippingStatus": "WAITING_SHIPMENT",
+            "tradeStatus": "IN_PROGRESS",
+            "completionCause": null,
+            "confirmedAt": "2026-11-19T02:30:10.113365Z",
+            "shipDeadlineAt": "2026-11-26T15:00:00Z",
+            "shipment": null,
+            "deliveredAt": null,
+            "inspectionDeadlineAt": null,
+            "cancellation": null,
+            "refundRequest": null,
+            "finalizedAt": null,
+            "myBalanceTransactions": [
+                {
+                    "transactionId": 402,
+                    "type": "PURCHASE",
+                    "amount": -30000,
+                    "balanceAfter": 0,
+                    "orderId": 261,
+                    "createdAt": "2026-11-19T02:30:10.113365Z"
+                }
+            ]
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:41.538+09:00",
+        "label": "\uc694\uccad\uc804 \uae30\uc874 \uc8fc\ubb38 \uad6c\ub9e4\uc790\uc758 \uae30\uc874 \uc8fc\ubb38 \uc0c1\uc138"
+    },
+    "conv_pay17": {
+        "code": "200",
+        "failed": false,
+        "body": {
+            "conversationId": 360,
+            "product": {
+                "productId": 257018,
+                "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58903)",
+                "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+                "category": "ELECTRONICS",
+                "price": 10000,
+                "initialQuantity": 16,
+                "remainingQuantity": 13,
+                "availableQuantity": 9,
+                "status": "ON_SALE"
+            },
+            "buyer": {
+                "nickname": "mpay03p17"
+            },
+            "seller": {
+                "nickname": "mpay03sl"
+            },
+            "myRole": "SELLER",
+            "writable": true,
+            "readOnlyReason": null,
+            "offers": [
+                
+            ],
+            "orders": [
+                
+            ],
+            "reservation": null
+        },
+        "error": null,
+        "at": "2026-11-19T11:39:41.477+09:00",
+        "label": "\uc694\uccad\uc804 \ud310\ub9e4\uc790\uc758 \uc0c8 \ub4f1\ub85d \uac00\uaca9 \uad6c\ub9e4\uc790 17 \ub300\ud654 \uc0c1\uc138"
+    }
+}
