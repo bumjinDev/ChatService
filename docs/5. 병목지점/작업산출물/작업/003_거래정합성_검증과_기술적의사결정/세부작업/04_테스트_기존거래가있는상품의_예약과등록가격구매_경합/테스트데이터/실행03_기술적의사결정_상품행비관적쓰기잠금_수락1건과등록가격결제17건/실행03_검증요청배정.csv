@@ -1,0 +1,19 @@
+﻿run_id,req_key,req_id,req_role,req_kind,cookie_key,slot_sec
+03,accept,accept-new,판매자(새 가격 제안 수락),accept,seller,90
+03,pay01,pay-01,새 등록 가격 구매자 01,pay,pay01,30
+03,pay02,pay-02,새 등록 가격 구매자 02,pay,pay02,30
+03,pay03,pay-03,새 등록 가격 구매자 03,pay,pay03,60
+03,pay04,pay-04,새 등록 가격 구매자 04,pay,pay04,60
+03,pay05,pay-05,새 등록 가격 구매자 05,pay,pay05,60
+03,pay06,pay-06,새 등록 가격 구매자 06,pay,pay06,60
+03,pay07,pay-07,새 등록 가격 구매자 07,pay,pay07,90
+03,pay08,pay-08,새 등록 가격 구매자 08,pay,pay08,90
+03,pay09,pay-09,새 등록 가격 구매자 09,pay,pay09,90
+03,pay10,pay-10,새 등록 가격 구매자 10,pay,pay10,90
+03,pay11,pay-11,새 등록 가격 구매자 11,pay,pay11,90
+03,pay12,pay-12,새 등록 가격 구매자 12,pay,pay12,90
+03,pay13,pay-13,새 등록 가격 구매자 13,pay,pay13,120
+03,pay14,pay-14,새 등록 가격 구매자 14,pay,pay14,120
+03,pay15,pay-15,새 등록 가격 구매자 15,pay,pay15,120
+03,pay16,pay-16,새 등록 가격 구매자 16,pay,pay16,180
+03,pay17,pay-17,새 등록 가격 구매자 17,pay,pay17,180

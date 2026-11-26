@@ -2,11 +2,9 @@ package com.chatservice.marketplace.offer.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.OptimisticLockingFailureException;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import com.chatservice.marketplace.common.error.BusinessException;
 import com.chatservice.marketplace.common.error.ErrorCode;
@@ -21,6 +19,7 @@ import com.chatservice.marketplace.offer.domain.OfferStatus;
 import com.chatservice.marketplace.offer.domain.PriceOffer;
 import com.chatservice.marketplace.offer.dto.OfferResponse;
 import com.chatservice.marketplace.product.domain.Product;
+import com.chatservice.marketplace.product.lock.ProductLockRegistry;
 import com.chatservice.marketplace.product.service.IProductService;
 import com.chatservice.marketplace.reservation.dto.ReservationResponse;
 import com.chatservice.marketplace.reservation.service.IReservationQueryService;
@@ -40,11 +39,14 @@ public class OfferService implements IOfferService {
     private final IAgreementQueryService agreementQueryService;
     private final RealtimePublisher realtimePublisher;
     private final TimeRules timeRules;
+    private final ProductLockRegistry productLockRegistry;
+    private final TransactionTemplate transactionTemplate;
 
     public OfferService(PriceOfferRepository priceOfferRepository, IConversationService conversationService,
                         IProductService productService, IReservationService reservationService,
                         IReservationQueryService reservationQueryService, IAgreementQueryService agreementQueryService,
-                        RealtimePublisher realtimePublisher, TimeRules timeRules) {
+                        RealtimePublisher realtimePublisher, TimeRules timeRules,
+                        ProductLockRegistry productLockRegistry, TransactionTemplate transactionTemplate) {
         this.priceOfferRepository = priceOfferRepository;
         this.conversationService = conversationService;
         this.productService = productService;
@@ -53,6 +55,8 @@ public class OfferService implements IOfferService {
         this.agreementQueryService = agreementQueryService;
         this.realtimePublisher = realtimePublisher;
         this.timeRules = timeRules;
+        this.productLockRegistry = productLockRegistry;
+        this.transactionTemplate = transactionTemplate;
     }
 
     /*
@@ -121,76 +125,108 @@ public class OfferService implements IOfferService {
      *           - {@code RESERVATION_QUANTITY_EXCEEDED}: 수락하려는데 제안 수량이 더 걸 수 있는 예약 수량보다 많다
      */
     @Override
-    // 조회한 다음에 상품의 버전이 달라져 커밋하지 못하면 이 메서드를 처음부터 다시 실행한다. 첫 실행을 포함해 최대 7번 실행한다
-    @Retryable(retryFor = OptimisticLockingFailureException.class, maxAttempts = 7, backoff = @Backoff(delay = 1))
-    @Transactional
     public OfferResponse respond(String memberId, Long offerId, boolean accept) {
+        // 수락은 같은 상품의 결제와 한 번에 한 건만 실행한다. 수락 요청에는 상품 ID 가 없으므로 가격 제안의 상품 ID 만 먼저 조회해 그 상품의 잠금 객체를 받는다. 없으면 OFFER_NOT_FOUND
+        // 거절은 예약을 만들지 않으므로 상품의 잠금 객체를 쓰지 않는다. 다른 요청과 함께 쓰지 않는 새 객체를 지정해, 기다리지 않고 블록에 들어간다
+        Object productLock;
+        Long productId = null;
         if (accept) {
-            TradeTestLog.registerTransactionEnd(logger, "가격 제안 수락", "OfferService.java", "respond",
-                    "제안ID", offerId);
-        }
-        try {
-            // 가격 제안 조회(테이블 "PRICE_OFFER"). 없으면 OFFER_NOT_FOUND
-            PriceOffer offer = priceOfferRepository.findById(offerId)
+            productId = priceOfferRepository.findProductIdByOfferId(offerId)
                     .orElseThrow(() -> new BusinessException(ErrorCode.OFFER_NOT_FOUND));
+            productLock = productLockRegistry.lockOf(productId);
+            // 잠금을 요구한 시각을 남긴다. 다른 요청이 잠금을 가지고 있으면 이 로그를 남긴 뒤 아래 블록 앞에서 기다린다
+            TradeTestLog.event(logger, "가격 제안 수락", "OfferService.java", "respond", "잠금요구",
+                    "상품ID", productId, "제안ID", offerId);
+        } else {
+            productLock = new Object();
+        }
+        // 잠금 객체로 synchronized 블록에 들어간 뒤에 트랜잭션을 시작하고, 커밋이나 롤백이 끝난 뒤에 블록을 나간다.
+        // 그래서 다음에 블록에 들어오는 요청은 이 수락이 커밋한 예약이 반영된 수량으로 판단한다
+        synchronized (productLock) {
             if (accept) {
-                TradeTestLog.event(logger, "가격 제안 수락", "OfferService.java", "respond", "수락시작",
-                        "상품ID", offer.getProductId(), "제안ID", offer.getOfferId(), "대화ID", offer.getConversationId(),
-                        "판매자ID", offer.getSellerId(), "구매자ID", offer.getBuyerId(),
-                        "요청수량", offer.getQuantity(), "제안상태", offer.getStatus());
+                // 잠금을 얻은 시각을 남긴다. 트랜잭션을 시작하기 전이다
+                TradeTestLog.event(logger, "가격 제안 수락", "OfferService.java", "respond", "잠금획득",
+                        "상품ID", productId, "제안ID", offerId);
             }
-            // 가격 제안을 받은 판매자 본인만 응답할 수 있다
-            if (!offer.getSellerId().equals(memberId)) {
-                throw new BusinessException(ErrorCode.NOT_SELLER);
+            try {
+                // 트랜잭션을 시작해 아래 본문을 실행한다. 본문이 정상으로 끝나면 커밋하고, 예외가 나오면 롤백한다
+                return transactionTemplate.execute(status -> {
+                    if (accept) {
+                        TradeTestLog.registerTransactionEnd(logger, "가격 제안 수락", "OfferService.java", "respond",
+                                "제안ID", offerId);
+                    }
+                    try {
+                        // 가격 제안 조회(테이블 "PRICE_OFFER"). 없으면 OFFER_NOT_FOUND
+                        PriceOffer offer = priceOfferRepository.findById(offerId)
+                                .orElseThrow(() -> new BusinessException(ErrorCode.OFFER_NOT_FOUND));
+                        if (accept) {
+                            TradeTestLog.event(logger, "가격 제안 수락", "OfferService.java", "respond", "수락시작",
+                                    "상품ID", offer.getProductId(), "제안ID", offer.getOfferId(), "대화ID", offer.getConversationId(),
+                                    "판매자ID", offer.getSellerId(), "구매자ID", offer.getBuyerId(),
+                                    "요청수량", offer.getQuantity(), "제안상태", offer.getStatus());
+                        }
+                        // 가격 제안을 받은 판매자 본인만 응답할 수 있다
+                        if (!offer.getSellerId().equals(memberId)) {
+                            throw new BusinessException(ErrorCode.NOT_SELLER);
+                        }
+                        // 상품 조회(테이블 "PRODUCT"). 없으면 PRODUCT_NOT_FOUND
+                        Product product = productService.getProduct(offer.getProductId());
+                        // 판매 종료 상품의 가격 제안에는 응답할 수 없다
+                        if (!product.isOnSale()) {
+                            throw new BusinessException(ErrorCode.PRODUCT_NOT_ON_SALE);
+                        }
+                        // 이미 수락했거나 거절한 가격 제안에는 다시 응답할 수 없다
+                        if (!offer.isPending()) {
+                            throw new BusinessException(ErrorCode.OFFER_ALREADY_RESPONDED);
+                        }
+
+                        /* 응답이 안되는 기준을 전부 통과 후에 실제로 가격 제안 상태를 바꾸는 위치 */
+
+
+                        OfferStatus before = offer.getStatus(); // 로깅용 - 바꾸기 전 가격 제안 상태
+                        // 가격 제안 상태 변경(테이블 "PRICE_OFFER") : 수락이면 ACCEPTED, 거절이면 REJECTED 로 바꾸고 응답 시각을 기록한다. 엔티티 필드만 바꾸며 UPDATE 는 flush 때 실행된다
+                        offer.respond(accept, timeRules.now());
+
+                        logger.info("[가격 제안 응답] offerId={}, memberId={}, {} -> {}", offerId, memberId, before, offer.getStatus());
+
+                        // 응답에 담을 예약 내용. 수락일 때만 채우고 거절이면 null 이다
+                        ReservationResponse reservation = null;
+
+                        /* 현재 요청이 예약에 대한 수락이라면 하나의 트랜잭션에서 대화 내역 조회 -> 같은 상품에 대해 기존 예약 점유 여부 확인 -> 예약 점유 가능 수량 확인 -> 예약 내역(수량 점유) 생성 과정 전체를 수행 */
+                        if (accept) {
+                            // 예약 내역 데이터 생성(테이블 "RESERVATION") : 가격 제안을 한 구매 희망자에게 제안 수량만큼 예약을 건다. 예약이 거절되면 이 수락도 롤백된다
+                            /* memberID : 컨트롤러에서부터 받은 이 제안을 수락하는 당사자인 판매자 ID
+                            *  Price_offer 테이블 Entity 속성 값 3 개
+                            *   - conversationId : 이 가격 제안이 등록된 대화 ID(컬럼 CONVERSATION_ID). 예약 생성에서 이 대화를 조회해서 상품과, 예약을 받을 구매 희망자를 알아낸다
+                            *   - quantity : 구매 희망자가 제안한 수량(컬럼 QUANTITY). 예약 생성에서 더 걸 수 있는 예약 수량과 비교하고, 통과하면 이 수량만큼 예약한다
+                            *   - offerId : 지금 수락하는 가격 제안 ID(컬럼 OFFER_ID). 예약 내역에 이 예약을 만든 가격 제안으로 저장한다
+                            * */
+                            reservation = reservationService.reserve(memberId,
+                                    offer.getConversationId(), offer.getQuantity(), offer.getOfferId());
+                        }
+
+                        // 대화 상대(구매 희망자)의 세션에 보낼 가격 제안 이벤트를 등록한다. 실제 전송은 커밋 후에 한다
+                        publish(offer, memberId);
+                        // 메서드가 반환되면 트랜잭션이 커밋된다
+                        if (accept) {
+                            TradeTestLog.event(logger, "가격 제안 수락", "OfferService.java", "respond", "커밋전",
+                                    "제안ID", offer.getOfferId(), "제안상태", offer.getStatus(),
+                                    "예약ID", reservation.reservationId(), "예약수량", reservation.quantity());
+                        }
+                        return OfferResponse.of(offer, reservation);
+                    } catch (RuntimeException e) {
+                        TradeTestLog.recordFailure(e);   // 업무 오류이면 오류 코드, 그 밖의 예외이면 예외 이름
+                        throw e;                         // 같은 예외를 그대로 다시 던짐
+                    }
+                });
+            } finally {
+                if (accept) {
+                    // 잠금을 놓는 시각을 남긴다. 커밋이나 롤백이 끝난 뒤이고 블록을 나가기 직전이다. 수락이 성공했을 때와 예외로 끝났을 때 모두 남긴다.
+                    // 블록 안에서 남기므로, 다음에 잠금을 얻는 요청의 잠금획득 로그는 언제나 이 로그보다 뒤에 남는다
+                    TradeTestLog.event(logger, "가격 제안 수락", "OfferService.java", "respond", "잠금해제",
+                            "상품ID", productId, "제안ID", offerId);
+                }
             }
-            // 상품 조회(테이블 "PRODUCT"). 낙관적 락으로 조회하며 행 잠금을 얻지 않는다. 이 응답 처리가 커밋하기 직전에 상품의 버전이 1 올라간다. 없으면 PRODUCT_NOT_FOUND
-            Product product = productService.getProductWithOptimisticLock(offer.getProductId());
-            // 판매 종료 상품의 가격 제안에는 응답할 수 없다
-            if (!product.isOnSale()) {
-                throw new BusinessException(ErrorCode.PRODUCT_NOT_ON_SALE);
-            }
-            // 이미 수락했거나 거절한 가격 제안에는 다시 응답할 수 없다
-            if (!offer.isPending()) {
-                throw new BusinessException(ErrorCode.OFFER_ALREADY_RESPONDED);
-            }
-
-            /* 응답이 안되는 기준을 전부 통과 후에 실제로 가격 제안 상태를 바꾸는 위치 */
-
-            // 로깅용 - 바꾸기 전 가격 제안 상태
-            OfferStatus before = offer.getStatus();
-            // 가격 제안 상태 변경(테이블 "PRICE_OFFER") : 수락이면 ACCEPTED, 거절이면 REJECTED 로 바꾸고 응답 시각을 기록한다. 엔티티 필드만 바꾸며 UPDATE 는 flush 때 실행된다
-            offer.respond(accept, timeRules.now());
-
-            logger.info("[가격 제안 응답] offerId={}, memberId={}, {} -> {}", offerId, memberId, before, offer.getStatus());
-
-            // 응답에 담을 예약 내역. 수락일 때만 채우고 거절이면 null 이다
-            ReservationResponse reservation = null;
-
-            /* 수락이면 같은 트랜잭션에서 예약 내역(수량 점유)까지 생성 */
-            if (accept) {
-                // 예약 내역 데이터 생성(테이블 "RESERVATION") : 가격 제안을 한 구매 희망자에게 제안 수량만큼 예약을 건다. 예약이 거절되면 이 수락도 롤백된다
-                /* memberID : 컨트롤러에서부터 받은 이 제안을 수락하는 당사자인 판매자 ID
-                *  Price_offer 테이블 Entity 속성 값 3 개
-                *   - conversationId : 이 가격 제안이 등록된 대화 ID(컬럼 CONVERSATION_ID). 예약 생성에서 이 대화를 조회해서 상품과, 예약을 받을 구매 희망자를 알아낸다
-                *   - quantity : 구매 희망자가 제안한 수량(컬럼 QUANTITY). 예약 생성에서 더 걸 수 있는 예약 수량과 비교하고, 통과하면 이 수량만큼 예약한다
-                *   - offerId : 지금 수락하는 가격 제안 ID(컬럼 OFFER_ID). 예약 내역에 이 예약을 만든 가격 제안으로 저장한다
-                * */
-                reservation = reservationService.reserve(memberId,
-                        offer.getConversationId(), offer.getQuantity(), offer.getOfferId());
-            }
-
-            // 대화 상대(구매 희망자)의 세션에 보낼 가격 제안 이벤트를 등록한다. 실제 전송은 커밋 후에 한다
-            publish(offer, memberId);
-            // 메서드가 반환되면 트랜잭션이 커밋된다
-            if (accept) {
-                TradeTestLog.event(logger, "가격 제안 수락", "OfferService.java", "respond", "커밋전",
-                        "제안ID", offer.getOfferId(), "제안상태", offer.getStatus(),
-                        "예약ID", reservation.reservationId(), "예약수량", reservation.quantity());
-            }
-            return OfferResponse.of(offer, reservation);
-        } catch (RuntimeException e) {
-            TradeTestLog.recordFailure(e);   // 업무 오류이면 오류 코드, 그 밖의 예외이면 예외 이름
-            throw e;                         // 같은 예외를 그대로 다시 던짐
         }
     }
 
