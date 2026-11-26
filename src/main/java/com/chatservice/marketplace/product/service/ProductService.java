@@ -99,25 +99,6 @@ public class ProductService implements IProductService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
     }
 
-    /**
-     * 상품을 낙관적 락으로 조회한다. 판매 종료된 상품도 조회한다.
-     *
-     * 가격 제안 응답이 상품을 처음 읽을 때 쓴다. 조회할 때 행 잠금을 얻지 않고, 호출하는 쪽의 트랜잭션이 커밋하기 직전에 상품의 버전이 1 올라간다.
-     * 조회한 다음에 다른 트랜잭션이 상품의 버전을 바꿨으면 호출하는 쪽의 트랜잭션은 커밋하지 못하고 롤백된다. 호출하는 쪽의 트랜잭션에서 실행된다.
-     *
-     * @param productId 조회할 상품 ID
-     * @return 조회한 상품
-     * @throws BusinessException {@code PRODUCT_NOT_FOUND}: 상품이 없다
-     */
-    @Override
-    @Transactional
-    public Product getProductWithOptimisticLock(Long productId) {
-        // 상품 조회(테이블 "PRODUCT"). 행 잠금 없이 조회하며 없으면 PRODUCT_NOT_FOUND
-        // 상품의 버전은 호출하는 쪽의 트랜잭션이 커밋하기 직전에 1 올라간다
-        return productRepository.findByIdWithOptimisticLock(productId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
-    }
-
     @Override
     @Transactional
     public void deductStock(Product product, long quantity, Instant now) {
