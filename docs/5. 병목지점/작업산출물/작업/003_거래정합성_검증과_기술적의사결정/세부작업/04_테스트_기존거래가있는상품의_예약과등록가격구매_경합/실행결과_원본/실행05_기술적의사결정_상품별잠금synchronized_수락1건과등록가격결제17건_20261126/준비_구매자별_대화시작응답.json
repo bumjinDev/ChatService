@@ -1,0 +1,602 @@
+{
+    "order": {
+        "conversationId": 465,
+        "product": {
+            "productId": 262515,
+            "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58905)",
+            "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+            "category": "ELECTRONICS",
+            "price": 10000,
+            "initialQuantity": 16,
+            "remainingQuantity": 16,
+            "availableQuantity": 16,
+            "status": "ON_SALE"
+        },
+        "buyer": {
+            "nickname": "run05_order_buyer"
+        },
+        "seller": {
+            "nickname": "run05_seller"
+        },
+        "myRole": "BUYER",
+        "writable": true,
+        "readOnlyReason": null,
+        "offers": [
+            
+        ],
+        "orders": [
+            
+        ],
+        "reservation": null
+    },
+    "rsv": {
+        "conversationId": 466,
+        "product": {
+            "productId": 262515,
+            "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58905)",
+            "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+            "category": "ELECTRONICS",
+            "price": 10000,
+            "initialQuantity": 16,
+            "remainingQuantity": 16,
+            "availableQuantity": 16,
+            "status": "ON_SALE"
+        },
+        "buyer": {
+            "nickname": "run05_reserve_buyer"
+        },
+        "seller": {
+            "nickname": "run05_seller"
+        },
+        "myRole": "BUYER",
+        "writable": true,
+        "readOnlyReason": null,
+        "offers": [
+            
+        ],
+        "orders": [
+            
+        ],
+        "reservation": null
+    },
+    "offer": {
+        "conversationId": 467,
+        "product": {
+            "productId": 262515,
+            "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58905)",
+            "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+            "category": "ELECTRONICS",
+            "price": 10000,
+            "initialQuantity": 16,
+            "remainingQuantity": 16,
+            "availableQuantity": 16,
+            "status": "ON_SALE"
+        },
+        "buyer": {
+            "nickname": "run05_offer_buyer"
+        },
+        "seller": {
+            "nickname": "run05_seller"
+        },
+        "myRole": "BUYER",
+        "writable": true,
+        "readOnlyReason": null,
+        "offers": [
+            
+        ],
+        "orders": [
+            
+        ],
+        "reservation": null
+    },
+    "pay01": {
+        "conversationId": 468,
+        "product": {
+            "productId": 262515,
+            "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58905)",
+            "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+            "category": "ELECTRONICS",
+            "price": 10000,
+            "initialQuantity": 16,
+            "remainingQuantity": 16,
+            "availableQuantity": 16,
+            "status": "ON_SALE"
+        },
+        "buyer": {
+            "nickname": "run05_listed_buyer01"
+        },
+        "seller": {
+            "nickname": "run05_seller"
+        },
+        "myRole": "BUYER",
+        "writable": true,
+        "readOnlyReason": null,
+        "offers": [
+            
+        ],
+        "orders": [
+            
+        ],
+        "reservation": null
+    },
+    "pay02": {
+        "conversationId": 469,
+        "product": {
+            "productId": 262515,
+            "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58905)",
+            "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+            "category": "ELECTRONICS",
+            "price": 10000,
+            "initialQuantity": 16,
+            "remainingQuantity": 16,
+            "availableQuantity": 16,
+            "status": "ON_SALE"
+        },
+        "buyer": {
+            "nickname": "run05_listed_buyer02"
+        },
+        "seller": {
+            "nickname": "run05_seller"
+        },
+        "myRole": "BUYER",
+        "writable": true,
+        "readOnlyReason": null,
+        "offers": [
+            
+        ],
+        "orders": [
+            
+        ],
+        "reservation": null
+    },
+    "pay03": {
+        "conversationId": 470,
+        "product": {
+            "productId": 262515,
+            "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58905)",
+            "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+            "category": "ELECTRONICS",
+            "price": 10000,
+            "initialQuantity": 16,
+            "remainingQuantity": 16,
+            "availableQuantity": 16,
+            "status": "ON_SALE"
+        },
+        "buyer": {
+            "nickname": "run05_listed_buyer03"
+        },
+        "seller": {
+            "nickname": "run05_seller"
+        },
+        "myRole": "BUYER",
+        "writable": true,
+        "readOnlyReason": null,
+        "offers": [
+            
+        ],
+        "orders": [
+            
+        ],
+        "reservation": null
+    },
+    "pay04": {
+        "conversationId": 471,
+        "product": {
+            "productId": 262515,
+            "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58905)",
+            "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+            "category": "ELECTRONICS",
+            "price": 10000,
+            "initialQuantity": 16,
+            "remainingQuantity": 16,
+            "availableQuantity": 16,
+            "status": "ON_SALE"
+        },
+        "buyer": {
+            "nickname": "run05_listed_buyer04"
+        },
+        "seller": {
+            "nickname": "run05_seller"
+        },
+        "myRole": "BUYER",
+        "writable": true,
+        "readOnlyReason": null,
+        "offers": [
+            
+        ],
+        "orders": [
+            
+        ],
+        "reservation": null
+    },
+    "pay05": {
+        "conversationId": 472,
+        "product": {
+            "productId": 262515,
+            "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58905)",
+            "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+            "category": "ELECTRONICS",
+            "price": 10000,
+            "initialQuantity": 16,
+            "remainingQuantity": 16,
+            "availableQuantity": 16,
+            "status": "ON_SALE"
+        },
+        "buyer": {
+            "nickname": "run05_listed_buyer05"
+        },
+        "seller": {
+            "nickname": "run05_seller"
+        },
+        "myRole": "BUYER",
+        "writable": true,
+        "readOnlyReason": null,
+        "offers": [
+            
+        ],
+        "orders": [
+            
+        ],
+        "reservation": null
+    },
+    "pay06": {
+        "conversationId": 473,
+        "product": {
+            "productId": 262515,
+            "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58905)",
+            "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+            "category": "ELECTRONICS",
+            "price": 10000,
+            "initialQuantity": 16,
+            "remainingQuantity": 16,
+            "availableQuantity": 16,
+            "status": "ON_SALE"
+        },
+        "buyer": {
+            "nickname": "run05_listed_buyer06"
+        },
+        "seller": {
+            "nickname": "run05_seller"
+        },
+        "myRole": "BUYER",
+        "writable": true,
+        "readOnlyReason": null,
+        "offers": [
+            
+        ],
+        "orders": [
+            
+        ],
+        "reservation": null
+    },
+    "pay07": {
+        "conversationId": 474,
+        "product": {
+            "productId": 262515,
+            "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58905)",
+            "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+            "category": "ELECTRONICS",
+            "price": 10000,
+            "initialQuantity": 16,
+            "remainingQuantity": 16,
+            "availableQuantity": 16,
+            "status": "ON_SALE"
+        },
+        "buyer": {
+            "nickname": "run05_listed_buyer07"
+        },
+        "seller": {
+            "nickname": "run05_seller"
+        },
+        "myRole": "BUYER",
+        "writable": true,
+        "readOnlyReason": null,
+        "offers": [
+            
+        ],
+        "orders": [
+            
+        ],
+        "reservation": null
+    },
+    "pay08": {
+        "conversationId": 475,
+        "product": {
+            "productId": 262515,
+            "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58905)",
+            "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+            "category": "ELECTRONICS",
+            "price": 10000,
+            "initialQuantity": 16,
+            "remainingQuantity": 16,
+            "availableQuantity": 16,
+            "status": "ON_SALE"
+        },
+        "buyer": {
+            "nickname": "run05_listed_buyer08"
+        },
+        "seller": {
+            "nickname": "run05_seller"
+        },
+        "myRole": "BUYER",
+        "writable": true,
+        "readOnlyReason": null,
+        "offers": [
+            
+        ],
+        "orders": [
+            
+        ],
+        "reservation": null
+    },
+    "pay09": {
+        "conversationId": 476,
+        "product": {
+            "productId": 262515,
+            "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58905)",
+            "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+            "category": "ELECTRONICS",
+            "price": 10000,
+            "initialQuantity": 16,
+            "remainingQuantity": 16,
+            "availableQuantity": 16,
+            "status": "ON_SALE"
+        },
+        "buyer": {
+            "nickname": "run05_listed_buyer09"
+        },
+        "seller": {
+            "nickname": "run05_seller"
+        },
+        "myRole": "BUYER",
+        "writable": true,
+        "readOnlyReason": null,
+        "offers": [
+            
+        ],
+        "orders": [
+            
+        ],
+        "reservation": null
+    },
+    "pay10": {
+        "conversationId": 477,
+        "product": {
+            "productId": 262515,
+            "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58905)",
+            "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+            "category": "ELECTRONICS",
+            "price": 10000,
+            "initialQuantity": 16,
+            "remainingQuantity": 16,
+            "availableQuantity": 16,
+            "status": "ON_SALE"
+        },
+        "buyer": {
+            "nickname": "run05_listed_buyer10"
+        },
+        "seller": {
+            "nickname": "run05_seller"
+        },
+        "myRole": "BUYER",
+        "writable": true,
+        "readOnlyReason": null,
+        "offers": [
+            
+        ],
+        "orders": [
+            
+        ],
+        "reservation": null
+    },
+    "pay11": {
+        "conversationId": 478,
+        "product": {
+            "productId": 262515,
+            "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58905)",
+            "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+            "category": "ELECTRONICS",
+            "price": 10000,
+            "initialQuantity": 16,
+            "remainingQuantity": 16,
+            "availableQuantity": 16,
+            "status": "ON_SALE"
+        },
+        "buyer": {
+            "nickname": "run05_listed_buyer11"
+        },
+        "seller": {
+            "nickname": "run05_seller"
+        },
+        "myRole": "BUYER",
+        "writable": true,
+        "readOnlyReason": null,
+        "offers": [
+            
+        ],
+        "orders": [
+            
+        ],
+        "reservation": null
+    },
+    "pay12": {
+        "conversationId": 479,
+        "product": {
+            "productId": 262515,
+            "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58905)",
+            "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+            "category": "ELECTRONICS",
+            "price": 10000,
+            "initialQuantity": 16,
+            "remainingQuantity": 16,
+            "availableQuantity": 16,
+            "status": "ON_SALE"
+        },
+        "buyer": {
+            "nickname": "run05_listed_buyer12"
+        },
+        "seller": {
+            "nickname": "run05_seller"
+        },
+        "myRole": "BUYER",
+        "writable": true,
+        "readOnlyReason": null,
+        "offers": [
+            
+        ],
+        "orders": [
+            
+        ],
+        "reservation": null
+    },
+    "pay13": {
+        "conversationId": 480,
+        "product": {
+            "productId": 262515,
+            "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58905)",
+            "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+            "category": "ELECTRONICS",
+            "price": 10000,
+            "initialQuantity": 16,
+            "remainingQuantity": 16,
+            "availableQuantity": 16,
+            "status": "ON_SALE"
+        },
+        "buyer": {
+            "nickname": "run05_listed_buyer13"
+        },
+        "seller": {
+            "nickname": "run05_seller"
+        },
+        "myRole": "BUYER",
+        "writable": true,
+        "readOnlyReason": null,
+        "offers": [
+            
+        ],
+        "orders": [
+            
+        ],
+        "reservation": null
+    },
+    "pay14": {
+        "conversationId": 481,
+        "product": {
+            "productId": 262515,
+            "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58905)",
+            "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+            "category": "ELECTRONICS",
+            "price": 10000,
+            "initialQuantity": 16,
+            "remainingQuantity": 16,
+            "availableQuantity": 16,
+            "status": "ON_SALE"
+        },
+        "buyer": {
+            "nickname": "run05_listed_buyer14"
+        },
+        "seller": {
+            "nickname": "run05_seller"
+        },
+        "myRole": "BUYER",
+        "writable": true,
+        "readOnlyReason": null,
+        "offers": [
+            
+        ],
+        "orders": [
+            
+        ],
+        "reservation": null
+    },
+    "pay15": {
+        "conversationId": 482,
+        "product": {
+            "productId": 262515,
+            "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58905)",
+            "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+            "category": "ELECTRONICS",
+            "price": 10000,
+            "initialQuantity": 16,
+            "remainingQuantity": 16,
+            "availableQuantity": 16,
+            "status": "ON_SALE"
+        },
+        "buyer": {
+            "nickname": "run05_listed_buyer15"
+        },
+        "seller": {
+            "nickname": "run05_seller"
+        },
+        "myRole": "BUYER",
+        "writable": true,
+        "readOnlyReason": null,
+        "offers": [
+            
+        ],
+        "orders": [
+            
+        ],
+        "reservation": null
+    },
+    "pay16": {
+        "conversationId": 483,
+        "product": {
+            "productId": 262515,
+            "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58905)",
+            "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+            "category": "ELECTRONICS",
+            "price": 10000,
+            "initialQuantity": 16,
+            "remainingQuantity": 16,
+            "availableQuantity": 16,
+            "status": "ON_SALE"
+        },
+        "buyer": {
+            "nickname": "run05_listed_buyer16"
+        },
+        "seller": {
+            "nickname": "run05_seller"
+        },
+        "myRole": "BUYER",
+        "writable": true,
+        "readOnlyReason": null,
+        "offers": [
+            
+        ],
+        "orders": [
+            
+        ],
+        "reservation": null
+    },
+    "pay17": {
+        "conversationId": 484,
+        "product": {
+            "productId": 262515,
+            "name": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uac00\uaca9 \uc81c\uc548 \uc218\ub77d 1\uac74\uacfc \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c 17\uac74 \ud14c\uc2a4\ud2b8 \uc0c1\ud488(\uc2e4\ud58905)",
+            "description": "\uae30\uc874 \uac70\ub798\uac00 \uc788\ub294 \uc0c1\ud488\uc758 \uc218\ub77d 1\uac74\uacfc \ub2e4\uc218 \ub4f1\ub85d \uac00\uaca9 \uacb0\uc81c \ud14c\uc2a4\ud2b8\uc6a9 \uc0c1\ud488",
+            "category": "ELECTRONICS",
+            "price": 10000,
+            "initialQuantity": 16,
+            "remainingQuantity": 16,
+            "availableQuantity": 16,
+            "status": "ON_SALE"
+        },
+        "buyer": {
+            "nickname": "run05_listed_buyer17"
+        },
+        "seller": {
+            "nickname": "run05_seller"
+        },
+        "myRole": "BUYER",
+        "writable": true,
+        "readOnlyReason": null,
+        "offers": [
+            
+        ],
+        "orders": [
+            
+        ],
+        "reservation": null
+    }
+}
